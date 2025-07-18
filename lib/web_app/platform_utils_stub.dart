@@ -1,0 +1,3 @@
+
+
+bool get isIOS => false;

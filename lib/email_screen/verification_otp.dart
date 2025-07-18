@@ -1,0 +1,290 @@
+
+import 'dart:convert';
+import 'package:azpire_new/root/root.dart';
+import 'package:azpire_new/Controller/email_controller.dart';
+import 'package:azpire_new/utils/apptextstyle.dart';
+import 'package:azpire_new/widgets/custom_button/My_Button.dart';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timer_count_down/timer_controller.dart';
+import 'package:timer_count_down/timer_count_down.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:azpire_new/View/Dashboard_screen.dart';
+import 'package:http/http.dart' as http;
+import '../utils/apptext.dart';
+import '../widgets/custompincodetextfield.dart';
+
+class VerificationOtpScreen extends StatefulWidget {
+  var email;
+  var emailOtp;
+  VerificationOtpScreen({super.key, required this.email,required this.emailOtp });
+
+  @override
+  State<VerificationOtpScreen> createState() => _VerificationOtpScreenState();
+}
+
+class _VerificationOtpScreenState extends State<VerificationOtpScreen> {
+  final CountdownController _controller = CountdownController(autoStart: true);
+  bool resend = false;
+  final EmailController _emailController = EmailController();
+  //final ApiService apiService = ApiService();
+  String enteredOtp = '';
+  String? newotp;
+  bool isLoading = false;
+
+  @override
+  void initState(){
+ print(widget.email);
+  }
+  Future<void> otpverify() async {
+    String? _registeredDevice;
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var token = prefs.getString('token');
+    print('FCM Token: ${token == null ? " ":token}');
+    setState(() {
+      isLoading = true;
+    });
+    final String url = '$root/email_otp_verified';
+    print("New OTP: $newotp");
+    print("New OTP: ${widget.email}");
+    print("New OTP: $enteredOtp");
+
+    final Map<String, String> userData = {
+      'email': widget.email,
+      'email_otp': enteredOtp,
+      "access_token" : "${token == null ? " " : token}')"
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        body: userData,
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        print('Full response body: ${response.body}');
+        //print('Mobile OTP Response: $jsonResponse');
+        if(jsonResponse["status"] == "SUCCESS"){
+          setState(() {
+            isLoading = false;
+          });
+
+          var user_id = jsonResponse["user_id"].toString();
+          var name = jsonResponse["name"];
+          var mobile_no = jsonResponse["mobile_no"].toString();
+          var email = jsonResponse["email"];
+          var pofile = jsonResponse["pofile"] ?? " ";
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setBool('isLoggedIn', true);
+          await prefs.setString('user_id', user_id);
+          await prefs.setString('name', name);
+          await prefs.setString('mobile_no', mobile_no);
+          await prefs.setString('email', email);
+          await prefs.setString('pofile', pofile);
+          showToast("Sign In Successful");
+          _controller.pause();
+          Get.to(() => DashboardScreen(deviceID:_registeredDevice!));
+          // Navigator.push(context, MaterialPageRoute(builder: (context) => DashboardScreen()));
+        }else {
+          setState(() {
+            isLoading = false;
+          });
+          showToast("OTP Mismatch. Please try again.");
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(content: Text('OTP Mismatch. Please try again.')),
+          // );
+        }
+      } else {
+        print('Request failed with status: ${response.statusCode}.');
+      }
+    } catch (e) {
+      print('Error:1 $e');
+    }
+  }
+
+  Future<void> otp_timeout() async {
+    final String url = '$root/otp_timeout';
+
+    final Map<String, String> userData = {
+      'email': widget.email,
+    };
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        body: userData,
+      );
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        print('OTP Timeout Response: $jsonResponse');
+      } else {
+        print('Request failed with status: ${response.statusCode}.');
+      }
+    } catch (e) {
+      print('Error:3 $e');
+    }
+  }
+
+  Future<void> otp_resend() async {
+
+    final String url = '$root/email_login_resend_otp';
+    final Map<String, String> userData = {
+      'email': widget.email,
+    };
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        body: userData,
+      );
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        print('OTP Resend Response: $jsonResponse');
+        if(jsonResponse["status"] == "SUCCESS"){
+          setState(() {
+            newotp = jsonResponse['data']['email_otp'].toString();
+            resend = false;
+          });
+
+          // Restart the countdown timer when OTP is resent
+          _controller.restart();
+        }
+
+      } else {
+        print('Request failed with status: ${response.statusCode}.');
+      }
+    } catch (e) {
+      print('Error:2 $e');
+    }
+  }
+
+  String formatTime(double time) {
+    int minutes = (time / 60).floor();
+    int seconds = (time % 60).floor();
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+
+
+  // Future<void> otp_timeout() async{
+  //
+  //   await _emailService.otpTimeout(email: widget.email);
+  //
+  // }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 50),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 30),
+                InkWell(
+                  onTap: () {
+                    Get.back();
+                    // Navigator.of(context).pop();
+                  },
+                  child: Icon(Icons.arrow_back),
+                ),
+                SizedBox(height: 30),
+                Text(
+                  AppText.verificationcode,
+                  style: Apptextstyle.s18wbcB
+                ),
+                SizedBox(height: 10),
+                Text(
+                    AppText.emailsentotp,
+                  style: Apptextstyle.s14wncLb
+                ),
+                SizedBox(height: 20),
+                CustomPinCodeField(
+                  appContext: context,
+                  onChanged: (value) {
+                    print(value);
+                  },
+                  onCompleted: (value) {
+                    setState(() {
+                      enteredOtp = value;
+                    });
+                    print(value);
+                  },
+                ),
+                SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    resend == true ?
+                    GestureDetector(
+                      onTap: () {
+                        if (resend) {
+                          otp_resend();
+                        }
+                      },
+                      child: Text(
+                          AppText.resendmobileotp,
+                        style: Apptextstyle. s14wncblue
+                      ),
+                    ) :
+                    SizedBox(),
+                    Countdown(
+                      controller: _controller,
+                      seconds: 60,
+                      build: (BuildContext context, double time) => Text(
+                        formatTime(time),
+                        style: TextStyle(fontSize: 14, fontFamily: "Inter",),
+                      ),
+                      interval: Duration(seconds: 1),
+                      onFinished: () {
+                        setState(() {
+                          resend = true;
+                        });
+                        otp_timeout();
+                        print('Timer is done!');
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 60),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 50),
+                  child: isLoading == false ? MyButton(
+                    press: () async {
+                      otpverify();
+                    },
+                    text: AppText.SUBMIT,
+                  ) : Center(child: Image.asset(
+                    "assets/gif/logo.gif",
+                    height: 50,
+                    fit: BoxFit.contain,
+                  ),),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+showToast(String msg) {
+  Fluttertoast.showToast(
+    msg: msg,
+    toastLength: Toast.LENGTH_SHORT,
+    gravity: ToastGravity.BOTTOM,
+    timeInSecForIosWeb: 1,
+    backgroundColor: Colors.black,
+    textColor: Colors.white,
+    fontSize: 16.0,
+  );
+}

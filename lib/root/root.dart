@@ -1,0 +1,1 @@
+var root = "https://app.aspirehealthspan.ai/aspire_api";
