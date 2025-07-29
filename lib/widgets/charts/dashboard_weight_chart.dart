@@ -92,19 +92,21 @@ class _WeightChartPageState extends State<WeightChartPage>
   Widget build(BuildContext context) {
     return Scaffold(
       body: _isLoading
-          ? _buildShimmerEffect() // Show shimmer effect while loading
+          ? _buildShimmerEffect()
           : Column(
         children: [
-          _buildChart(
-            title: '',
-            seriesName: "Weight(lbs)",
-            dataSource: chartData,
-            xMapper: (data, _) => data.day,
-            yMapper: (data, _) => data.weightrate.toDouble(),
-            color: Color(0xffF5B849),
+          Expanded(
+            child: _buildChart(
+              title: '',
+              seriesName: "Weight(lbs)",
+              dataSource: chartData,
+              xMapper: (data, _) => data.day,
+              yMapper: (data, _) => data.weightrate.toDouble(),
+              color: Color(0xffF5B849),
+            ),
           ),
         ],
-      )
+      ),
     );
   }
   Widget _buildShimmerEffect() {
@@ -147,66 +149,62 @@ class _WeightChartPageState extends State<WeightChartPage>
     double minY = 30,
     double interval = 30,
   }) {
-    return Container(
-      width: double.infinity,
-      height: MediaQuery.of(context).size.height * 0.22,
-      child: SfCartesianChart(
-        tooltipBehavior: TooltipBehavior(enable: true),
-        //tooltipBehavior: TooltipBehavior(enable: true),
-        title: ChartTitle(
-          alignment: ChartAlignment.near,
-          text: title,
-          textStyle: Apptextstyle.swn14cothers,
-        ),
-        plotAreaBorderWidth: 0.0,
-        plotAreaBorderColor: Colors.grey.shade100,
-        backgroundColor: Colors.white,
-        primaryXAxis: CategoryAxis(
-          majorTickLines: MajorTickLines(width: 0),
-          majorGridLines: const MajorGridLines(width: 0),
-          title: AxisTitle(
-            text: '',
-            textStyle: TextStyle(color: AppColors.contentColorBlack),
-          ),
-          labelStyle: TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.bold,
-              color: Colors.black
-          ),
-        ),
-        primaryYAxis: NumericAxis(
-          maximum: maxY,
-          minimum: minY,
-          interval: interval,
-          title: AxisTitle(
-            text: '',
-            textStyle: TextStyle(color: Colors.black),
-          ),
-          labelStyle: TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.bold,
-              color: Colors.black
-          ),
-          majorGridLines: const MajorGridLines(width: 0),
-          minorGridLines: const MinorGridLines(width: 0),
-          majorTickLines: MajorTickLines(width: 0),
-        ),
-        series: <CartesianSeries>[
-          SplineSeries<WeightChartData, String>(
-            name: seriesName,
-            dataSource: dataSource,
-            xValueMapper: xMapper,
-            yValueMapper: yMapper,
-            color: color,
-            markerSettings: MarkerSettings(
-                isVisible: true,
-                //color: color,
-                height: 12,width: 12
-            ),
-          ),
-        ],
-
+    return SfCartesianChart(
+      tooltipBehavior: TooltipBehavior(enable: true),
+      //tooltipBehavior: TooltipBehavior(enable: true),
+      title: ChartTitle(
+        alignment: ChartAlignment.near,
+        text: title,
+        textStyle: Apptextstyle.swn14cothers,
       ),
+      plotAreaBorderWidth: 0.0,
+      plotAreaBorderColor: Colors.grey.shade100,
+      backgroundColor: Colors.white,
+      primaryXAxis: CategoryAxis(
+        majorTickLines: MajorTickLines(width: 0),
+        majorGridLines: const MajorGridLines(width: 0),
+        title: AxisTitle(
+          text: '',
+          textStyle: TextStyle(color: AppColors.contentColorBlack),
+        ),
+        labelStyle: TextStyle(
+            fontSize: 9,
+            fontWeight: FontWeight.bold,
+            color: Colors.black
+        ),
+      ),
+      primaryYAxis: NumericAxis(
+        maximum: maxY,
+        minimum: minY,
+        interval: interval,
+        title: AxisTitle(
+          text: '',
+          textStyle: TextStyle(color: Colors.black),
+        ),
+        labelStyle: TextStyle(
+            fontSize: 9,
+            fontWeight: FontWeight.bold,
+            color: Colors.black
+        ),
+        majorGridLines: const MajorGridLines(width: 0),
+        minorGridLines: const MinorGridLines(width: 0),
+        majorTickLines: MajorTickLines(width: 0),
+      ),
+      series: <CartesianSeries>[
+        SplineSeries<WeightChartData, String>(
+          name: seriesName,
+          dataSource: dataSource,
+          xValueMapper: xMapper,
+          yValueMapper: yMapper,
+          color: color,
+          markerSettings: MarkerSettings(
+              isVisible: true,
+              //color: color,
+              height: 12,width: 12
+          ),
+        ),
+      ],
+
     );
   }
 

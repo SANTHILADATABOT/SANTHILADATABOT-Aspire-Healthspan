@@ -162,6 +162,7 @@ class AppText {
   static const registerdevice = "Registered Device";
   static const syncdata = "Sync Data";
   static const skip = "Skip";
+  static const nearbycling = "Near by Cling Devices";
 
   //spo2 Screen
   static const b_oxygen = "Blood Oxygen";

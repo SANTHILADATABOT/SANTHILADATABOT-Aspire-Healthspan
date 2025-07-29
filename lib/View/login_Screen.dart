@@ -54,72 +54,9 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     initializePreferences();
     requestNotificationPermissions();
-   //checkAndRequestATT();
   }
 
-  Future<void> checkAndRequestATT() async {
-    if (!Platform.isIOS) {
-      print("Not iOS, no ATT required.");
-      return;
-    }
 
-    final status = await AppTrackingTransparency.trackingAuthorizationStatus;
-
-    if (status == TrackingStatus.notDetermined) {
-      // Show custom prompt first
-      final userChoice = await showGeneralDialog<bool>(
-        context: context,
-        barrierDismissible: false,
-        barrierColor: Colors.black54,
-        transitionDuration: Duration(milliseconds: 300),
-        pageBuilder: (context, animation1, animation2) {
-          // final screenWidth = MediaQuery.of(context).size.width;
-          // final screenheight = MediaQuery.of(context).size.width;
-          // final dialogWidth = screenWidth * 0.70;
-          // final dialogheight = screenheight * 0.70;
-          return WillPopScope(
-            onWillPop: () async => false,  // Prevent back button
-            child: AlertDialog(
-              title: Text('App Tracking Transparency'),
-              content: Text("Enabling personalized fitness insights to support your wellness goals and enhance your experience."),
-              actions: [
-                TextButton(
-                  child: Text('Ask App Not to Track',style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold
-                  ),),
-                  onPressed: () {
-                    Navigator.of(context).pop(false);
-                  },
-                ),
-                TextButton(
-                  child: Text('Allow',style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold
-                  ),),
-                  onPressed: () {
-                    Navigator.of(context).pop(true);
-                  },
-                ),
-              ],
-            ),
-          );
-        },
-      );
-
-
-      if (userChoice == true) {
-        // User tapped Allow -> now show system ATT dialog
-        //final systemResult = await AppTrackingTransparency.requestTrackingAuthorization();
-        print("System ATT Result:$userChoice");
-      } else {
-        // User tapped Ask App Not to Track -> handle as denied
-        print("User declined in custom prompt, not requesting ATT");
-      }
-    } else {
-      print("ATT status already determined: $status");
-    }
-  }
 
   Future<void> initializePreferences() async {
     prefs = await SharedPreferences.getInstance();

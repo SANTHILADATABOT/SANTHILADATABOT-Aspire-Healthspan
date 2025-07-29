@@ -32,10 +32,16 @@ class CustomCard1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    // final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    // final height = isLandscape ? size.height * 0.85 : size.height * 0.55;
+    final screenSize = MediaQuery.of(context).size;
+    final double portraitHeight = screenSize.height > screenSize.width
+        ? screenSize.height
+        : screenSize.width;
     return InkWell(
       onTap: press,
       child: Container(
-        height: size.height * 0.55,
+        height: portraitHeight *0.55,
         width: double.infinity,
         child: Card(
           color: Color(0xFFffffff),
@@ -77,12 +83,11 @@ class CustomCard1 extends StatelessWidget {
                   children: [
                     Container(
                       width: size.width * 0.65,
-                      height: size.height *0.30,
+                      height:portraitHeight *0.30,
                       child: chart,
                     ),
                   ],
                 ),
-
                 Padding(
                   padding: const EdgeInsets.only(bottom: 20.0),
                   child: Column(
@@ -185,10 +190,16 @@ class CustomCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    // final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    // final height = isLandscape ? size.height * 0.85 : size.height * 0.45;
+    final screenSize = MediaQuery.of(context).size;
+    final double portraitHeight = screenSize.height > screenSize.width
+        ? screenSize.height
+        : screenSize.width;
     return InkWell(
       onTap: press,
       child: Container(
-        height: size.height * 0.45,
+        height:portraitHeight * 0.45,
         width: double.infinity,
         child: Card(
           color: Color(0xFFffffff),
@@ -230,7 +241,7 @@ class CustomCard extends StatelessWidget {
                   children: [
                     Container(
                       width: size.width * 0.65,
-                      height: size.height * 0.28,
+                      height: portraitHeight *0.28,
                       child: chart,
                     ),
                   ],
@@ -310,10 +321,12 @@ class CustomCardspo2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final height = isLandscape ? size.width * 0.65 : size.height * 0.65;
     return InkWell(
       onTap: press,
       child: Container(
-        height: size.height * 0.65,
+        height: height,
         width: double.infinity,
         child: Card(
           color: Color(0xFFffffff),
@@ -357,7 +370,9 @@ class CustomCardspo2 extends StatelessWidget {
                         // Chart aligned to right
                         Container(
                           width: size.width * 0.60,
-                          height: size.height * 0.30,
+                        height: isLandscape
+                        ? size.width * 0.30 // scale with width in landscape
+                            : size.height * 0.30,
                           child: chart,
                         ),
                         const SizedBox(height: 5),
@@ -398,57 +413,6 @@ class CustomCardspo2 extends StatelessWidget {
                     ),
                   ],
                 ),
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.end,
-                //   children: [
-                //     Container(
-                //       width: size.width*0.65,
-                //       height: size.height*0.28,
-                //       child: chart,
-                //     ),
-                //   ],
-                // ),
-                // Align(
-                //   alignment: Alignment.centerRight,
-                //   child: Container(
-                //     width: size.width * 0.42, // make it fixed width to center properly
-                //     child: Column(
-                //       mainAxisAlignment: MainAxisAlignment.end,
-                //       children: [
-                //         Container(
-                //           padding: const EdgeInsets.symmetric(horizontal: 5),
-                //           child: _buildLegendspo2(
-                //             context,
-                //             const Color(0xFFD1FCD1),
-                //             const Color(0xFF64EE64),
-                //             AppText.spo2_n,
-                //           ),
-                //         ),
-                //         const SizedBox(height: 7),
-                //         Container(
-                //           padding: const EdgeInsets.symmetric(horizontal: 5),
-                //           child: _buildLegendspo2(
-                //             context,
-                //             const Color(0xFFFAF0CC),
-                //             const Color(0xFFF5D666),
-                //             AppText.spo2_h,
-                //           ),
-                //         ),
-                //         const SizedBox(height: 7),
-                //         Container(
-                //           padding: const EdgeInsets.symmetric(horizontal: 5),
-                //           child: _buildLegendspo2(
-                //             context,
-                //             const Color(0xFFF6CCCC),
-                //             const Color(0xFFF38F8F),
-                //             AppText.spo2_l,
-                //           ),
-                //         ),
-                //       ],
-                //     ),
-                //   ),
-                // ),
-
                 Padding(
                   padding: const EdgeInsets.only(bottom: 20.0),
                   child: Column(
@@ -513,7 +477,7 @@ class CustomCardspo2 extends StatelessWidget {
      String label
      // String label,
       ) {
-    double width = MediaQuery.of(context).size.width*0.55;
+    double width = MediaQuery.of(context).size.width*0.52;
 
     return Container(
       width: width,
@@ -576,10 +540,14 @@ class CustomCardsleep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    // final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    // final height = isLandscape ? size.height * 0.95 : size.height * 0.60;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final height = isLandscape ? size.width * 0.60 : size.height * 0.60;
     return InkWell(
       onTap: press,
       child: Container(
-        height: size.height * 0.60,
+        height: height,
         width: double.infinity,
         child: Card(
           color: Color(0xFFffffff),
@@ -622,7 +590,9 @@ class CustomCardsleep extends StatelessWidget {
                       children: [
                         Container(
                           width: size.width * 0.60,
-                          height: size.height * 0.30,
+                          height: isLandscape
+                              ? size.width * 0.30 // scale with width in landscape
+                              : size.height * 0.30,
                           child: chart,
                         ),
                         const SizedBox(height: 5),
@@ -661,21 +631,6 @@ class CustomCardsleep extends StatelessWidget {
                     ),
                   ],
                 ),
-                /// === ROW 1: Deep + Middle ===
-
-                // SizedBox(height: 5),
-                // /// === ROW 2: Light ===
-                // Container(
-                //   padding: EdgeInsets.symmetric(horizontal: 5),
-                //   child: Row(
-                //    // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                //     mainAxisAlignment: MainAxisAlignment.end,
-                //     children: [
-                //
-                //     ],
-                //   ),
-                // ),
-
                 Padding(
                   padding: const EdgeInsets.only(bottom: 20.0),
                   child: Column(

@@ -79,8 +79,6 @@ class _EmailScreenState extends State<EmailScreen> {
   }
 
 
-
-
    @override
    Widget build(BuildContext context) {
      return Scaffold(
@@ -140,6 +138,7 @@ class _EmailScreenState extends State<EmailScreen> {
      );
    }
 }
+
 
 showToast(String msg) {
   Fluttertoast.showToast(

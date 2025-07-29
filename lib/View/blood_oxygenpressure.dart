@@ -8,6 +8,7 @@ import 'package:flutter_holo_date_picker/date_picker.dart';
 import 'package:flutter_holo_date_picker/i18n/date_picker_i18n.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../utils/appimages.dart';
@@ -54,7 +55,14 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
   int? toYear;
   String yearPickerLabel = "Pick Years";
   String? Upto;
+  String? username;
 
+  Future<void> loadUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString("name"); // or "username"
+    });
+  }
 
 
   String formatDateTime(String input) {
@@ -141,6 +149,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
   @override
   void initState() {
     super.initState();
+    loadUsername();
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
@@ -318,6 +327,16 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
     }
   }
 
+  String makePossessive(String? name) {
+    if (name == null || name.trim().isEmpty) return '';
+    name = name.trim();
+    if (name.endsWith('s') || name.endsWith('S')) {
+      return "$name'";  // Chris → Chris'
+    } else {
+      return "$name's"; // Amelia → Amelia's
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -331,7 +350,8 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
               Expanded(
                 child: Center(
                   child: Text(
-                    AppText.spo2_heading,
+                    username != null
+                        ? "${makePossessive(username)} Blood Oxygen" : "",
                     textAlign: TextAlign.center,
                     style: Apptextstyle.s18wbap,
                   ),
@@ -348,847 +368,849 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
           ),
           backgroundColor: Color(0xFFffffff),
         ),
-        body: SingleChildScrollView(
-            child:
-            Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              SizedBox(
-                height: 10,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Container(
-                  width: double.infinity,
-                  // height: 50, // give it a fixed height
-                  child: Column(
-                    children: [
-                      SizedBox(height: 10,),
-                      Align(
-                        alignment: Alignment.center,
-                        child: Container(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              InkWell(
-                                child: Text(
-                                  'Day',
-                                  style: Reports == 'Day'
-                                      ? Apptextstyle.s16wncR
-                                      : Apptextstyle.s16wncG,
-                                ),
-                                onTap: () {
-                                  setState(() {
-                                    Reports = 'Day';
-                                    currentTitle = 'Daily Blood oxygen Average';
-                                  });
-                                  simulateLoading(Day_Chart);
-                                },
-                              ),
-                              SizedBox(width: 20),
-                              InkWell(
-                                child: Text(
-                                  'Week',
-                                  style: Reports == 'Week'
-                                      ? Apptextstyle.s16wncR
-                                      : Apptextstyle.s16wncG,
-                                ),
-                                onTap: () {
-                                  setState(() {
-                                    Reports = 'Week';
-                                    currentTitle = 'Weekly Blood oxygen Average';
-                                  });
-                                  simulateLoading(Week_Chart);
-                                },
-                              ),
-                              SizedBox(width: 20),
-                              InkWell(
-                                child: Text(
-                                  'Month',
-                                  style: Reports == 'Month'
-                                      ? Apptextstyle.s16wncR
-                                      : Apptextstyle.s16wncG,
-                                ),
-                                onTap: () {
-                                  setState(() {
-                                    Reports = 'Month';
-                                    currentTitle = 'Monthly Blood oxygen Average';
-                                  });
-                                  simulateLoading(Month_Chart);
-                                },
-                              ),
-                              SizedBox(width: 20),
-                              InkWell(
-                                child: Text(
-                                  'Year',
-                                  style: Reports == 'Year'
-                                      ? Apptextstyle.s16wncR
-                                      : Apptextstyle.s16wncG,
-                                ),
-                                onTap: () {
-                                  setState(() {
-                                    currentTitle = 'Yearly Blood oxygen Average';
-                                    Reports = 'Year';
-
-                                  });
-                                  simulateLoading(Year_Chart);
-                                },
-                              ),
-                              SizedBox(width: 20),
-                              InkWell(
-                                child: Text(
-                                  'Multi-Year',
-                                  style: Reports == 'Multi-Year'
-                                      ? Apptextstyle.s16wncR
-                                      : Apptextstyle.s16wncG,
-                                ),
-                                onTap: () {
-                                  setState(() {
-                                    currentTitle = 'Multi-Year Blood oxygen Average';
-                                    Reports = 'Multi-Year';
-
-                                    final now = DateTime.now();
-                                    //fromYear = now.year;
-                                    toYear = now.year;
-
-                                    yearPickerLabel =
-                                        "${DateFormat('yyyy').format(DateTime(toYear!))}";
-
-                                  });
-
-                                  simulateLoading(MultiYear_Chart);
-
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      // Space between filter and date picker
-                      // DATE PICKER BELOW THE FILTER ROW
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          InkWell(
-                            onTap: () async {
-
-                              if (Reports == 'Multi-Year') {
-                                // Pick FROM Date (Year + Month)
-                                var toDatePicked = await DatePicker.showSimpleDatePicker(
-                                  context,
-                                  initialDate: Upto != null
-                                      ? DateTime(int.parse(Upto!))
-                                      : DateTime.now(),
-                                  firstDate: DateTime(1960),
-                                  lastDate: DateTime.now(),
-                                  dateFormat: "yyyy",
-                                  locale: DateTimePickerLocale.en_us,
-                                  looping: false,
-                                    titleText: 'Select End Year'
-                                );
-
-                                if (toDatePicked != null) {
-                                  toYear = toDatePicked.year;
-
-                                  setState(() {
-                                    Upto = toYear.toString();
-                                    yearPickerLabel = "$Upto";
-                                  });
-
-                                  await MultiYear_Chart();
-                                }
-                              }
-                              else {
-                                String dateFormatString =
-                                (Reports == 'Day' || Reports == 'Week')
-                                    ? "MMMM dd, yyyy"
-                                    : "MMMM-yyyy";
-
-                                var datePicked = await DatePicker
-                                    .showSimpleDatePicker(
-                                  context,
-                                  initialDate: selectedDate ?? DateTime.now(),
-                                  firstDate: DateTime(1960),
-                                  lastDate: DateTime.now(),
-                                  dateFormat: dateFormatString,
-                                  locale: DateTimePickerLocale.en_us,
-                                  looping: false,
-                                );
-
-                                if (datePicked != null) {
-                                  setState(() {
-                                    selectedDate = datePicked;
-
-                                    if (Reports == 'Week') {
-                                      // From Week to Day
-                                      Reports = 'Day';
-                                      currentTitle =
-                                      'Daily Blood oxygen Average';
-                                      mainDate =
-                                          DateFormat('MMMM dd, yyyy').format(
-                                              datePicked);
-                                      simulateLoading(Day_Chart);
-                                    } else if (Reports == 'Year') {
-                                      // From Year to Month
-                                      Reports = 'Month';
-                                      currentTitle =
-                                      'Monthly Blood oxygen Average';
-                                      mainDate = DateFormat('MMMM-yyyy').format(
-                                          datePicked);
-                                      simulateLoading(Month_Chart);
-                                    } else {
-                                      // Stay in current report type
-                                      switch (Reports) {
-                                        case 'Day':
-                                          currentTitle =
-                                          'Daily Blood oxygen Average';
-                                          mainDate = DateFormat('MMMM dd, yyyy')
-                                              .format(datePicked);
-                                          simulateLoading(Day_Chart);
-                                          break;
-                                        case 'Month':
-                                          currentTitle =
-                                          'Monthly Blood oxygen Average';
-                                          mainDate =
-                                              DateFormat('MMMM-yyyy').format(
-                                                  datePicked);
-                                          simulateLoading(Month_Chart);
-                                          break;
-                                      }
-                                    }
-                                  });
-                                }
-                              }
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Color(0xff275176),
-                                borderRadius: BorderRadius.all(Radius.circular(8)),
-                              ),
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    Reports == 'Multi-Year'
-                                        ? yearPickerLabel
-                                        : selectedDate != null
-                                        ? ((Reports == 'Day' || Reports == 'Week')
-                                        ? DateFormat('MMMM dd, yyyy').format(selectedDate!)
-                                        : DateFormat('MMMM-yyyy').format(selectedDate!))
-                                        : "",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Icon(Icons.arrow_drop_down, color: Colors.white),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                    ],
-                  ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+              child:
+              Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                SizedBox(
+                  height: 10,
                 ),
-              ),
-              SizedBox(
-                height: 25,
-              ),
-
-              if (isLoading)
-                Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Container(
                     width: double.infinity,
-                    height: MediaQuery.of(context).size.height * 0.40,
-                    color: Colors.white,
+                    // height: 50, // give it a fixed height
+                    child: Column(
+                      children: [
+                        SizedBox(height: 10,),
+                        Align(
+                          alignment: Alignment.center,
+                          child: Container(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                InkWell(
+                                  child: Text(
+                                    'Day',
+                                    style: Reports == 'Day'
+                                        ? Apptextstyle.s16wncR
+                                        : Apptextstyle.s16wncG,
+                                  ),
+                                  onTap: () {
+                                    setState(() {
+                                      Reports = 'Day';
+                                      currentTitle = 'Daily Blood oxygen Average';
+                                    });
+                                    simulateLoading(Day_Chart);
+                                  },
+                                ),
+                                SizedBox(width: 20),
+                                InkWell(
+                                  child: Text(
+                                    'Week',
+                                    style: Reports == 'Week'
+                                        ? Apptextstyle.s16wncR
+                                        : Apptextstyle.s16wncG,
+                                  ),
+                                  onTap: () {
+                                    setState(() {
+                                      Reports = 'Week';
+                                      currentTitle = 'Weekly Blood oxygen Average';
+                                    });
+                                    simulateLoading(Week_Chart);
+                                  },
+                                ),
+                                SizedBox(width: 20),
+                                InkWell(
+                                  child: Text(
+                                    'Month',
+                                    style: Reports == 'Month'
+                                        ? Apptextstyle.s16wncR
+                                        : Apptextstyle.s16wncG,
+                                  ),
+                                  onTap: () {
+                                    setState(() {
+                                      Reports = 'Month';
+                                      currentTitle = 'Monthly Blood oxygen Average';
+                                    });
+                                    simulateLoading(Month_Chart);
+                                  },
+                                ),
+                                SizedBox(width: 20),
+                                InkWell(
+                                  child: Text(
+                                    'Year',
+                                    style: Reports == 'Year'
+                                        ? Apptextstyle.s16wncR
+                                        : Apptextstyle.s16wncG,
+                                  ),
+                                  onTap: () {
+                                    setState(() {
+                                      currentTitle = 'Yearly Blood oxygen Average';
+                                      Reports = 'Year';
+          
+                                    });
+                                    simulateLoading(Year_Chart);
+                                  },
+                                ),
+                                SizedBox(width: 20),
+                                InkWell(
+                                  child: Text(
+                                    'Multi-Year',
+                                    style: Reports == 'Multi-Year'
+                                        ? Apptextstyle.s16wncR
+                                        : Apptextstyle.s16wncG,
+                                  ),
+                                  onTap: () {
+                                    setState(() {
+                                      currentTitle = 'Multi-Year Blood oxygen Average';
+                                      Reports = 'Multi-Year';
+          
+                                      final now = DateTime.now();
+                                      //fromYear = now.year;
+                                      toYear = now.year;
+          
+                                      yearPickerLabel =
+                                          "${DateFormat('yyyy').format(DateTime(toYear!))}";
+          
+                                    });
+          
+                                    simulateLoading(MultiYear_Chart);
+          
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        // Space between filter and date picker
+                        // DATE PICKER BELOW THE FILTER ROW
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            InkWell(
+                              onTap: () async {
+          
+                                if (Reports == 'Multi-Year') {
+                                  // Pick FROM Date (Year + Month)
+                                  var toDatePicked = await DatePicker.showSimpleDatePicker(
+                                    context,
+                                    initialDate: Upto != null
+                                        ? DateTime(int.parse(Upto!))
+                                        : DateTime.now(),
+                                    firstDate: DateTime(1960),
+                                    lastDate: DateTime.now(),
+                                    dateFormat: "yyyy",
+                                    locale: DateTimePickerLocale.en_us,
+                                    looping: false,
+                                      titleText: 'Select End Year'
+                                  );
+          
+                                  if (toDatePicked != null) {
+                                    toYear = toDatePicked.year;
+          
+                                    setState(() {
+                                      Upto = toYear.toString();
+                                      yearPickerLabel = "$Upto";
+                                    });
+          
+                                    await MultiYear_Chart();
+                                  }
+                                }
+                                else {
+                                  String dateFormatString =
+                                  (Reports == 'Day' || Reports == 'Week')
+                                      ? "MMMM dd, yyyy"
+                                      : "MMMM-yyyy";
+          
+                                  var datePicked = await DatePicker
+                                      .showSimpleDatePicker(
+                                    context,
+                                    initialDate: selectedDate ?? DateTime.now(),
+                                    firstDate: DateTime(1960),
+                                    lastDate: DateTime.now(),
+                                    dateFormat: dateFormatString,
+                                    locale: DateTimePickerLocale.en_us,
+                                    looping: false,
+                                  );
+          
+                                  if (datePicked != null) {
+                                    setState(() {
+                                      selectedDate = datePicked;
+          
+                                      if (Reports == 'Week') {
+                                        // From Week to Day
+                                        Reports = 'Day';
+                                        currentTitle =
+                                        'Daily Blood oxygen Average';
+                                        mainDate =
+                                            DateFormat('MMMM dd, yyyy').format(
+                                                datePicked);
+                                        simulateLoading(Day_Chart);
+                                      } else if (Reports == 'Year') {
+                                        // From Year to Month
+                                        Reports = 'Month';
+                                        currentTitle =
+                                        'Monthly Blood oxygen Average';
+                                        mainDate = DateFormat('MMMM-yyyy').format(
+                                            datePicked);
+                                        simulateLoading(Month_Chart);
+                                      } else {
+                                        // Stay in current report type
+                                        switch (Reports) {
+                                          case 'Day':
+                                            currentTitle =
+                                            'Daily Blood oxygen Average';
+                                            mainDate = DateFormat('MMMM dd, yyyy')
+                                                .format(datePicked);
+                                            simulateLoading(Day_Chart);
+                                            break;
+                                          case 'Month':
+                                            currentTitle =
+                                            'Monthly Blood oxygen Average';
+                                            mainDate =
+                                                DateFormat('MMMM-yyyy').format(
+                                                    datePicked);
+                                            simulateLoading(Month_Chart);
+                                            break;
+                                        }
+                                      }
+                                    });
+                                  }
+                                }
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Color(0xff275176),
+                                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      Reports == 'Multi-Year'
+                                          ? yearPickerLabel
+                                          : selectedDate != null
+                                          ? ((Reports == 'Day' || Reports == 'Week')
+                                          ? DateFormat('MMMM dd, yyyy').format(selectedDate!)
+                                          : DateFormat('MMMM-yyyy').format(selectedDate!))
+                                          : "",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Icon(Icons.arrow_drop_down, color: Colors.white),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+          
+                      ],
+                    ),
                   ),
-                )
-              else if (Reports == "Day")
-                buildBloodOxygenChart(
-                  context: context,
-                  chartData: chartData,
-                  targetspo2noraml: targetNormal?.toInt() ?? 91,
-                  targetspo2high: targetNormal?.toInt() ?? 95,
-                    ismonth: false,
-                    Xaxistitle: 'Time of Day',
-                    title: 'Blood Oxygen for this Day',
-                    xValueMapper: (d, _) => d.day // Your list of BloodOxygenData
-                )
-                else if (Reports == "Week")
+                ),
+                SizedBox(
+                  height: 25,
+                ),
+          
+                if (isLoading)
+                  Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(
+                      width: double.infinity,
+                      height: MediaQuery.of(context).size.height * 0.40,
+                      color: Colors.white,
+                    ),
+                  )
+                else if (Reports == "Day")
                   buildBloodOxygenChart(
                     context: context,
                     chartData: chartData,
-                      targetspo2noraml: targetNormal?.toInt() ?? 91,
-                      targetspo2high: targetNormal?.toInt() ?? 95 ,// Your
-                      title: 'Avg Daily Blood Oxygen ',
-                    ismonth: false,
-                    Xaxistitle: 'Days',
-                      xValueMapper: (d, _) => d.day
-                  )
-                else if (Reports == "Month")
-                    buildBloodOxygenChart(
-                        context: context,
-                        chartData: chartData,
-                        targetspo2noraml: targetNormal?.toInt() ?? 91,
-                        targetspo2high: targetNormal?.toInt() ?? 95, // Your
-                        title: 'Avg Weekly Blood Oxygen',
+                    targetspo2noraml: targetNormal?.toInt() ?? 91,
+                    targetspo2high: targetNormal?.toInt() ?? 95,
                       ismonth: false,
-                      Xaxistitle: 'Weeks',
-                        xValueMapper: (d, _) => d.months
+                      Xaxistitle: 'Time of Day',
+                      title: 'Blood Oxygen for this Day',
+                      xValueMapper: (d, _) => d.day // Your list of BloodOxygenData
+                  )
+                  else if (Reports == "Week")
+                    buildBloodOxygenChart(
+                      context: context,
+                      chartData: chartData,
+                        targetspo2noraml: targetNormal?.toInt() ?? 91,
+                        targetspo2high: targetNormal?.toInt() ?? 95 ,// Your
+                        title: 'Avg Daily Blood Oxygen ',
+                      ismonth: false,
+                      Xaxistitle: 'Days',
+                        xValueMapper: (d, _) => d.day
                     )
-                  else if (Reports == "Year")
+                  else if (Reports == "Month")
                       buildBloodOxygenChart(
                           context: context,
                           chartData: chartData,
                           targetspo2noraml: targetNormal?.toInt() ?? 91,
                           targetspo2high: targetNormal?.toInt() ?? 95, // Your
-                          title: 'Avg Monthly Blood Oxygen',
-                        ismonth: true,
-                        Xaxistitle: 'Months',
+                          title: 'Avg Weekly Blood Oxygen',
+                        ismonth: false,
+                        Xaxistitle: 'Weeks',
                           xValueMapper: (d, _) => d.months
                       )
-                    else if (Reports == "Multi-Year")
+                    else if (Reports == "Year")
                         buildBloodOxygenChart(
                             context: context,
                             chartData: chartData,
                             targetspo2noraml: targetNormal?.toInt() ?? 91,
                             targetspo2high: targetNormal?.toInt() ?? 95, // Your
-                            title: 'Avg Yearly Blood Oxygen',
-                          ismonth: true,
-                          Xaxistitle: 'Years',
-                            xValueMapper: (d, _) => d.Year
-                        ),
-              SizedBox(height: 30),
-              Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(right: 10, left: 20),
-                      child: Container(
-                        padding: EdgeInsets.all(8),
-                        width: size.width * 0.95,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(
-                            color: Colors.grey.shade500,
-                            width: 1.0,
+                            title: 'Avg Monthly Blood Oxygen',
+                          ismonth: false,
+                          Xaxistitle: 'Months',
+                            xValueMapper: (d, _) => d.months
+                        )
+                      else if (Reports == "Multi-Year")
+                          buildBloodOxygenChart(
+                              context: context,
+                              chartData: chartData,
+                              targetspo2noraml: targetNormal?.toInt() ?? 91,
+                              targetspo2high: targetNormal?.toInt() ?? 95, // Your
+                              title: 'Avg Yearly Blood Oxygen',
+                            ismonth: true,
+                            Xaxistitle: 'Years',
+                              xValueMapper: (d, _) => d.Year
+                          ),
+                SizedBox(height: 30),
+                Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(right: 10, left: 20),
+                        child: Container(
+                          padding: EdgeInsets.all(8),
+                          width: size.width * 0.95,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                              color: Colors.grey.shade500,
+                              width: 1.0,
+                            ),
+                          ),
+                          child: Container(
+                            width: size.width * 0.55,
+                            child: Column(
+                             // mainAxisAlignment: MainAxisAlignment.start,
+                              //crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  //mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Column(
+                                      children: [
+                                        _buildLegendspo2(
+                                          context,
+                                          const Color(0xFFD1FCD1),
+                                          const Color(0xFF64EE64),
+                                          AppText.spo2_n,
+                                          AppText.spo2_np,
+                                        ),
+                                        const SizedBox(height: 5),
+                                        _buildLegendspo2(
+                                          context,
+                                          const Color(0xFFFAF0CC),
+                                          const Color(0xFFF5D666),
+                                          AppText.spo2_h,
+                                          AppText.spo2_mp,
+                                        ),
+                                        const SizedBox(height: 5),
+                                        _buildLegendspo2(
+                                          context,
+                                          const Color(0xFFF6CCCC),
+                                          const Color(0xFFF38F8F),
+                                          AppText.spo2_l,
+                                          AppText.spo2_lp,
+                                        ),
+                                      ],
+                                    )
+                                    // Column(
+                                    //   crossAxisAlignment: CrossAxisAlignment.start,
+                                    //   children: [
+                                    //     Row(
+                                    //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    //       children: [
+                                    //         Container(
+                                    //           width: size.width * 0.1,
+                                    //           height: 10,
+                                    //           decoration: BoxDecoration(
+                                    //             color: Color(0xFFD1FCD1),
+                                    //             border: Border.all(color: Color(0xFF64EE64), width: 1),
+                                    //           ),
+                                    //         ),
+                                    //         SizedBox(width: 5),
+                                    //         Text(
+                                    //           AppText.spo2_n,
+                                    //           style: Apptextstyle.s11wbcB,
+                                    //           overflow: TextOverflow.ellipsis,
+                                    //           softWrap: false,
+                                    //         ),
+                                    //       ],
+                                    //     ),
+                                    //     SizedBox(height: 8),
+                                    //     Row(
+                                    //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    //       children: [
+                                    //         Container(
+                                    //           width: size.width * 0.1,
+                                    //           height: 10,
+                                    //           decoration: BoxDecoration(
+                                    //             color: Color(0xFFFAF0CC),
+                                    //             border: Border.all(color: Color(0xFFF5D666), width: 1),
+                                    //           ),
+                                    //         ),
+                                    //         SizedBox(width: 5),
+                                    //         Text(
+                                    //           AppText.spo2_h,
+                                    //           style: Apptextstyle.s11wbcB,
+                                    //           overflow: TextOverflow.ellipsis,
+                                    //           softWrap: false,
+                                    //         ),
+                                    //       ],
+                                    //     ),
+                                    //     SizedBox(height: 8),
+                                    //     Row(
+                                    //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    //       children: [
+                                    //         Container(
+                                    //           width: size.width * 0.1,
+                                    //           height: 10,
+                                    //           decoration: BoxDecoration(
+                                    //             color: Color(0xFFF6CCCC),
+                                    //             border: Border.all(color: Color(0xFFF38F8F), width: 1),
+                                    //           ),
+                                    //         ),
+                                    //         SizedBox(width: 5),
+                                    //         Text(
+                                    //           AppText.spo2_l,
+                                    //           style: Apptextstyle.s11wbcB,
+                                    //           maxLines: 2,
+                                    //           softWrap: true,
+                                    //           // textAlign: TextAlign.left,
+                                    //         ),
+                                    //       ],
+                                    //     ),
+                                    //
+                                    //   ],
+                                    // ),
+          
+                                  ],
+                                ),
+          
+          
+                              ],
+                            ),
                           ),
                         ),
+                      ),
+                      SizedBox(height: 20),
+                      // Show text outside the containers when visible
+                      AnimatedSize(
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        child: AnimatedOpacity(
+                          opacity: _isTextVisibleblue ? 1.0 : 0.0,
+                          duration: Duration(milliseconds: 300),
+                          child: _isTextVisibleblue
+                              ? Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Text(
+                              AppText.spo2normal_info,
+                              style: Apptextstyle.s12wncB,
+                              textAlign: TextAlign.left,
+                            ),
+                          )
+                              : SizedBox.shrink(),
+                        ),
+                      ),
+                      AnimatedSize(
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        child: AnimatedOpacity(
+                          opacity: _isTextVisibleorange ? 1.0 : 0.0,
+                          duration: Duration(milliseconds: 300),
+                          child: _isTextVisibleorange
+                              ? Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Text(
+                              AppText.sp02_concern,
+                              style: Apptextstyle.s12wncB,
+                              textAlign: TextAlign.left,
+                            ),
+                          )
+                              : SizedBox.shrink(),
+                        ),
+                      ),
+                      AnimatedSize(
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        child: AnimatedOpacity(
+                          opacity: _isTextVisiblegreen ? 1.0 : 0.0,
+                          duration: Duration(milliseconds: 300),
+                          child: _isTextVisiblegreen
+                              ? Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Text(
+                              AppText.sp02_low,
+                              style: Apptextstyle.s12wncB,
+                              textAlign: TextAlign.left,
+                            ),
+                          )
+                              : SizedBox.shrink(),
+                        ),
+                      ),
+                    ]),
+                recentSpo2 == null ?
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(30, 10, 20, 10),
+                  child: Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(
+                      width: double.infinity,
+                      height: 75,
+                      color: Colors.white,
+                    ),
+                  ),
+                ) :
+                Padding(
+                  padding: EdgeInsets.only(right: 10, left: 20),
+                  child: Stack(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 20, 0, 25),
                         child: Container(
-                          width: size.width * 0.55,
+                          decoration: BoxDecoration(
+                            color: Colors.white, // Card background color
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                              color: Colors.grey.shade500,
+                              width: 1.0,
+                            ),
+                          ),
                           child: Column(
-                           // mainAxisAlignment: MainAxisAlignment.start,
-                            //crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // Top section with image and text
+                              SizedBox(height: 10,),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 5),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    SizedBox(width: 5),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          AppText.mostrecent,
+                                          style: Apptextstyle.s13wbcB,
+                                        ),
+                                        SizedBox(width: 5),
+                                        Text(
+                                          mainDate ?? ' ',
+                                          // Default value if no data is available
+                                          style: Apptextstyle.s14wbcB,
+          
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+          
+                              ),
+                              SizedBox(height: 10),
+                              // Systolic Row
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                //mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Column(
-                                    children: [
-                                      _buildLegendspo2(
-                                        context,
-                                        const Color(0xFFD1FCD1),
-                                        const Color(0xFF64EE64),
-                                        AppText.spo2_n,
-                                        AppText.spo2_np,
-                                      ),
-                                      const SizedBox(height: 5),
-                                      _buildLegendspo2(
-                                        context,
-                                        const Color(0xFFFAF0CC),
-                                        const Color(0xFFF5D666),
-                                        AppText.spo2_h,
-                                        AppText.spo2_mp,
-                                      ),
-                                      const SizedBox(height: 5),
-                                      _buildLegendspo2(
-                                        context,
-                                        const Color(0xFFF6CCCC),
-                                        const Color(0xFFF38F8F),
-                                        AppText.spo2_l,
-                                        AppText.spo2_lp,
-                                      ),
-                                    ],
-                                  )
-                                  // Column(
-                                  //   crossAxisAlignment: CrossAxisAlignment.start,
-                                  //   children: [
-                                  //     Row(
-                                  //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  //       children: [
-                                  //         Container(
-                                  //           width: size.width * 0.1,
-                                  //           height: 10,
-                                  //           decoration: BoxDecoration(
-                                  //             color: Color(0xFFD1FCD1),
-                                  //             border: Border.all(color: Color(0xFF64EE64), width: 1),
-                                  //           ),
-                                  //         ),
-                                  //         SizedBox(width: 5),
-                                  //         Text(
-                                  //           AppText.spo2_n,
-                                  //           style: Apptextstyle.s11wbcB,
-                                  //           overflow: TextOverflow.ellipsis,
-                                  //           softWrap: false,
-                                  //         ),
-                                  //       ],
-                                  //     ),
-                                  //     SizedBox(height: 8),
-                                  //     Row(
-                                  //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  //       children: [
-                                  //         Container(
-                                  //           width: size.width * 0.1,
-                                  //           height: 10,
-                                  //           decoration: BoxDecoration(
-                                  //             color: Color(0xFFFAF0CC),
-                                  //             border: Border.all(color: Color(0xFFF5D666), width: 1),
-                                  //           ),
-                                  //         ),
-                                  //         SizedBox(width: 5),
-                                  //         Text(
-                                  //           AppText.spo2_h,
-                                  //           style: Apptextstyle.s11wbcB,
-                                  //           overflow: TextOverflow.ellipsis,
-                                  //           softWrap: false,
-                                  //         ),
-                                  //       ],
-                                  //     ),
-                                  //     SizedBox(height: 8),
-                                  //     Row(
-                                  //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  //       children: [
-                                  //         Container(
-                                  //           width: size.width * 0.1,
-                                  //           height: 10,
-                                  //           decoration: BoxDecoration(
-                                  //             color: Color(0xFFF6CCCC),
-                                  //             border: Border.all(color: Color(0xFFF38F8F), width: 1),
-                                  //           ),
-                                  //         ),
-                                  //         SizedBox(width: 5),
-                                  //         Text(
-                                  //           AppText.spo2_l,
-                                  //           style: Apptextstyle.s11wbcB,
-                                  //           maxLines: 2,
-                                  //           softWrap: true,
-                                  //           // textAlign: TextAlign.left,
-                                  //         ),
-                                  //       ],
-                                  //     ),
-                                  //
-                                  //   ],
-                                  // ),
-
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 17),
+                                    child: Text(
+                                      AppText.b_oxygen,
+                                      style: Apptextstyle.s12wncB,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 10.0),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 8),
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: Color(0xffFF0000),
+                                              // Border color for Systolic
+                                              width: 1.0,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                                5), // Optional: Rounded corners
+                                          ),
+                                          child: Text(
+                                            recentSpo2 != null ? '$recentSpo2%' : ' ',
+                                            style: Apptextstyle.s12wbcR,
+                                          ),
+          
+                                        ),
+                                        SizedBox(width: 15),
+                                        // Space between value and info icon
+                                        Column(
+                                          mainAxisAlignment: MainAxisAlignment
+                                              .center,
+                                          children: [
+                                            InkWell(
+                                              onTap: () => _toggletextinfo(),
+                                              // Toggle text on icon click
+                                              child: Icon(
+                                                Icons.info_outline_rounded,
+                                                color: is_heart_rate ? Color(
+                                                    0xffFF0000) : Color(0xFF997f7f),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               ),
-
-
+                              SizedBox(height: 10),
+                              AnimatedSize(
+                                duration: Duration(milliseconds: 300),
+                                curve: Curves.easeInCubic,
+                                child: AnimatedOpacity(
+                                  opacity: is_heart_rate ? 1.0 : 0.0,
+                                  duration: Duration(milliseconds: 300),
+                                  child: is_heart_rate
+                                      ? Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Text(
+                                      AppText.spo2_info,
+                                      style: TextStyle(fontSize: 12.0),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  )
+                                      : SizedBox.shrink(),
+                                ),
+                              ),
+                              // Info text
+                              SizedBox(height: 15,)
                             ],
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 20),
-                    // Show text outside the containers when visible
-                    AnimatedSize(
-                      duration: Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      child: AnimatedOpacity(
-                        opacity: _isTextVisibleblue ? 1.0 : 0.0,
-                        duration: Duration(milliseconds: 300),
-                        child: _isTextVisibleblue
-                            ? Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Text(
-                            AppText.spo2normal_info,
-                            style: Apptextstyle.s12wncB,
-                            textAlign: TextAlign.left,
-                          ),
-                        )
-                            : SizedBox.shrink(),
-                      ),
-                    ),
-                    AnimatedSize(
-                      duration: Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      child: AnimatedOpacity(
-                        opacity: _isTextVisibleorange ? 1.0 : 0.0,
-                        duration: Duration(milliseconds: 300),
-                        child: _isTextVisibleorange
-                            ? Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Text(
-                            AppText.sp02_concern,
-                            style: Apptextstyle.s12wncB,
-                            textAlign: TextAlign.left,
-                          ),
-                        )
-                            : SizedBox.shrink(),
-                      ),
-                    ),
-                    AnimatedSize(
-                      duration: Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      child: AnimatedOpacity(
-                        opacity: _isTextVisiblegreen ? 1.0 : 0.0,
-                        duration: Duration(milliseconds: 300),
-                        child: _isTextVisiblegreen
-                            ? Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Text(
-                            AppText.sp02_low,
-                            style: Apptextstyle.s12wncB,
-                            textAlign: TextAlign.left,
-                          ),
-                        )
-                            : SizedBox.shrink(),
-                      ),
-                    ),
-                  ]),
-              recentSpo2 == null ?
-              Padding(
-                padding: const EdgeInsets.fromLTRB(30, 10, 20, 10),
-                child: Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
-                  child: Container(
-                    width: double.infinity,
-                    height: 75,
-                    color: Colors.white,
-                  ),
-                ),
-              ) :
-              Padding(
-                padding: EdgeInsets.only(right: 10, left: 20),
-                child: Stack(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 20, 0, 25),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white, // Card background color
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(
-                            color: Colors.grey.shade500,
-                            width: 1.0,
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            // Top section with image and text
-                            SizedBox(height: 10,),
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 5),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  SizedBox(width: 5),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        AppText.mostrecent,
-                                        style: Apptextstyle.s13wbcB,
-                                      ),
-                                      SizedBox(width: 5),
-                                      Text(
-                                        mainDate ?? ' ',
-                                        // Default value if no data is available
-                                        style: Apptextstyle.s14wbcB,
-
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-
-                            ),
-                            SizedBox(height: 10),
-                            // Systolic Row
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Padding(
+                        padding: const EdgeInsets.only(left: 18),
+                        child: AnimatedBuilder(
+                          animation: _controller,
+                          builder: (context, child) {
+                            return Stack(
+                              alignment: Alignment.center,
+                              // Align children to center
                               children: [
-                                Padding(
-                                  padding: EdgeInsets.only(left: 17),
-                                  child: Text(
-                                    AppText.b_oxygen,
-                                    style: Apptextstyle.s12wncB,
+                                Opacity(
+                                  opacity: _opacityAnimation.value,
+                                  // Apply the opacity to the container
+                                  child: Container(
+                                    width: 45,
+                                    height: 45,
+                                    decoration: BoxDecoration(
+                                      color: Color(0xffFF0000),
+                                      // Background color remains constant
+                                      shape: BoxShape
+                                          .rectangle, // Optional: make it circular
+                                    ),
                                   ),
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 10.0),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 8),
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                            color: Color(0xffFF0000),
-                                            // Border color for Systolic
-                                            width: 1.0,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                              5), // Optional: Rounded corners
-                                        ),
-                                        child: Text(
-                                          recentSpo2 != null ? '$recentSpo2%' : ' ',
-                                          style: Apptextstyle.s12wbcR,
-                                        ),
-
-                                      ),
-                                      SizedBox(width: 15),
-                                      // Space between value and info icon
-                                      Column(
-                                        mainAxisAlignment: MainAxisAlignment
-                                            .center,
-                                        children: [
-                                          InkWell(
-                                            onTap: () => _toggletextinfo(),
-                                            // Toggle text on icon click
-                                            child: Icon(
-                                              Icons.info_outline_rounded,
-                                              color: is_heart_rate ? Color(
-                                                  0xffFF0000) : Color(0xFF997f7f),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                Container(
+                                  width: 45,
+                                  height: 45,
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                      image: AssetImage(
+                                          Appimages.spo2_logo),
+                                      fit: BoxFit.cover, // Image remains static
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+          
+                  ),
+                ),
+                SizedBox(height: 20,),
+                isLoading ?
+                Center(child: Image.asset(
+                  Appimages.applogo,
+                  height: 50,
+                  fit: BoxFit.contain,
+                ),) :
+                Padding(
+                  padding: EdgeInsets.only(right: 15, left: 20,bottom: 10),
+                  child: Container(
+                    //height: MediaQuery.of(context).size.height,
+                    decoration: BoxDecoration(
+                      color: Colors.white, // Card background color
+                      borderRadius: BorderRadius.circular(5),
+                      border: Border.all(
+                        color: Colors.grey.shade500, // Border color
+                        width: 1.0, // Border width
+                      ),
+                    ),
+                    child: Card(
+                      color: Colors.white,
+                      elevation: 0, // Remove default elevation
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(height: 15,),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                currentTitle,
+                                style: TextStyle(
+                                    color: Colors.red, fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 30),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    Reports,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF275176)),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    AppText.b_oxygen2,
+                                    style: Apptextstyle.s13wbcothers,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.end,
                                   ),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 10),
-                            AnimatedSize(
-                              duration: Duration(milliseconds: 300),
-                              curve: Curves.easeInCubic,
-                              child: AnimatedOpacity(
-                                opacity: is_heart_rate ? 1.0 : 0.0,
-                                duration: Duration(milliseconds: 300),
-                                child: is_heart_rate
-                                    ? Padding(
-                                  padding: const EdgeInsets.all(10),
-                                  child: Text(
-                                    AppText.spo2_info,
-                                    style: TextStyle(fontSize: 12.0),
-                                    textAlign: TextAlign.left,
-                                  ),
-                                )
-                                    : SizedBox.shrink(),
-                              ),
-                            ),
-                            // Info text
-                            SizedBox(height: 15,)
-                          ],
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 18),
-                      child: AnimatedBuilder(
-                        animation: _controller,
-                        builder: (context, child) {
-                          return Stack(
-                            alignment: Alignment.center,
-                            // Align children to center
-                            children: [
-                              Opacity(
-                                opacity: _opacityAnimation.value,
-                                // Apply the opacity to the container
-                                child: Container(
-                                  width: 45,
-                                  height: 45,
-                                  decoration: BoxDecoration(
-                                    color: Color(0xffFF0000),
-                                    // Background color remains constant
-                                    shape: BoxShape
-                                        .rectangle, // Optional: make it circular
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                width: 45,
-                                height: 45,
-                                decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                    image: AssetImage(
-                                        Appimages.spo2_logo),
-                                    fit: BoxFit.cover, // Image remains static
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-
-                ),
-              ),
-              SizedBox(height: 20,),
-              isLoading ?
-              Center(child: Image.asset(
-                Appimages.applogo,
-                height: 50,
-                fit: BoxFit.contain,
-              ),) :
-              Padding(
-                padding: EdgeInsets.only(right: 15, left: 20,bottom: 10),
-                child: Container(
-                  //height: MediaQuery.of(context).size.height,
-                  decoration: BoxDecoration(
-                    color: Colors.white, // Card background color
-                    borderRadius: BorderRadius.circular(5),
-                    border: Border.all(
-                      color: Colors.grey.shade500, // Border color
-                      width: 1.0, // Border width
-                    ),
-                  ),
-                  child: Card(
-                    color: Colors.white,
-                    elevation: 0, // Remove default elevation
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SizedBox(height: 15,),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              currentTitle,
-                              style: TextStyle(
-                                  color: Colors.red, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 30),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  Reports,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF275176)),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  AppText.b_oxygen2,
-                                  style: Apptextstyle.s13wbcothers,
-                                  overflow: TextOverflow.ellipsis,
-                                  textAlign: TextAlign.end,
-                                ),
-                              ),
-                            ],
                           ),
-                        ),
-                        SizedBox(height: 5),
-                        SizedBox(height: 10),
-                        SizedBox(
-                          // height: 250,
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            //physics: BouncingScrollPhysics(),
-                            itemCount: chartData.length,
-                            itemBuilder: (context, index) {
-                              return Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment
-                                          .spaceBetween,
-                                      crossAxisAlignment: CrossAxisAlignment
-                                          .center,
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            Reports == 'Month' ?
-                                                chartData[index].months
-                                                : Reports == 'Year'
-                                                ? DateFormat("MMM").format(
-                                                chartData[index].date)
-                                                : Reports == 'Multi-Year'
-                                                ? DateFormat("yyyy").format(
-                                                chartData[index].date)
-                                            // Format for month
-                                                :Reports == 'Day' ? DateFormat(
-                                                'MMM dd, yyyy HH:mm')
-                                                .format(chartData[index]
-                                                .date) :
-                                            chartData[index].day,
-                                            // Format for other reports
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                                fontSize: 12
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(right: 20),
+                          SizedBox(height: 5),
+                          SizedBox(height: 10),
+                          SizedBox(
+                            // height: 250,
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              //physics: BouncingScrollPhysics(),
+                              itemCount: chartData.length,
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment
+                                            .spaceBetween,
+                                        crossAxisAlignment: CrossAxisAlignment
+                                            .center,
+                                        children: [
+                                          Expanded(
                                             child: Text(
-                                              '${chartData[index].spo2}%', // Add % here
+                                              Reports == 'Month' ?
+                                                  chartData[index].months
+                                                  : Reports == 'Year'
+                                                  ? DateFormat("MMM").format(
+                                                  chartData[index].date)
+                                                  : Reports == 'Multi-Year'
+                                                  ? DateFormat("yyyy").format(
+                                                  chartData[index].date)
+                                              // Format for month
+                                                  :Reports == 'Day' ? DateFormat(
+                                                  'MMM dd, yyyy HH:mm')
+                                                  .format(chartData[index]
+                                                  .date) :
+                                              chartData[index].day,
+                                              // Format for other reports
                                               overflow: TextOverflow.ellipsis,
-                                              textAlign: TextAlign.right,
                                               style: TextStyle(
                                                   fontSize: 12
                                               ),
                                             ),
                                           ),
-                                        ),
-
-                                      ],
-                                    ),
-                                    Divider()
-                                  ],
-                                ),
-                              );
-                            },
+                                          Expanded(
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(right: 20),
+                                              child: Text(
+                                                '${chartData[index].spo2}%', // Add % here
+                                                overflow: TextOverflow.ellipsis,
+                                                textAlign: TextAlign.right,
+                                                style: TextStyle(
+                                                    fontSize: 12
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+          
+                                        ],
+                                      ),
+                                      Divider()
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
+                )
+                // else if (Reports == "Week")
+                //   buildBloodPressureChart(
+                //     chartData: chartData,
+                //     xValueMapper: (BloodPressureData data, _) => data.day,
+                //   )
+                //   else if (Reports == "Month")
+                //       buildBloodPressureChart(
+                //         chartData: chartData,
+                //         xValueMapper: (BloodPressureData data, _) => data.months,
+                //       )
+                //     else if (Reports == "Year")
+                //         buildBloodPressureChart(
+                //           chartData: chartData,
+                //           xValueMapper: (BloodPressureData data, _) => data.Year,
+                //         ),
+              ]
               )
-              // else if (Reports == "Week")
-              //   buildBloodPressureChart(
-              //     chartData: chartData,
-              //     xValueMapper: (BloodPressureData data, _) => data.day,
-              //   )
-              //   else if (Reports == "Month")
-              //       buildBloodPressureChart(
-              //         chartData: chartData,
-              //         xValueMapper: (BloodPressureData data, _) => data.months,
-              //       )
-              //     else if (Reports == "Year")
-              //         buildBloodPressureChart(
-              //           chartData: chartData,
-              //           xValueMapper: (BloodPressureData data, _) => data.Year,
-              //         ),
-            ]
-            )
+          ),
         )
     );
   }
@@ -1209,9 +1231,19 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
     required String Xaxistitle,
 
   }) {
+    // ✅ Use MediaQuery to get screen dimensions
+    final screenSize = MediaQuery.of(context).size;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    // ✅ Always use portrait height (the larger of height or width)
+    final portraitHeight = screenSize.height > screenSize.width
+        ? screenSize.height
+        : screenSize.width;
+
+    final chartHeight = portraitHeight * 0.4;
     return Container(
       width: double.infinity,
-      height: MediaQuery.of(context).size.height * 0.40,
+      height:chartHeight,
       child: SfCartesianChart(
         title: ChartTitle(text: title),
         //margin: const EdgeInsets.only(left: 10, right: 20),

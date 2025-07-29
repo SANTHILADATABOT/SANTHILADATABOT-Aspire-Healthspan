@@ -16,9 +16,10 @@ import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:image_picker/image_picker.dart';
-
 import '../../utils/apptext.dart';
 import 'edit phone number.dart';
+import 'package:oktoast/oktoast.dart';
+import 'package:flutter/foundation.dart'; // for kIsWeb
 
 
 class EditProfile extends StatefulWidget {

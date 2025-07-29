@@ -41,17 +41,29 @@ class CustomBottomNavBar extends StatelessWidget {
                   BottomBarItem(
                     inActiveItem: Icon(Icons.home_filled, color: Color(0xff386BF6)),
                     activeItem: Icon(Icons.home_filled, color: Colors.white),
-                    itemLabel: 'Home',
+                    //itemLabel: 'Home',
+                    itemLabelWidget: Text(
+                      'Home',
+                      style: TextStyle(fontSize: 9), // Increase font size
+                    ),
                   ),
                   BottomBarItem(
                     inActiveItem: Icon(Icons.notifications, color: Color(0xff386BF6)),
                     activeItem: Icon(Icons.notifications, color: Colors.white),
-                    itemLabel: 'Notifications',
+                    //itemLabel: 'Notifications',
+                    itemLabelWidget: Text(
+                      'Notifications',
+                      style: TextStyle(fontSize: 9), // Increase font size
+                    ),
                   ),
                   BottomBarItem(
                     inActiveItem: Icon(Icons.person, color: Color(0xff386BF6)),
                     activeItem: Icon(Icons.person, color: Colors.white),
-                    itemLabel: 'Profile',
+                    //itemLabel: 'Profile',
+                    itemLabelWidget: Text(
+                      'Profile',
+                      style: TextStyle(fontSize: 9), // Increase font size
+                    ),
                   ),
                 ],
                 onTap: (index) {

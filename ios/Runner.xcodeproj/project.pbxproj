@@ -578,7 +578,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = J66P36JNBL;
 				ENABLE_BITCODE = NO;
 				FLUTTER_BUILD_NAME = 11;
-				FLUTTER_BUILD_NUMBER = 11.2;
+				FLUTTER_BUILD_NUMBER = 11.4;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseCore\"",
@@ -613,7 +613,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 11.2;
+				MARKETING_VERSION = 11.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.eugene.aspire;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -827,7 +827,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = J66P36JNBL;
 				ENABLE_BITCODE = NO;
 				FLUTTER_BUILD_NAME = 11;
-				FLUTTER_BUILD_NUMBER = 11.2;
+				FLUTTER_BUILD_NUMBER = 11.4;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseCore\"",
@@ -862,7 +862,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 11.2;
+				MARKETING_VERSION = 11.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.eugene.aspire;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -895,7 +895,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = J66P36JNBL;
 				ENABLE_BITCODE = NO;
 				FLUTTER_BUILD_NAME = 11;
-				FLUTTER_BUILD_NUMBER = 11.2;
+				FLUTTER_BUILD_NUMBER = 11.4;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseCore\"",
@@ -930,7 +930,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 11.2;
+				MARKETING_VERSION = 11.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.eugene.aspire;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

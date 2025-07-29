@@ -5,13 +5,16 @@ import 'package:azpire_new/View/Dashboard_screen.dart';
 import 'package:azpire_new/View/Dialy_steps.dart';
 import 'package:azpire_new/View/Heart_rate.dart';
 import 'package:azpire_new/View/Sleep_chart.dart';
+import 'package:azpire_new/View/blood_oxygenpressure.dart';
 import 'package:azpire_new/View/blood_pressure.dart';
+import 'package:azpire_new/View/profile.dart';
 import 'package:azpire_new/View/weight.dart';
 import 'package:azpire_new/View/Notifications.dart';
 import 'package:azpire_new/View/login_Screen.dart';
 import 'package:azpire_new/menu/goal_settings.dart';
 import 'package:azpire_new/minutedata/minutedata.dart';
 import 'package:azpire_new/View/bluetoothscreen.dart';
+import 'package:azpire_new/utils/appimages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -49,7 +52,8 @@ class _NavMenuState extends State<NavMenu> {
         padding: EdgeInsets.zero,
         children: [
       Container(
-        height: 120,
+        height: MediaQuery.of(context).size.height*0.15,
+        width: MediaQuery.of(context).size.width < 600 ? 80 : 250,
         child: DrawerHeader(
           padding: EdgeInsets.zero,
         child: Column(
@@ -180,6 +184,24 @@ class _NavMenuState extends State<NavMenu> {
 
                   },
                 ),
+                ListTile(
+                  leading: Image.asset(
+                    Appimages.spo2_logo,
+                    height: 30,
+                    width: 30,
+                    color: Color(0xFF254a6c), // Optional: apply color overlay if needed
+                  ),
+                  title: Text(
+                    'Blood Oxygen',
+                    style: TextStyle(
+                      fontFamily: "Inter",
+                      color: Color(0xFF505970),
+                    ),
+                  ),
+                  onTap: () {
+                    Get.to(() => BloodoxygenPressureChartPage());
+                  },
+                ),
                 // SizedBox(height: 10,),
                 ListTile(
                   leading: Icon(Icons.monitor_weight_outlined,color: Color(0xFF254a6c),size: 25),
@@ -216,15 +238,26 @@ class _NavMenuState extends State<NavMenu> {
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.timer,color:Color(0xFF254a6c),size: 25),
-                  title: Text('MinuteData',style: TextStyle(
+                  leading: Icon(Icons.person_4,color: Color(0xFF254a6c),size: 25),
+                  title: Text('Profile',style: TextStyle(
                       fontFamily: "Inter",
                       color: Color(0xFF505970)
                   ),),
-                 onTap: (){
-                    Get.to(()=>MinuteData());
-                 },
+                  onTap: (){
+                    Get.to(() => Profile());
+
+                  },
                 ),
+                // ListTile(
+                //   leading: Icon(Icons.timer,color:Color(0xFF254a6c),size: 25),
+                //   title: Text('MinuteData',style: TextStyle(
+                //       fontFamily: "Inter",
+                //       color: Color(0xFF505970)
+                //   ),),
+                //  onTap: (){
+                //     Get.to(()=>MinuteData());
+                //  },
+                // ),
                 ListTile(
                   leading: Icon(Icons.exit_to_app,color:Color(0xFF254a6c),size: 25),
                   title: Text('Logout',style: TextStyle(
@@ -242,9 +275,14 @@ class _NavMenuState extends State<NavMenu> {
              child: Row(
                children: [
                  widget.profile == null || widget.profile == " " || widget.profile == "None"?
-                 CircleAvatar(
-                   backgroundImage: AssetImage("assets/gif/avatar.png"),
-                   radius: 25,
+                 GestureDetector(
+                   onTap: (){
+                     Get.to(()=>Profile());
+                   },
+                   child: CircleAvatar(
+                     backgroundImage: AssetImage("assets/gif/avatar.png"),
+                     radius: 25,
+                   ),
                  )
                  : CircleAvatar(
              backgroundImage: NetworkImage(widget.profile),
@@ -276,6 +314,7 @@ class _NavMenuState extends State<NavMenu> {
              ),
            ),
          ),
+
           // User Profile section at the bottom
         ],
       ),
@@ -313,128 +352,137 @@ class _NavMenuState extends State<NavMenu> {
               // title: Text("Title of Dialog"),
               // content: Text(contentText),
               actions: <Widget>[
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.20, // Adjust width as needed
-                  width: MediaQuery.of(context).size.width * 1.75, // Adjust width as needed
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
-                          child: Center(child: Text("Logout",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 20),)),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.vertical,
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "Do you want to Logout?",
-                                  style: TextStyle(
-                                    // fontWeight: FontWeight.bold,
-                                    fontSize: 17.0,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                SizedBox(width: 5),
-                              ],
-                            ),
-                          ),
-                        ),
-                        // SizedBox(height: 10),
-                        Center(
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child:
-                            is_loading ? CircularProgressIndicator(color: Colors.red,) :
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                InkWell(
-                                  onTap: () async {
-                                    setState(() {
-                                      is_loading = true;
-                                    });
-                                    logout_api();
-
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(4.0),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        borderRadius: BorderRadius.circular(20.0),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(20, 4, 20, 4),
-                                        child: Row(
-                                          children: [
-                                            Text(
-                                              "Logout",
-                                              style: TextStyle(
-                                                fontSize: 17,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            SizedBox(width: 5,),
-                                            Icon(Icons.logout,color: Colors.white,)
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                InkWell(
-                                  onTap: () async{
-                                    Get.back();
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(20.0),
-                                      ),
-                                      child: const Padding(
-                                        padding: EdgeInsets.fromLTRB(20, 4, 20, 8),
-                                        child: Center(
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                "Cancel",
-                                                style: TextStyle(
-                                                  fontSize: 17,
-                                                  color: Colors.black,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              SizedBox(width: 5,),
-                                              Icon(Icons.arrow_right_alt_sharp,color: Colors.white,)
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+              maxWidth: 300, // Limits width for large screens (e.g., Web)
+            ),
+            child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.20, // Adjust for responsiveness
+            width: double.infinity, // Will follow maxWidth from BoxConstraints
+            child: Container(
+            decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20.0),
+            ),
+            child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+            const Padding(
+            padding: EdgeInsets.fromLTRB(0, 15, 0, 0),
+            child: Center(
+            child: Text(
+            "Logout",
+            style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 20),
+            ),
+            ),
+            ),
+            const Padding(
+            padding: EdgeInsets.fromLTRB(0, 15, 0, 15),
+            child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+            Text(
+            "Do you want to Logout?",
+            style: TextStyle(
+            fontSize: 17.0,
+            color: Colors.black,
+            ),
+            ),
+            SizedBox(width: 5),
+            ],
+            ),
+            ),
+            ),
+            Center(
+            child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: is_loading
+            ? const CircularProgressIndicator(color: Colors.red)
+                : Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+            InkWell(
+            onTap: () async {
+            setState(() {
+            is_loading = true;
+            });
+            logout_api();
+            },
+            child: Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: Container(
+            decoration: BoxDecoration(
+            color: Colors.red,
+            borderRadius: BorderRadius.circular(20.0),
+            ),
+            child: const Padding(
+            padding: EdgeInsets.fromLTRB(20, 4, 20, 4),
+            child: Row(
+            children: [
+            Text(
+            "Logout",
+            style: TextStyle(
+            fontSize: 17,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            ),
+            ),
+            SizedBox(width: 5),
+            Icon(Icons.logout, color: Colors.white),
+            ],
+            ),
+            ),
+            ),
+            ),
+            ),
+            InkWell(
+            onTap: () async {
+            Get.back();
+            },
+            child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+            decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20.0),
+            ),
+            child: const Padding(
+            padding: EdgeInsets.fromLTRB(20, 4, 20, 8),
+            child: Row(
+            children: [
+            Text(
+            "Cancel",
+            style: TextStyle(
+            fontSize: 17,
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            ),
+            ),
+            SizedBox(width: 5),
+            Icon(Icons.arrow_right_alt_sharp,
+            color: Colors.white),
+            ],
+            ),
+            ),
+            ),
+            ),
+            ),
+            ],
+            ),
+            ),
+            ),
+            ],
+            ),
+            ),
+            ),
+            ),
               ],
             );
           },

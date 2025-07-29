@@ -1,4 +1,4 @@
-import 'dart:convert';
+
 import 'dart:ui';
 import 'package:azpire_new/Controller/steps_controller.dart';
 import 'package:azpire_new/Model/steps_model.dart';
@@ -9,6 +9,7 @@ import 'package:flutter_holo_date_picker/date_picker.dart';
 import 'package:flutter_holo_date_picker/i18n/date_picker_i18n.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:http/http.dart' as http;
@@ -29,7 +30,7 @@ class _StepsChartPageState extends State<StepsChartPage>
   var datetime;
   String currentTitle = 'Average Daily Data';
   String Reports = 'Day';
- // String selectedPeriod = 'Day';
+  // String selectedPeriod = 'Day';
   bool ismmHg220 = false;
   bool ismmhg80 = false;
   bool isLoading = false;
@@ -57,6 +58,7 @@ class _StepsChartPageState extends State<StepsChartPage>
   String? Upto;
   final numberFormatter = NumberFormat.decimalPattern('en_US');
   String _formattedTappedSteps = '';
+  String? username;
 
 
   void simulateLoading(Future<void> Function() chartFunction) async {
@@ -76,6 +78,7 @@ class _StepsChartPageState extends State<StepsChartPage>
   @override
   void initState() {
     super.initState();
+    loadUsername();
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500), // Speed of blinking
@@ -172,15 +175,15 @@ class _StepsChartPageState extends State<StepsChartPage>
       // final String formattedDate = recentRaw != null ? formatDateTime(recentRaw) : result['mainDate'];
 
       setState(() {
-       mainDate = result['mainDate'];
+        mainDate = result['mainDate'];
         stespsvalue = result['recent_step'];
         milesValue = result['miles'];
         calValue = result['calories'];
         _stepsData = result['chartData'];
-       target_steps = result['targetsteps'];
-       max_steps = result['maxSteps'];
-       dailyAvgSteps = result['daily_avg_steps'];
-       target_visible = true;
+        target_steps = result['targetsteps'];
+        max_steps = result['maxSteps'];
+        dailyAvgSteps = result['daily_avg_steps'];
+        target_visible = true;
       });
     } catch (e) {
       print('Error loading weekly steps: $e');
@@ -192,7 +195,7 @@ class _StepsChartPageState extends State<StepsChartPage>
   Future<void> Month_Chart() async {
     setState(() => _isLoading = true);
     try {
-     // final service = StepsService();
+      // final service = StepsService();
       final result = await _stepscontroller.Month_Chart(
         userId: '102',
         date: DateFormat('yyyy-MM').format(selectedDate ?? DateTime.now()),
@@ -259,9 +262,9 @@ class _StepsChartPageState extends State<StepsChartPage>
     try {
       // final service = StepsService();
       final result = await _stepscontroller.MultiYear_Chart(
-        userId: '102',
-        //fromYear: fromYear!,
-        toYear: toYear!
+          userId: '102',
+          //fromYear: fromYear!,
+          toYear: toYear!
       );
 
       // final String? recentRaw = result['recent_datetime'];
@@ -283,6 +286,23 @@ class _StepsChartPageState extends State<StepsChartPage>
     } finally {
       setState(() => _isLoading = false);
     }
+  }
+
+  String makePossessive(String? name) {
+    if (name == null || name.trim().isEmpty) return '';
+    name = name.trim();
+    if (name.endsWith('s') || name.endsWith('S')) {
+      return "$name'";  // Chris → Chris'
+    } else {
+      return "$name's"; // Amelia → Amelia's
+    }
+  }
+
+  Future<void> loadUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString("name"); // or "username"
+    });
   }
 
 
@@ -317,6 +337,8 @@ class _StepsChartPageState extends State<StepsChartPage>
 
     Size size = MediaQuery.of(context).size;
 
+
+
     return Scaffold(
         backgroundColor: Color(0xFFffffff),
         appBar: AppBar(
@@ -327,7 +349,8 @@ class _StepsChartPageState extends State<StepsChartPage>
               Expanded(
                 child: Center(
                   child: Text(
-                    AppText.steps_heading,
+                    username != null
+                        ? "${makePossessive(username)} Avg Daily Steps" : "",
                     textAlign: TextAlign.center,
                     style: Apptextstyle.s18wbap,
                   ),
@@ -356,172 +379,172 @@ class _StepsChartPageState extends State<StepsChartPage>
                       // height: 50, // give it a fixed height
                       child: Column(
                         children: [
-                      //   Row(
-                      //   mainAxisAlignment: MainAxisAlignment.end,
-                      //   children: [
-                      //     InkWell(
-                      //       onTap: () async {
-                      //         var datePicked = await DatePicker.showSimpleDatePicker(
-                      //           context,
-                      //           initialDate: selectedDate ?? DateTime.now(),
-                      //           firstDate: DateTime(1960),
-                      //           lastDate: DateTime.now(),
-                      //           dateFormat: "MMMM dd, yyyy",
-                      //           locale: DateTimePickerLocale.en_us,
-                      //           looping: false,
-                      //         );
-                      //
-                      //         if (datePicked != null) {
-                      //           DateTime today = DateTime.now();
-                      //           // Remove time part for accurate date comparison
-                      //           DateTime selected = DateTime(
-                      //               datePicked.year, datePicked.month,
-                      //               datePicked.day);
-                      //           DateTime current = DateTime(
-                      //               today.year, today.month, today.day);
-                      //
-                      //           // if (selected.isAtSameMomentAs(current)) {
-                      //           setState(() {
-                      //             selectedDate = datePicked;
-                      //             mainDate = DateFormat('dd-MMMM-yyyy').format(datePicked);
-                      //             selectedPeriod = 'Day';
-                      //             currentTitle = 'Average Daily Data';
-                      //             Reports = 'Day';
-                      //           });
-                      //           simulateLoading(Day_Chart);
-                      //
-                      //         }
-                      //
-                      //       },
-                      //       child: Container(
-                      //         decoration: BoxDecoration(
-                      //           color: Color(0xff275176),
-                      //           borderRadius: BorderRadius.all(Radius.circular(8)),
-                      //         ),
-                      //         child: Padding(
-                      //           padding:
-                      //           const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      //           child: Text(
-                      //             selectedDate != null
-                      //                 ? DateFormat('MMMM dd, yyyy').format(selectedDate!)
-                      //                 : "Pick Date",
-                      //             style: TextStyle(
-                      //               color: Colors.white,
-                      //               fontWeight: FontWeight.bold,
-                      //             ),
-                      //           ),
-                      //         ),
-                      //       ),
-                      //     ),
-                      //   ],
-                      // ),
+                          //   Row(
+                          //   mainAxisAlignment: MainAxisAlignment.end,
+                          //   children: [
+                          //     InkWell(
+                          //       onTap: () async {
+                          //         var datePicked = await DatePicker.showSimpleDatePicker(
+                          //           context,
+                          //           initialDate: selectedDate ?? DateTime.now(),
+                          //           firstDate: DateTime(1960),
+                          //           lastDate: DateTime.now(),
+                          //           dateFormat: "MMMM dd, yyyy",
+                          //           locale: DateTimePickerLocale.en_us,
+                          //           looping: false,
+                          //         );
+                          //
+                          //         if (datePicked != null) {
+                          //           DateTime today = DateTime.now();
+                          //           // Remove time part for accurate date comparison
+                          //           DateTime selected = DateTime(
+                          //               datePicked.year, datePicked.month,
+                          //               datePicked.day);
+                          //           DateTime current = DateTime(
+                          //               today.year, today.month, today.day);
+                          //
+                          //           // if (selected.isAtSameMomentAs(current)) {
+                          //           setState(() {
+                          //             selectedDate = datePicked;
+                          //             mainDate = DateFormat('dd-MMMM-yyyy').format(datePicked);
+                          //             selectedPeriod = 'Day';
+                          //             currentTitle = 'Average Daily Data';
+                          //             Reports = 'Day';
+                          //           });
+                          //           simulateLoading(Day_Chart);
+                          //
+                          //         }
+                          //
+                          //       },
+                          //       child: Container(
+                          //         decoration: BoxDecoration(
+                          //           color: Color(0xff275176),
+                          //           borderRadius: BorderRadius.all(Radius.circular(8)),
+                          //         ),
+                          //         child: Padding(
+                          //           padding:
+                          //           const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          //           child: Text(
+                          //             selectedDate != null
+                          //                 ? DateFormat('MMMM dd, yyyy').format(selectedDate!)
+                          //                 : "Pick Date",
+                          //             style: TextStyle(
+                          //               color: Colors.white,
+                          //               fontWeight: FontWeight.bold,
+                          //             ),
+                          //           ),
+                          //         ),
+                          //       ),
+                          //     ),
+                          //   ],
+                          // ),
                           // Date Picker button aligned right
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Align(
-                        alignment: Alignment.center,
-                        child: Container(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              InkWell(
-                                child: Text(
-                                  'Day',
-                                  style: Reports == 'Day'
-                                      ? Apptextstyle.s16wncR
-                                      : Apptextstyle.s16wncG,
-                                ),
-                                onTap: ()  {
-                                  setState(() {
-                                    //selectedPeriod = 'Day';
-                                    currentTitle = 'Average Daily Data';
-                                    Reports = 'Day';
-                                    _tappedSteps = null;
-                                  });
-                                  simulateLoading(Day_Chart);
-                                },
-                              ),
-                              SizedBox(width: 20),
-                              InkWell(
-                                child: Text(
-                                    'Week',
-                                    style: Reports == 'Week' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG
-                                ),
-                                onTap: () {
-                                  setState(() {
-                                    //selectedPeriod = 'Week';
-                                    currentTitle = ' Weekly Daily Data';
-                                    Reports = 'Week';
-                                    _tappedSteps = null;
-                                    //Week_Chart();
-                                  });
-                                  simulateLoading(Week_Chart);
-                                },
-                              ),
-                              SizedBox(width: 20,),
-                              InkWell(
-                                child: Text(
-                                    'Month',
-                                    style: Reports == 'Month' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG
-                                ),
-                                onTap: () {
-                                  setState(() {
-                                   // selectedPeriod = 'Month';
-                                    currentTitle = 'Average Monthly Data';
-                                    Reports = 'Month';
-                                    _tappedSteps = null;
-                                    //month_Chart();
-                                  });
-                                  simulateLoading(Month_Chart);
-                                },
-                              ),
-                              SizedBox(width: 20,),
-                              InkWell(
-                                child: Text(
-                                    'Year',
-                                    style: Reports == 'Year' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG
-                                ),
-                                onTap: () {
-                                  setState(() {
-                                   // selectedPeriod = 'Year';
-                                    currentTitle = ' Average Yearly Data';
-                                    Reports = 'Year';
-                                    _tappedSteps = null;
-                                    //Year_Chart();
-                                  });
-                                  simulateLoading(Year_Chart);
-                                },
-                              ),
-                              SizedBox(width: 20,),
-                              InkWell(
-                                child: Text(
-                                    'Multi-Year',
-                                    style: Reports == 'Multi-Year' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG
-                                ),
-                                onTap: () {
-                                  setState(() {
-                                    // selectedPeriod = 'Year';
-                                    currentTitle = ' Multi-Year Yearly Data';
-                                    Reports = 'Multi-Year';
-                                    _tappedSteps = null;
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Align(
+                            alignment: Alignment.center,
+                            child: Container(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  InkWell(
+                                    child: Text(
+                                      'Day',
+                                      style: Reports == 'Day'
+                                          ? Apptextstyle.s16wncR
+                                          : Apptextstyle.s16wncG,
+                                    ),
+                                    onTap: ()  {
+                                      setState(() {
+                                        //selectedPeriod = 'Day';
+                                        currentTitle = 'Average Daily Data';
+                                        Reports = 'Day';
+                                        _tappedSteps = null;
+                                      });
+                                      simulateLoading(Day_Chart);
+                                    },
+                                  ),
+                                  SizedBox(width: 20),
+                                  InkWell(
+                                    child: Text(
+                                        'Week',
+                                        style: Reports == 'Week' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG
+                                    ),
+                                    onTap: () {
+                                      setState(() {
+                                        //selectedPeriod = 'Week';
+                                        currentTitle = ' Weekly Daily Data';
+                                        Reports = 'Week';
+                                        _tappedSteps = null;
+                                        //Week_Chart();
+                                      });
+                                      simulateLoading(Week_Chart);
+                                    },
+                                  ),
+                                  SizedBox(width: 20,),
+                                  InkWell(
+                                    child: Text(
+                                        'Month',
+                                        style: Reports == 'Month' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG
+                                    ),
+                                    onTap: () {
+                                      setState(() {
+                                        // selectedPeriod = 'Month';
+                                        currentTitle = 'Average Monthly Data';
+                                        Reports = 'Month';
+                                        _tappedSteps = null;
+                                        //month_Chart();
+                                      });
+                                      simulateLoading(Month_Chart);
+                                    },
+                                  ),
+                                  SizedBox(width: 20,),
+                                  InkWell(
+                                    child: Text(
+                                        'Year',
+                                        style: Reports == 'Year' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG
+                                    ),
+                                    onTap: () {
+                                      setState(() {
+                                        // selectedPeriod = 'Year';
+                                        currentTitle = ' Average Yearly Data';
+                                        Reports = 'Year';
+                                        _tappedSteps = null;
+                                        //Year_Chart();
+                                      });
+                                      simulateLoading(Year_Chart);
+                                    },
+                                  ),
+                                  SizedBox(width: 20,),
+                                  InkWell(
+                                    child: Text(
+                                        'Multi-Year',
+                                        style: Reports == 'Multi-Year' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG
+                                    ),
+                                    onTap: () {
+                                      setState(() {
+                                        // selectedPeriod = 'Year';
+                                        currentTitle = ' Multi-Year Yearly Data';
+                                        Reports = 'Multi-Year';
+                                        _tappedSteps = null;
 
-                                    final now = DateTime.now();
-                                    //fromYear = now.year;
-                                    toYear = now.year;
+                                        final now = DateTime.now();
+                                        //fromYear = now.year;
+                                        toYear = now.year;
 
-                                    yearPickerLabel =
+                                        yearPickerLabel =
                                         "${DateFormat('yyyy').format(DateTime(toYear!))}";
 
-                                  });
-                                  simulateLoading(MultiYear_Chart);
-                                },
-                              ),
+                                      });
+                                      simulateLoading(MultiYear_Chart);
+                                    },
+                                  ),
 
-                            ],
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
                           const SizedBox(height: 10),
                           // Space between filter and date picker
                           // DATE PICKER BELOW THE FILTER ROW
@@ -533,15 +556,15 @@ class _StepsChartPageState extends State<StepsChartPage>
 
                                   if (Reports == 'Multi-Year') {
                                     var toDatePicked = await DatePicker.showSimpleDatePicker(
-                                      context,
-                                      initialDate: Upto != null
-                                          ? DateTime(int.parse(Upto!))
-                                          : DateTime.now(),
-                                      firstDate: DateTime(1960),
-                                      lastDate: DateTime.now(),
-                                      dateFormat: "yyyy",
-                                      locale: DateTimePickerLocale.en_us,
-                                      looping: false,
+                                        context,
+                                        initialDate: Upto != null
+                                            ? DateTime(int.parse(Upto!))
+                                            : DateTime.now(),
+                                        firstDate: DateTime(1960),
+                                        lastDate: DateTime.now(),
+                                        dateFormat: "yyyy",
+                                        locale: DateTimePickerLocale.en_us,
+                                        looping: false,
                                         titleText: 'Select End Year'
                                     );
 
@@ -651,20 +674,20 @@ class _StepsChartPageState extends State<StepsChartPage>
                     ),
                   ),
                   SizedBox(height: 25,),
-            // if (_tappedSteps != null)
-            //   Card(
-            //         color: Colors.white,
-            //         child: Padding(
-            //           padding: const EdgeInsets.all(8.0),
-            //           child:
-            //               Text(
-            //                 '${NumberFormat.decimalPattern('en_US').format(_tappedSteps)} Steps',
-            //                 style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xff775DD0)),
-            //               ),
-            //         ),
-            //       ),
+                  // if (_tappedSteps != null)
+                  //   Card(
+                  //         color: Colors.white,
+                  //         child: Padding(
+                  //           padding: const EdgeInsets.all(8.0),
+                  //           child:
+                  //               Text(
+                  //                 '${NumberFormat.decimalPattern('en_US').format(_tappedSteps)} Steps',
+                  //                 style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xff775DD0)),
+                  //               ),
+                  //         ),
+                  //       ),
 
-                if (_isLoading)
+                  if (_isLoading)
                     Shimmer.fromColors(
                       baseColor: Colors.grey[300]!,
                       highlightColor: Colors.grey[100]!,
@@ -677,34 +700,13 @@ class _StepsChartPageState extends State<StepsChartPage>
                         ),
                       ),
                     )
-                else if (Reports == "Day")
-                  buildStepsChartWidget(
-                    context: context,
-                    size: size,
-                    title: " Hourly Steps for this Day",
-                    data: _stepsData,
-                      xValueMapper: (d, _) => d.labelHour,
-                    maxInterval: maxinterval,
-                    onPointTap: (details) {
-                      setState(() {
-                        // print("_tappedSteps${details.dataPoints}");
-                        _tappedIndex = details.pointIndex;
-                        _tappedSteps = details.dataPoints![details.pointIndex!].y as int;
-                        // print("_tappedSteps$_tappedSteps");
-                      });
-                    },
-                    targetSteps: target_steps ?? 10000,
-                    isweek: true,
-                    Daysteps: true,
-                      Xaxistitle: 'Time of Day'
-                  )
-                else if (Reports == "Week")
+                  else if (Reports == "Day")
                     buildStepsChartWidget(
-                    context: context,
-                    size: size,
-                    title: "Avg Daily Steps per Day",
+                        context: context,
+                        size: size,
+                        title: " Hourly Steps for this Day",
                         data: _stepsData,
-                        xValueMapper: (d, _) => d.day,
+                        xValueMapper: (d, _) => d.labelHour,
                         maxInterval: maxinterval,
                         onPointTap: (details) {
                           setState(() {
@@ -715,17 +717,17 @@ class _StepsChartPageState extends State<StepsChartPage>
                           });
                         },
                         targetSteps: target_steps ?? 10000,
-                        isweek: false,
-                        Daysteps: false,
-                        Xaxistitle: 'Days'
-                  )
-                else if (Reports == "Month")
+                        isweek: true,
+                        Daysteps: true,
+                        Xaxistitle: 'Time of Day'
+                    )
+                  else if (Reports == "Week")
                       buildStepsChartWidget(
-                      context: context,
-                      size: size,
-                      title: "Avg Weekly Steps",
+                          context: context,
+                          size: size,
+                          title: "Avg Daily Steps per Day",
                           data: _stepsData,
-                          xValueMapper: (d, _) => d.monthName,
+                          xValueMapper: (d, _) => d.day,
                           maxInterval: maxinterval,
                           onPointTap: (details) {
                             setState(() {
@@ -738,14 +740,13 @@ class _StepsChartPageState extends State<StepsChartPage>
                           targetSteps: target_steps ?? 10000,
                           isweek: false,
                           Daysteps: false,
-                          Xaxistitle: 'Weeks'
-
-                    )
-                  else if (Reports == "Year")
+                          Xaxistitle: 'Days'
+                      )
+                    else if (Reports == "Month")
                         buildStepsChartWidget(
-                        context: context,
-                        size: size,
-                        title: "Avg Monthly Steps",
+                            context: context,
+                            size: size,
+                            title: "Avg Weekly Steps",
                             data: _stepsData,
                             xValueMapper: (d, _) => d.monthName,
                             maxInterval: maxinterval,
@@ -760,15 +761,16 @@ class _StepsChartPageState extends State<StepsChartPage>
                             targetSteps: target_steps ?? 10000,
                             isweek: false,
                             Daysteps: false,
-                            Xaxistitle: 'Months'
-                      )
-                      else if (Reports == "Multi-Year")
+                            Xaxistitle: 'Weeks'
+
+                        )
+                      else if (Reports == "Year")
                           buildStepsChartWidget(
-                            context: context,
-                            size: size,
-                            title: "Avg Yearly Steps",
+                              context: context,
+                              size: size,
+                              title: "Avg Monthly Steps",
                               data: _stepsData,
-                              xValueMapper: (d, _) => d.year,
+                              xValueMapper: (d, _) => d.monthName,
                               maxInterval: maxinterval,
                               onPointTap: (details) {
                                 setState(() {
@@ -781,9 +783,30 @@ class _StepsChartPageState extends State<StepsChartPage>
                               targetSteps: target_steps ?? 10000,
                               isweek: false,
                               Daysteps: false,
-                              Xaxistitle: 'Years'
+                              Xaxistitle: 'Months'
+                          )
+                        else if (Reports == "Multi-Year")
+                            buildStepsChartWidget(
+                                context: context,
+                                size: size,
+                                title: "Avg Yearly Steps",
+                                data: _stepsData,
+                                xValueMapper: (d, _) => d.year,
+                                maxInterval: maxinterval,
+                                onPointTap: (details) {
+                                  setState(() {
+                                    // print("_tappedSteps${details.dataPoints}");
+                                    _tappedIndex = details.pointIndex;
+                                    _tappedSteps = details.dataPoints![details.pointIndex!].y as int;
+                                    // print("_tappedSteps$_tappedSteps");
+                                  });
+                                },
+                                targetSteps: target_steps ?? 10000,
+                                isweek: false,
+                                Daysteps: false,
+                                Xaxistitle: 'Years'
 
-                          ),
+                            ),
                   SizedBox(height: 10,),
                   // Row(
                   //   mainAxisAlignment: MainAxisAlignment.center,
@@ -922,33 +945,33 @@ class _StepsChartPageState extends State<StepsChartPage>
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                   Column(
-                                     crossAxisAlignment: CrossAxisAlignment.center,
-                                     children: [
-                                       Text(
-                                         AppText.steps_count,
-                                         style: Apptextstyle.s12wcb
-                                       ),
-                                       SizedBox(height: 10,),
-                                       Container(
-                                         padding: EdgeInsets.zero,
-                                         decoration: BoxDecoration(
-                                           border: Border.all(
-                                             color: Color(0xff775DD0), // Border color for Systolic
-                                             width: 1.0,
-                                           ),
-                                           borderRadius: BorderRadius.circular(5), // Optional: Rounded corners
-                                         ),
-                                         child: Padding(
-                                           padding: EdgeInsets.symmetric(horizontal: 4),
-                                           child: Text(
-                                             stespsvalue != null ? '$stespsvalue steps' : '',
-                                             style: Apptextstyle.s12wbcv
-                                           ),
-                                         ),
-                                       ),
-                                     ],
-                                   ),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                            AppText.steps_count,
+                                            style: Apptextstyle.s12wcb
+                                        ),
+                                        SizedBox(height: 10,),
+                                        Container(
+                                          padding: EdgeInsets.zero,
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: Color(0xff775DD0), // Border color for Systolic
+                                              width: 1.0,
+                                            ),
+                                            borderRadius: BorderRadius.circular(5), // Optional: Rounded corners
+                                          ),
+                                          child: Padding(
+                                            padding: EdgeInsets.symmetric(horizontal: 4),
+                                            child: Text(
+                                                stespsvalue != null ? '$stespsvalue steps' : '',
+                                                style: Apptextstyle.s12wbcv
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
@@ -970,7 +993,7 @@ class _StepsChartPageState extends State<StepsChartPage>
                                             padding: EdgeInsets.symmetric(horizontal: 4),
                                             child: Text(
                                                 milesValue != null ? '${numberFormatter.format(milesValue)} mi' : '0 mi',
-                                              style: Apptextstyle.s12wbcv
+                                                style: Apptextstyle.s12wbcv
                                             ),
                                           ),
                                         ),
@@ -980,8 +1003,8 @@ class _StepsChartPageState extends State<StepsChartPage>
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
                                         Text(
-                                          AppText.cal_burnt,
-                                          style: Apptextstyle.s12wcb
+                                            AppText.cal_burnt,
+                                            style: Apptextstyle.s12wcb
                                         ),
                                         SizedBox(height: 10,),
                                         Row(
@@ -999,7 +1022,7 @@ class _StepsChartPageState extends State<StepsChartPage>
                                                 padding: EdgeInsets.symmetric(horizontal: 4),
                                                 child: Text(
                                                     calValue != null ? '${numberFormatter.format(calValue)} kcal' : '0 kcal',
-                                                  style: Apptextstyle.s12wbcv
+                                                    style: Apptextstyle.s12wbcv
                                                 ),
                                               ),
                                             ),
@@ -1051,27 +1074,27 @@ class _StepsChartPageState extends State<StepsChartPage>
                                     )
                                   ],
                                 ),
-                               SizedBox(height: 10,),
+                                SizedBox(height: 10,),
                                 if(target_visible)
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      Reports == 'Month'
-                                          ? 'Current Actual Weekly Average Steps is '
-                                          '${NumberFormat.decimalPattern('en_US').format(dailyAvgSteps)}'
-                                          : 'Current Actual Daily Average Steps is '
-                                          '${NumberFormat.decimalPattern('en_US').format(dailyAvgSteps)}',
-                                      style: Apptextstyle.s12wbcp,
-                                    )
-                                    // Text(''
-                                    //     'Current Actual Daily Average Steps is '
-                                    //     '${NumberFormat.decimalPattern('en_US').format(dailyAvgSteps)}',
-                                    //     style: Apptextstyle.s12wbcp
-                                    // )
-                                  ],
-                                ),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        Reports == 'Month'
+                                            ? 'Current Actual Weekly Average Steps is '
+                                            '${NumberFormat.decimalPattern('en_US').format(dailyAvgSteps)}'
+                                            : 'Current Actual Daily Average Steps is '
+                                            '${NumberFormat.decimalPattern('en_US').format(dailyAvgSteps)}',
+                                        style: Apptextstyle.s12wbcp,
+                                      )
+                                      // Text(''
+                                      //     'Current Actual Daily Average Steps is '
+                                      //     '${NumberFormat.decimalPattern('en_US').format(dailyAvgSteps)}',
+                                      //     style: Apptextstyle.s12wbcp
+                                      // )
+                                    ],
+                                  ),
                                 // Info text
                                 SizedBox(height: 15,)
                               ],
@@ -1112,7 +1135,7 @@ class _StepsChartPageState extends State<StepsChartPage>
                             },
                           ),
                         ),
-                       // if(target_visible)
+                        // if(target_visible)
                       ],
                     ),
                   ),
@@ -1129,7 +1152,7 @@ class _StepsChartPageState extends State<StepsChartPage>
                     padding:  EdgeInsets.only(left: 30,right: 15, bottom: 10),
                     child: Container(
                       decoration: BoxDecoration(
-                       // color:  Colors.white,// Card background color
+                        // color:  Colors.white,// Card background color
                         borderRadius: BorderRadius.circular(5),
                         /*boxShadow: [
                           BoxShadow(
@@ -1211,7 +1234,7 @@ class _StepsChartPageState extends State<StepsChartPage>
                                 ],
                               ),
                             ),
-                             SizedBox(height: 10),
+                            SizedBox(height: 10),
                             SizedBox(
                               child: ListView.builder(
                                 padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -1244,7 +1267,7 @@ class _StepsChartPageState extends State<StepsChartPage>
                                                     .date) :
                                                 _stepsData[index].day,
                                                 // Format for other reports
-                                               //overflow: TextOverflow.ellipsis,
+                                                //overflow: TextOverflow.ellipsis,
                                                 textAlign: TextAlign.left,
                                                 style: TextStyle(
                                                     fontSize: 12
@@ -1254,7 +1277,7 @@ class _StepsChartPageState extends State<StepsChartPage>
                                             Expanded(
                                               child: Center(
                                                 child: Text(
-                                                 NumberFormat.decimalPattern('en_US').format(_stepsData[index].dailySteps),
+                                                  NumberFormat.decimalPattern('en_US').format(_stepsData[index].dailySteps),
                                                   overflow: TextOverflow.ellipsis,
                                                   style: TextStyle(
                                                       fontSize: 12
@@ -1317,10 +1340,18 @@ class _StepsChartPageState extends State<StepsChartPage>
     required bool isweek, Daysteps,
     required String Xaxistitle,
   }) {
+    // ✅ Use MediaQuery to get screen dimensions
+    final screenSize = MediaQuery.of(context).size;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
+    // ✅ Always use portrait height (the larger of height or width)
+    final portraitHeight = screenSize.height > screenSize.width
+        ? screenSize.height
+        : screenSize.width;
+    final chartHeight = portraitHeight * 0.5;
     return Container(
       width: double.infinity,
-      height: size.height * 0.5,
+      height: chartHeight,
       child: SfCartesianChart(
         tooltipBehavior: TooltipBehavior(
           enable: true,
@@ -1371,7 +1402,7 @@ class _StepsChartPageState extends State<StepsChartPage>
         primaryYAxis: NumericAxis(
           title: const AxisTitle(
             text: 'Steps',
-           // textStyle: TextStyle(color: AppColors.contentColorBlack),
+            // textStyle: TextStyle(color: AppColors.contentColorBlack),
           ),
           minimum: 0,
           maximum: maxInterval,
@@ -1386,17 +1417,28 @@ class _StepsChartPageState extends State<StepsChartPage>
           numberFormat: NumberFormat.decimalPattern('en_US'),
           plotBands: [
             /// 🎯 Target Line
-            PlotBand(
+           isweek == false ?PlotBand(
               isVisible: true,
               start: targetSteps.toDouble(),
               end: targetSteps.toDouble(),
-              borderWidth: 0,
+              borderWidth: 2,
               borderColor: Colors.green,
               //text: 'Target: $targetSteps',
               textStyle: const TextStyle(color: Colors.green, fontSize: 12,),
               horizontalTextAlignment: TextAnchor.middle,
               verticalTextAlignment: TextAnchor.start,
-            ),
+            ):
+           PlotBand(
+             isVisible: true,
+             start: targetSteps.toDouble(),
+             end: targetSteps.toDouble(),
+             borderWidth: 0,
+             borderColor: Colors.green,
+             //text: 'Target: $targetSteps',
+             textStyle: const TextStyle(color: Colors.green, fontSize: 12,),
+             horizontalTextAlignment: TextAnchor.middle,
+             verticalTextAlignment: TextAnchor.start,
+           )
           ],
         ),
         series: <CartesianSeries>[

@@ -238,7 +238,6 @@ class _SignupScreenState extends State<SignupScreen> {
                             TextButton(onPressed: (){
                               Get.to(() => LoginScreen());
                             }, child: Text(AppText.LOGIN,style:Apptextstyle.s13wncblue))
-
                           ],
                         )
                       ],

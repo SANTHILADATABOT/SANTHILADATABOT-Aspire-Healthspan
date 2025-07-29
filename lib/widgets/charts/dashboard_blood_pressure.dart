@@ -117,13 +117,15 @@ class _BloodPressureChartState extends State<BloodPressureChart>
     required int targetDiastolic,
 
   }) {
+    final screenSize = MediaQuery.of(context).size;
+    final double portraitHeight = screenSize.height > screenSize.width
+        ? screenSize.height
+        : screenSize.width;
+
     print("$systolic_sd_low....$systolic_sd_high");
     return Container(
       width: double.infinity,
-      height: MediaQuery
-          .of(context)
-          .size
-          .height * 0.40,
+      height: portraitHeight * 0.30,
       child: SfCartesianChart(
         plotAreaBorderWidth: 0.0,
         backgroundColor: Color(0xFFffffff),

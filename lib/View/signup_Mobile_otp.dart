@@ -168,19 +168,16 @@ class _MobileOtpScreenState extends State<MobileOtpScreen> {
                   ],
                 ),
                 SizedBox(height: 60),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 50),
-                  child: isLoading == false ? MyButton(
-                    press: () async {
-                      otpverify();
-                    },
-                    text: AppText.SUBMIT,
-                  ) : Center(child: Image.asset(
-                    Appimages.applogo,
-                    height: 50,
-                    fit: BoxFit.contain,
-                  ),),
-                ),
+                isLoading == false ? MyButton(
+                  press: () async {
+                    otpverify();
+                  },
+                  text: AppText.SUBMIT,
+                ) : Center(child: Image.asset(
+                  Appimages.applogo,
+                  height: 50,
+                  fit: BoxFit.contain,
+                ),),
               ],
             ),
           ),

@@ -12,6 +12,7 @@ import 'package:flutter_holo_date_picker/flutter_holo_date_picker.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../utils/appimages.dart';
@@ -49,9 +50,9 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
   var time;
   List<SleepBarData> _daySleepBars = [];
   List<SleepBarData> _weekSleepBars = [];
-  List<MonthlySleepModel> _monthSleepBars = [];
-  List<YearlySleepModel> _yearsleepBars = [];
-  List<YearlySleepModel> _multiYearSleepBars = [];
+  List<SleepBarData> _monthSleepBars = [];
+  List<SleepBarData> _yearsleepBars = [];
+  List<SleepBarData> _multiYearSleepBars = [];
   String?  totalSleepRaw ;
   double _getHourValue(DateTime dt) => dt.hour + dt.minute / 60.0;
   final SleepController _sleepcontroller = Get.put(SleepController());
@@ -70,6 +71,14 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
   bool target_visible = false;
   late Map<String, Map<String, String>> daySummaries = {};
   late TooltipBehavior _tooltipBehavior;
+  String? username;
+
+  Future<void> loadUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString("name"); // or "username"
+    });
+  }
 
 
   String formatDateTime(String input) {
@@ -131,6 +140,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
   void initState() {
     // TODO: implement initState
     super.initState();
+    loadUsername();
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500), // Speed of blinking
@@ -388,363 +398,341 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
     }
   }
 
+  String makePossessive(String? name) {
+    if (name == null || name.trim().isEmpty) return '';
+    name = name.trim();
+    if (name.endsWith('s') || name.endsWith('S')) {
+      return "$name'";  // Chris → Chris'
+    } else {
+      return "$name's"; // Amelia → Amelia's
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
 
     Size size = MediaQuery.of(context).size;
 
+
+
     return Scaffold(
       backgroundColor: Color(0xFFffffff),
       appBar: AppBar(
         centerTitle: true,
+
         title: Text(
-          AppText.sleep_heading,
+          username != null
+              ? "${makePossessive(username)} Sleep Statistics" : "",
           style: Apptextstyle.s18wbap,
         ),
         backgroundColor: Color(0xFFffffff),
+        leading:  IconButton(
+          onPressed: (){
+            Get.back();
+          },
+          icon: Icon(Icons.arrow_back_ios),
+        ),
       ),
-      body: SingleChildScrollView(
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  height: 10,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Container(
-                    width: double.infinity,
-                    // height: 50, // give it a fixed height
-                    child: Column(
-                      children: [
-                        // SizedBox(
-                        //   height: 10,
-                        // ),
-                        Align(
-                          alignment: Alignment.center,
-                          child: Container(
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                InkWell(
-                                  child: Text(
-                                    'Day',
-                                    style:
-                                    Reports == 'Day' ?  Apptextstyle.s16wncR
-                                        : Apptextstyle.s16wncG,
-                                  ),
-                                  onTap: () {
-                                    setState(() {
-                                      Reports = "Day";
-                                      currentTitle = 'Daily Sleep Average';
-
-                                    });
-                                    simulateLoading(Day_Chart);
-                                  },
-                                ),
-                                SizedBox(
-                                  width: 20,
-                                ),
-                                InkWell(
-                                  child: Text(
-                                    'Week',
-                                    style:  Reports == 'Week' ?  Apptextstyle.s16wncR
-                                        : Apptextstyle.s16wncG,
-                                  ),
-                                  onTap: () {
-                                    setState(() {
-                                      Reports = "Week";
-                                      currentTitle = 'Weekly Sleep Average';
-                                    });
-                                    simulateLoading(Week_Chart);
-                                  },
-                                ),
-                                SizedBox(
-                                  width: 20,
-                                ),
-                                InkWell(
-                                  child: Text(
-                                    'Month',
-                                    style:Reports == 'Month' ?  Apptextstyle.s16wncR
-                                        : Apptextstyle.s16wncG,
-                                  ),
-                                  onTap: () {
-                                    setState(() {
-                                      Reports = "Month";
-                                      currentTitle = 'Monthly Sleep Average';
-                                    });
-                                    simulateLoading(Month_Chart);
-                                  },
-                                ),
-                                SizedBox(
-                                  width: 20,
-                                ),
-                                InkWell(
-                                  child: Text(
-                                    'Year',
-                                    style: Reports == 'Year' ?  Apptextstyle.s16wncR
-                                        : Apptextstyle.s16wncG,
-                                  ),
-                                  onTap: () {
-                                    setState(() {
-                                      Reports = "Year";
-                                      currentTitle = 'Yearly Sleep Average';
-                                    });
-                                    simulateLoading(Year_Chart);
-                                  },
-                                ),
-                                SizedBox(
-                                  width: 20,
-                                ),
-                                InkWell(
-                                  child: Text(
-                                    'Multi-Year',
-                                    style: Reports == 'Multi-Year' ?  Apptextstyle.s16wncR
-                                        : Apptextstyle.s16wncG,
-                                  ),
-                                  onTap: () {
-                                    setState(() {
-                                      Reports = "Multi-Year";
-                                      currentTitle = 'Multi-Year Sleep Average';
-
-                                      final now = DateTime.now();
-                                      //fromYear = now.year;
-                                      toYear = now.year;
-
-                                      yearPickerLabel =
-                                          "${DateFormat('yyyy').format(DateTime(toYear!))}";
-                                    });
-                                    simulateLoading(MultiYear_Chart);
-                                  },
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        // Space between filter and date picker
-                        // DATE PICKER BELOW THE FILTER ROW
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            InkWell(
-                              onTap: () async {
-
-                                if (Reports == 'Multi-Year') {
-                                  var toDatePicked = await DatePicker.showSimpleDatePicker(
-                                    context,
-                                    initialDate: Upto != null
-                                        ? DateTime(int.parse(Upto!))
-                                        : DateTime.now(),
-                                    firstDate: DateTime(1960),
-                                    lastDate: DateTime.now(),
-                                    dateFormat: "yyyy",
-                                    locale: DateTimePickerLocale.en_us,
-                                    looping: false,
-                                      titleText: 'Select End Year'
-                                  );
-
-                                  if (toDatePicked != null) {
-                                    toYear = toDatePicked.year;
-
-                                    setState(() {
-                                      Upto = toYear.toString();
-                                      yearPickerLabel = "$Upto";
-                                    });
-
-                                    await MultiYear_Chart();
-                                  }
-                                }
-                                else {
-                                  String dateFormatString =
-                                  (Reports == 'Day' || Reports == 'Week')
-                                      ? "MMMM dd, yyyy"
-                                      : "MMMM-yyyy";
-
-                                  var datePicked = await DatePicker
-                                      .showSimpleDatePicker(
-                                    context,
-                                    initialDate: selectedDate ?? DateTime.now(),
-                                    firstDate: DateTime(1960),
-                                    lastDate: DateTime.now(),
-                                    dateFormat: dateFormatString,
-                                    locale: DateTimePickerLocale.en_us,
-                                    looping: false,
-                                  );
-
-                                  if (datePicked != null) {
-                                    setState(() {
-                                      selectedDate = datePicked;
-
-                                      if (Reports == 'Week') {
-                                        // From Week to Day
-                                        Reports = 'Day';
-                                        currentTitle = 'Daily Sleep Average';
-                                        mainDate =
-                                            DateFormat('MMMM dd, yyyy').format(
-                                                datePicked);
-                                        simulateLoading(Day_Chart);
-                                      } else if (Reports == 'Year') {
-                                        // From Year to Month
-                                        Reports = 'Month';
-                                        currentTitle = 'Monthly Sleep Average';
-                                        mainDate =
-                                            DateFormat('MMMM-yyyy').format(
-                                                datePicked);
-                                        simulateLoading(Month_Chart);
-                                      } else {
-                                        // Stay in current report type
-                                        switch (Reports) {
-                                          case 'Day':
-                                            currentTitle =
-                                            'Daily Sleep Average';
-                                            mainDate =
-                                                DateFormat('MMMM dd, yyyy')
-                                                    .format(datePicked);
-                                            simulateLoading(Day_Chart);
-                                            break;
-                                          case 'Month':
-                                            currentTitle =
-                                            'Monthly Sleep Average';
-                                            mainDate =
-                                                DateFormat('MMMM-yyyy').format(
-                                                    datePicked);
-                                            simulateLoading(Month_Chart);
-                                            break;
-                                        }
-                                      }
-                                    });
-                                  }
-                                }
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Color(0xff275176),
-                                  borderRadius: BorderRadius.all(Radius.circular(8)),
-                                ),
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      Reports == 'Multi-Year'
-                                          ? yearPickerLabel
-                                          : selectedDate != null
-                                          ? ((Reports == 'Day' || Reports == 'Week')
-                                          ? DateFormat('MMMM dd, yyyy').format(selectedDate!)
-                                          : DateFormat('MMMM-yyyy').format(selectedDate!))
-                                          : "",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Icon(Icons.arrow_drop_down, color: Colors.white),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                      ],
-                    ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: 10,
                   ),
-                ),
-                SizedBox(
-                  height: 25,
-                ),
-                if (_isLoading)
-                  Shimmer.fromColors(
-                    baseColor: Colors.grey[300]!,
-                    highlightColor: Colors.grey[100]!,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: Container(
                       width: double.infinity,
-                      height: size.height * 0.3,
-                      color: Colors.white,
-                    ),
-                  )
-                else if (Reports == "Day")
-                  Container(
-                    width: double.infinity,
-                    height: size.height * 0.4,
-                    child: SfCartesianChart(
-                      tooltipBehavior: TooltipBehavior(
-                        enable: true,
-                        canShowMarker: false, // Removes the dot marker
+                      // height: 50, // give it a fixed height
+                      child: Column(
+                        children: [
+                          // SizedBox(
+                          //   height: 10,
+                          // ),
+                          Align(
+                            alignment: Alignment.center,
+                            child: Container(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  InkWell(
+                                    child: Text(
+                                      'Day',
+                                      style:
+                                      Reports == 'Day' ?  Apptextstyle.s16wncR
+                                          : Apptextstyle.s16wncG,
+                                    ),
+                                    onTap: () {
+                                      setState(() {
+                                        Reports = "Day";
+                                        currentTitle = 'Daily Sleep Average';
+        
+                                      });
+                                      simulateLoading(Day_Chart);
+                                    },
+                                  ),
+                                  SizedBox(
+                                    width: 20,
+                                  ),
+                                  InkWell(
+                                    child: Text(
+                                      'Week',
+                                      style:  Reports == 'Week' ?  Apptextstyle.s16wncR
+                                          : Apptextstyle.s16wncG,
+                                    ),
+                                    onTap: () {
+                                      setState(() {
+                                        Reports = "Week";
+                                        currentTitle = 'Weekly Sleep Average';
+                                      });
+                                      simulateLoading(Week_Chart);
+                                    },
+                                  ),
+                                  SizedBox(
+                                    width: 20,
+                                  ),
+                                  InkWell(
+                                    child: Text(
+                                      'Month',
+                                      style:Reports == 'Month' ?  Apptextstyle.s16wncR
+                                          : Apptextstyle.s16wncG,
+                                    ),
+                                    onTap: () {
+                                      setState(() {
+                                        Reports = "Month";
+                                        currentTitle = 'Monthly Sleep Average';
+                                      });
+                                      simulateLoading(Month_Chart);
+                                    },
+                                  ),
+                                  SizedBox(
+                                    width: 20,
+                                  ),
+                                  InkWell(
+                                    child: Text(
+                                      'Year',
+                                      style: Reports == 'Year' ?  Apptextstyle.s16wncR
+                                          : Apptextstyle.s16wncG,
+                                    ),
+                                    onTap: () {
+                                      setState(() {
+                                        Reports = "Year";
+                                        currentTitle = 'Yearly Sleep Average';
+                                      });
+                                      simulateLoading(Year_Chart);
+                                    },
+                                  ),
+                                  SizedBox(
+                                    width: 20,
+                                  ),
+                                  InkWell(
+                                    child: Text(
+                                      'Multi-Year',
+                                      style: Reports == 'Multi-Year' ?  Apptextstyle.s16wncR
+                                          : Apptextstyle.s16wncG,
+                                    ),
+                                    onTap: () {
+                                      setState(() {
+                                        Reports = "Multi-Year";
+                                        currentTitle = 'Multi-Year Sleep Average';
+        
+                                        final now = DateTime.now();
+                                        //fromYear = now.year;
+                                        toYear = now.year;
+        
+                                        yearPickerLabel =
+                                            "${DateFormat('yyyy').format(DateTime(toYear!))}";
+                                      });
+                                      simulateLoading(MultiYear_Chart);
+                                    },
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          // Space between filter and date picker
+                          // DATE PICKER BELOW THE FILTER ROW
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              InkWell(
+                                onTap: () async {
+        
+                                  if (Reports == 'Multi-Year') {
+                                    var toDatePicked = await DatePicker.showSimpleDatePicker(
+                                      context,
+                                      initialDate: Upto != null
+                                          ? DateTime(int.parse(Upto!))
+                                          : DateTime.now(),
+                                      firstDate: DateTime(1960),
+                                      lastDate: DateTime.now(),
+                                      dateFormat: "yyyy",
+                                      locale: DateTimePickerLocale.en_us,
+                                      looping: false,
+                                        titleText: 'Select End Year'
+                                    );
+        
+                                    if (toDatePicked != null) {
+                                      toYear = toDatePicked.year;
+        
+                                      setState(() {
+                                        Upto = toYear.toString();
+                                        yearPickerLabel = "$Upto";
+                                      });
+        
+                                      await MultiYear_Chart();
+                                    }
+                                  }
+                                  else {
+                                    String dateFormatString =
+                                    (Reports == 'Day' || Reports == 'Week')
+                                        ? "MMMM dd, yyyy"
+                                        : "MMMM-yyyy";
+        
+                                    var datePicked = await DatePicker
+                                        .showSimpleDatePicker(
+                                      context,
+                                      initialDate: selectedDate ?? DateTime.now(),
+                                      firstDate: DateTime(1960),
+                                      lastDate: DateTime.now(),
+                                      dateFormat: dateFormatString,
+                                      locale: DateTimePickerLocale.en_us,
+                                      looping: false,
+                                    );
+        
+                                    if (datePicked != null) {
+                                      setState(() {
+                                        selectedDate = datePicked;
+        
+                                        if (Reports == 'Week') {
+                                          // From Week to Day
+                                          Reports = 'Day';
+                                          currentTitle = 'Daily Sleep Average';
+                                          mainDate =
+                                              DateFormat('MMMM dd, yyyy').format(
+                                                  datePicked);
+                                          simulateLoading(Day_Chart);
+                                        } else if (Reports == 'Year') {
+                                          // From Year to Month
+                                          Reports = 'Month';
+                                          currentTitle = 'Monthly Sleep Average';
+                                          mainDate =
+                                              DateFormat('MMMM-yyyy').format(
+                                                  datePicked);
+                                          simulateLoading(Month_Chart);
+                                        } else {
+                                          // Stay in current report type
+                                          switch (Reports) {
+                                            case 'Day':
+                                              currentTitle =
+                                              'Daily Sleep Average';
+                                              mainDate =
+                                                  DateFormat('MMMM dd, yyyy')
+                                                      .format(datePicked);
+                                              simulateLoading(Day_Chart);
+                                              break;
+                                            case 'Month':
+                                              currentTitle =
+                                              'Monthly Sleep Average';
+                                              mainDate =
+                                                  DateFormat('MMMM-yyyy').format(
+                                                      datePicked);
+                                              simulateLoading(Month_Chart);
+                                              break;
+                                          }
+                                        }
+                                      });
+                                    }
+                                  }
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Color(0xff275176),
+                                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        Reports == 'Multi-Year'
+                                            ? yearPickerLabel
+                                            : selectedDate != null
+                                            ? ((Reports == 'Day' || Reports == 'Week')
+                                            ? DateFormat('MMMM dd, yyyy').format(selectedDate!)
+                                            : DateFormat('MMMM-yyyy').format(selectedDate!))
+                                            : "",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Icon(Icons.arrow_drop_down, color: Colors.white),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+        
+                        ],
                       ),
-                      onTooltipRender: (TooltipArgs args) {
+                    ),
+                  ),
+                  SizedBox(
+                    height: 25,
+                  ),
+                  if (_isLoading)
+                    Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Container(
+                        width: double.infinity,
+                        height: size.height * 0.3,
+                        color: Colors.white,
+                      ),
+                    )
+                  else if (Reports == "Day")
+                    buildSleepChart(
+                      context: context,
+                      title: "Sleep for this Day",
+                      xAxisTitle: selectedDate != null
+                                  ? DateFormat('MMM dd, yyyy').format(selectedDate!)
+                                  : '',
+                      chartData: _daySleepBars,
+                      fullSleepData: _sleepsData,
+                      yAxisMax: yAxisMax,
+                      yAxisInterval: 1,
+                      targetSleepValue: targetSleepValue,
+                      onTooltipRenderCustom: (TooltipArgs args) {
                         args.header = 'Sleep';
                         final summary = _sleepsData.isNotEmpty ? _sleepsData.first : null;
-
                         if (summary != null) {
-                          args.text =
-                          'Deep : ${summary.totalDeep}\n'
+                          args.text = 'Deep : ${summary.totalDeep}\n'
                               'Middle : ${summary.totalMiddle}\n'
                               'Light : ${summary.totalLight}';
                         }
                       },
-                      title: ChartTitle(text: 'Sleep for this Day'),
-                      plotAreaBorderWidth: 0.0,
-                      plotAreaBorderColor: AppColors.greyshaded100,
-                      backgroundColor: AppColors.White,
-                      primaryXAxis: CategoryAxis(
-                        majorGridLines: MajorGridLines(width: 0),
-                        majorTickLines: MajorTickLines(width: 0),
-                        axisLine: AxisLine(width: 1, color: AppColors.Grey),
-                        labelStyle: TextStyle(   fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black),
-                        title: AxisTitle(
-                          text: selectedDate != null
-                              ? DateFormat('MMM dd, yyyy').format(selectedDate!)
-                              : '',
-                        ),
-                      ),
-                      primaryYAxis: NumericAxis(
-                        minimum: 0,
-                        maximum: yAxisMax,
-                        interval: 1,
-                        majorGridLines: MajorGridLines(width: 0),
-                        minorGridLines: MinorGridLines(width: 0),
-                        majorTickLines: MajorTickLines(width: 0),
-                        title: AxisTitle(text: 'Hours'),
-                        labelStyle: TextStyle(   fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black),
-                        plotBands: [
-                          if (targetSleepValue != null && targetSleepValue! > 0)
-                            PlotBand(
-                              isVisible: true,
-                              start: targetSleepValue,
-                              end: targetSleepValue,
-                              borderWidth: 2,
-                              borderColor: Colors.green,
-                              text: '',
-                              horizontalTextAlignment: TextAnchor.end,
-                              verticalTextAlignment: TextAnchor.middle,
-                            ),
-                        ],
-                      ),
-                      series: <RangeColumnSeries<SleepBarData, String>>[
-                        RangeColumnSeries<SleepBarData, String>(
-                          dataSource: _daySleepBars,
-                          xValueMapper: (d, _) => d.label,
-                          lowValueMapper: (d, _) => d.startHour,
-                          highValueMapper: (d, _) => d.endHour,
-                          pointColorMapper: (d, _) => _getColor(d.value),
-                        )
-                      ],
-                    )
-                  )
-                else if (Reports == "Week")
-                    Container(
-                      width: double.infinity,
-                      height: size.height * 0.35,
+                      ismonth: true,
+                      xAxisInterval: 1,
 
-                      child:SfCartesianChart(
-                        tooltipBehavior: TooltipBehavior(
-                          enable: true,
-                          canShowMarker: false, // Hides the marker dot
-                        ),
-                        onTooltipRender: (TooltipArgs args) {
+                    )
+                     else if (Reports == "Week")
+                      buildSleepChart(
+                        context: context,
+                        title: "Avg Daily Sleep",
+                        xAxisTitle: 'Day',
+                        chartData: _weekSleepBars,
+                        fullSleepData: _sleepsData,
+                        yAxisMax: yAxisMax,
+                        yAxisInterval: 1,
+                        targetSleepValue: targetSleepValue,
+                        onTooltipRenderCustom: (TooltipArgs args) {
+                          args.header = "Sleep";
                           final dayLabel = args.dataPoints![args.pointIndex!.toInt()].x;
                           final summary = _sleepsData.firstWhere(
                                 (e) => e.day_name == dayLabel,
@@ -768,148 +756,71 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                               years: '',
                             ),
                           );
-
                           args.text =
                           'Deep : ${summary.totalDeep}\n'
                               'Middle : ${summary.totalMiddle}\n'
                               'Light : ${summary.totalLight}';
                         },
-                        title: ChartTitle(text: 'Avg Daily Sleep'),
-                        plotAreaBorderWidth: 0.0,
-                        backgroundColor: AppColors.White,
-                        primaryXAxis: CategoryAxis(
-                          majorGridLines: MajorGridLines(width: 0),
-                          axisLine: AxisLine(width: 1, color: AppColors.Grey),
-                          title: AxisTitle(text: 'Day'),
-                          labelStyle: TextStyle(   fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black),
-                        ),
-                        primaryYAxis: NumericAxis(
-                          minimum: 0,
-                          maximum: yAxisMax,
-                          interval: 1,
-                          title: AxisTitle(text: 'Hours'),
-                          labelStyle: TextStyle(   fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black),
-                          plotBands: [
-                            if (targetSleepValue != null && targetSleepValue! > 0)
-                              PlotBand(
-                                isVisible: true,
-                                start: targetSleepValue,
-                                end: targetSleepValue,
-                                borderWidth: 2,
-                                borderColor: Colors.green,
-                              ),
-                          ],
-                        ),
-                        series: <CartesianSeries>[
-                          RangeColumnSeries<SleepBarData, String>(
-                            dataSource: _weekSleepBars,
-                            xValueMapper: (SleepBarData data, _) => data.label,
-                            lowValueMapper: (SleepBarData data, _) => data.startHour,
-                            highValueMapper: (SleepBarData data, _) => data.endHour,
-                            pointColorMapper: (SleepBarData data, _) => _getColor(data.value),
-                            name: 'Sleep',
-                          ),
-                        ],
-                      ),
-                       )
-                  else if (Reports == "Month")
-                      Container(
-                        width: double.infinity,
-                        height: size.height * 0.3,
-                        child: SfCartesianChart(
-                          tooltipBehavior: TooltipBehavior(
-                            enable: true,
-                            canShowMarker: false, // Hides the marker/dot
-                          ),
-                          onTooltipRender: (TooltipArgs args) {
-                            args.header = 'Sleep';
-                            final label = args.dataPoints![args.pointIndex!.toInt()].x;
-                            final summary = _sleepsData.firstWhere(
-                                  (e) => e.time_s.day.toString() == label,
-                              orElse: () => SleepDataChart1(
-                                time_s: DateTime.now(),
-                                day_name: '',
-                                month_name: '',
-                                years: '',
-                                awake_s: 0,
-                                lightSleep_s: 0,
-                                deepSleep_s: 0,
-                                remSleep_s: 0,
-                                awake_s1: 0,
-                                lightSleep_s1: 0,
-                                remSleep_s1: 0,
-                                total_sleep: '',
-                                totalLight: '0h 0m',
-                                totalMiddle: '0h 0m',
-                                totalDeep: '0h 0m',
-                                light2: 0,
-                                week_names: '',
-                              ),
-                            );
-
-                            args.text =
-                            'Deep : ${summary.totalDeep}\n'
-                                'Middle : ${summary.totalMiddle}\n'
-                                'Light : ${summary.totalLight}';
-                          },
-                          title: ChartTitle(text: 'Avg Daily Sleep'),
-                          plotAreaBorderWidth: 0.0,
-                          backgroundColor: Colors.white,
-                          primaryXAxis: CategoryAxis(
-                            labelStyle: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black),
-                            majorGridLines: MajorGridLines(width: 0),
-                            majorTickLines: MajorTickLines(width: 0),
-                            axisLine: AxisLine(width: 1, color: AppColors.Grey),
-                            interval: 2,
-                            labelIntersectAction: AxisLabelIntersectAction.none, // 👈 Prevents skipping
-                            title: AxisTitle(text: 'Days'),
-
-                          ),
-                          primaryYAxis: NumericAxis(
-                            majorGridLines: MajorGridLines(width: 0),
-                            minorGridLines: MinorGridLines(width: 0),
-                            majorTickLines: MajorTickLines(width: 0),
-                            minimum: 0,
-                            maximum: yAxisMax,
-                            interval: 1,
-                            labelStyle: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black),
-                            title: AxisTitle(text: 'Hours'),
-                            plotBands: [
-                              if (targetSleepValue != null && targetSleepValue! > 0)
-                                PlotBand(
-                                  isVisible: true,
-                                  start: targetSleepValue!,
-                                  end: targetSleepValue!,
-                                  borderWidth: 2,
-                                  borderColor: Colors.green,
-                                  text: '',
-                                  horizontalTextAlignment: TextAnchor.end,
-                                  verticalTextAlignment: TextAnchor.middle,
-                                ),
-                            ],
-                          ),
-                          series: <CartesianSeries>[
-                            RangeColumnSeries<MonthlySleepModel, String>(
-                              dataSource: _monthSleepBars,
-                              xValueMapper: (data, _) => data.label,
-                              lowValueMapper: (data, _) => data.startHour,
-                              highValueMapper: (data, _) => data.endHour,
-                              pointColorMapper: (data, _) => _getColor(data.value),
-                            ),
-                          ],
-                        )
-
+                        ismonth: true,
+                        xAxisInterval: 1,
                       )
-                    else if (Reports == "Year")
-                        Container(
-                          width: double.infinity,
-                          height: size.height * 0.3,
-                          child:SfCartesianChart(
-                            tooltipBehavior: TooltipBehavior(
-                              enable: true,
-                              canShowMarker: false, // Removes the dot marker
-                            ),
-                            onTooltipRender: (TooltipArgs args) {
+                    else if (Reports == "Month")
+                        buildSleepChart(
+                          context: context,
+                          title: "Avg Daily Sleep",
+                          xAxisTitle: 'Days',
+                          chartData: _monthSleepBars,
+                          fullSleepData: _sleepsData,
+                          yAxisMax: yAxisMax,
+                          yAxisInterval: 1,
+                          targetSleepValue: targetSleepValue,
+                              onTooltipRenderCustom: (TooltipArgs args) {
+                                args.header = 'Sleep';
+                                final label = args.dataPoints![args.pointIndex!.toInt()].x;
+                                final summary = _sleepsData.firstWhere(
+                                      (e) => e.time_s.day.toString() == label,
+                                  orElse: () => SleepDataChart1(
+                                    time_s: DateTime.now(),
+                                    day_name: '',
+                                    month_name: '',
+                                    years: '',
+                                    awake_s: 0,
+                                    lightSleep_s: 0,
+                                    deepSleep_s: 0,
+                                    remSleep_s: 0,
+                                    awake_s1: 0,
+                                    lightSleep_s1: 0,
+                                    remSleep_s1: 0,
+                                    total_sleep: '',
+                                    totalLight: '0h 0m',
+                                    totalMiddle: '0h 0m',
+                                    totalDeep: '0h 0m',
+                                    light2: 0,
+                                    week_names: '',
+                                  ),
+                                );
+
+                                args.text =
+                                'Deep : ${summary.totalDeep}\n'
+                                    'Middle : ${summary.totalMiddle}\n'
+                                    'Light : ${summary.totalLight}';
+                              },
+                          ismonth: true,
+                          xAxisInterval: 2,
+
+                        )
+                      else if (Reports == "Year")
+                          buildSleepChart(
+                            context: context,
+                            title: "Avg Monthly Sleep",
+                            xAxisTitle: 'Months',
+                            chartData: _yearsleepBars,
+                            fullSleepData: _sleepsData,
+                            yAxisMax: yAxisMax,
+                            yAxisInterval: 1,
+                            targetSleepValue: targetSleepValue,
+                            onTooltipRenderCustom: (TooltipArgs args) {
+                              args.header = 'Sleep';
                               final label = args.dataPoints![args.pointIndex!.toInt()].x;
 
                               final summary = _sleepsData.firstWhere(
@@ -940,64 +851,22 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                   'Middle : ${summary.totalMiddle}\n'
                                   'Light : ${summary.totalLight}';
                             },
-                            title: ChartTitle(text: 'Avg Monthly Sleep'),
-                            plotAreaBorderWidth: 0.0,
-                            backgroundColor: Colors.white,
-                            primaryXAxis: CategoryAxis(
-                              labelStyle: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black),
-                              majorGridLines: const MajorGridLines(width: 0),
-                              majorTickLines: MajorTickLines(width: 0),
-                              axisLine: AxisLine(width: 1, color: AppColors.Grey),
-                              title: AxisTitle(text: 'Months'),
-                              labelIntersectAction: AxisLabelIntersectAction.none, // 👈 Prevents skipping
-                              maximumLabels: 12,
-                            ),
-                            primaryYAxis: NumericAxis(
-                              majorGridLines: const MajorGridLines(width: 0),
-                              minorGridLines: const MinorGridLines(width: 0),
-                              majorTickLines: MajorTickLines(width: 0),
-                              minimum: 0,
-                              maximum: yAxisMax,
-                              labelStyle: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black),
-                              interval: 1,
-                              title: AxisTitle(text: 'Hours'),
-                              plotBands: [
-                                if (targetSleepValue != null && targetSleepValue! > 0)
-                                  PlotBand(
-                                    isVisible: true,
-                                    start: targetSleepValue,
-                                    end: targetSleepValue,
-                                    borderWidth: 2,
-                                    borderColor: Colors.green,
-                                    text: '',
-                                    horizontalTextAlignment: TextAnchor.end,
-                                    verticalTextAlignment: TextAnchor.middle,
-                                  ),
-                              ],
-                            ),
-                            series: <CartesianSeries>[
-                              RangeColumnSeries<YearlySleepModel, String>(
-                                dataSource: _yearsleepBars,
-                                xValueMapper: (data, _) => data.label,
-                                lowValueMapper: (YearlySleepModel data, _) => data.startHour,
-                                highValueMapper: (YearlySleepModel data, _) => data.endHour,
-                                pointColorMapper: (YearlySleepModel data, _) => _getColor(data.value),
-                                name: 'Sleep',
-                              ),
-                            ],
-                          )
+                            ismonth: false,
+                            xAxisInterval: 1,
 
-                        )
-                   else if (Reports == "Multi-Year")
-                       Container(
-                  width: double.infinity,
-                  height: size.height * 0.3,
-                  child:SfCartesianChart(
-                    tooltipBehavior: TooltipBehavior(
-                      enable: true,
-                      canShowMarker: false, // Removes the colored dot marker
-                    ),
-                    onTooltipRender: (TooltipArgs args) {
+                          )
+                     else if (Reports == "Multi-Year")
+                  buildSleepChart(
+                    context: context,
+                    title: "Avg Yearly Sleep",
+                    xAxisTitle: 'Years',
+                    chartData: _multiYearSleepBars,
+                    fullSleepData: _sleepsData,
+                    yAxisMax: yAxisMax,
+                    yAxisInterval: 1,
+                    targetSleepValue: targetSleepValue,
+                    onTooltipRenderCustom: (TooltipArgs args) {
+                      args.header = 'Sleep';
                       final label = args.dataPoints![args.pointIndex!.toInt()].x;
 
                       final summary = _sleepsData.firstWhere(
@@ -1028,453 +897,522 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                           'Middle : ${summary.totalMiddle}\n'
                           'Light : ${summary.totalLight}';
                     },
-                    title: ChartTitle(text: 'Avg Yearly Sleep'),
-                    plotAreaBorderWidth: 0.0,
-                    backgroundColor: Colors.white,
-                    primaryXAxis: CategoryAxis(
-                      labelStyle: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black),
-                      majorGridLines: MajorGridLines(width: 0),
-                      majorTickLines: MajorTickLines(width: 0),
-                      axisLine: AxisLine(width: 1, color: AppColors.Grey),
-                      title: AxisTitle(text: 'Years'),
-                    ),
-                    primaryYAxis: NumericAxis(
-                      majorGridLines: MajorGridLines(width: 0),
-                      minorGridLines: MinorGridLines(width: 0),
-                      majorTickLines: MajorTickLines(width: 0),
-                      minimum: 0,
-                      maximum: yAxisMax,
-                      labelStyle: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black),
-                      interval: 1,
-                      title: AxisTitle(text: 'Hours'),
-                      plotBands: [
-                        if (targetSleepValue != null && targetSleepValue! > 0)
-                          PlotBand(
-                            isVisible: true,
-                            start: targetSleepValue,
-                            end: targetSleepValue,
-                            borderWidth: 2,
-                            borderColor: Colors.green,
-                            text: '',
-                            horizontalTextAlignment: TextAnchor.end,
-                            verticalTextAlignment: TextAnchor.middle,
-                          ),
-                      ],
-                    ),
-                    series: <CartesianSeries>[
-                      RangeColumnSeries<YearlySleepModel, String>(
-                        dataSource: _multiYearSleepBars,
-                        xValueMapper: (YearlySleepModel data, _) => data.label,
-                        lowValueMapper: (YearlySleepModel data, _) => data.startHour,
-                        highValueMapper: (YearlySleepModel data, _) => data.endHour,
-                        pointColorMapper: (YearlySleepModel data, _) => _getColor(data.value),
-                        name: 'Sleep',
-                      ),
-                    ],
-                  )
-                       ),
-                    SizedBox(height: 20,),
-                    deepPercentage == null ?
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(30, 10, 20, 10),
-                    ) :
-                    Padding(
-                      padding: EdgeInsets.only(right: 10, left: 20),
-                      child: Stack(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 20, 0, 25),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Color(0xFFffffff), // Card background color
-                                borderRadius: BorderRadius.circular(5),
-                                border: Border.all(
-                                  color: Colors.grey.shade500,
-                                  width: 1.0,
+                    ismonth: false,
+                    xAxisInterval: 1,
+                  ),
+                      SizedBox(height: 20,),
+                      deepPercentage == null ?
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(30, 10, 20, 10),
+                      ) :
+                      Padding(
+                        padding: EdgeInsets.only(right: 10, left: 20),
+                        child: Stack(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 20, 0, 25),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Color(0xFFffffff), // Card background color
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: Border.all(
+                                    color: Colors.grey.shade500,
+                                    width: 1.0,
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    SizedBox(height: 30),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Color(0xFFb5e78c),
+                                                    border: Border.all(color: Color(0xFFb5e78c), width: 1.0),
+                                                    borderRadius: BorderRadius.circular(5),
+                                                  ),
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(8.0),
+                                                    child: Text(
+                                                      deepPercentage != null ? '$deepPercentage' : '',
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: Apptextstyle.s10wbcB,
+                                                    ),
+                                                  ),),
+                                                SizedBox(width: 5,),
+                                                Text(
+                                                  'Deep Sleep - Restorative Stage',
+                                                  style: Apptextstyle.s10wbcB,
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(height: 7,),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Color(0xFFef989e),
+                                                    border: Border.all(color: Color(0xFFef989e), width: 1.0),
+                                                    borderRadius: BorderRadius.circular(5),
+                                                  ),
+        
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(8.0),
+                                                    child: Text(
+                                                      middlePercentage != null ? '$middlePercentage' : '',
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: Apptextstyle.s10wbcB,
+                                                    ),
+                                                  ),),
+                                                SizedBox(width: 5,),
+                                                Text(
+                                                  'Middle Sleep - Transitional Stage',
+                                                  style: Apptextstyle.s10wbcB,
+                                                ),
+                                                //Text("Middle"),
+                                              ],
+                                            ),
+                                            SizedBox(height: 7,),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Color(0xFFa4bce7),
+                                                    border: Border.all(color: Color(0xFFa4bce7), width: 1.0),
+                                                    borderRadius: BorderRadius.circular(5),
+                                                  ),
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(8.0),
+                                                    child: Text(
+                                                      lightPercentage != null ? '$lightPercentage' : '',
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: Apptextstyle.s10wbcB,
+                                                    ),
+                                                  ),),
+                                                SizedBox(width: 5,),
+                                                Text(
+                                                  'Light Sleep - Relaxing Stage',
+                                                  style: Apptextstyle.s10wbcB,
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(height: 7,),
+                                            if(target_visible)
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                  child: Text(
+                                                    'Target Daily Sleep is $day_target_sleep',
+                                                      style: Apptextstyle.s12wbcG
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(height: 7,),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                  child: Text(
+                                                      'Current Actual Daily Average Sleep is $totalsleep',
+                                                      style: Apptextstyle.s12wbcG
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 10),
+                                    // Optional animated description
+                                    Column(
+                                      children: [
+                                        AnimatedSize(
+                                          duration: Duration(milliseconds: 300),
+                                          curve: Curves.easeInCubic,
+                                          child: AnimatedOpacity(
+                                            opacity: is_steps ? 1.0 : 0.0,
+                                            duration: Duration(milliseconds: 300),
+                                            child: is_steps
+                                                ? Padding(
+                                              padding: const EdgeInsets.all(10),
+                                              child: Text(
+                                                _getTextBasedOnCondition(),
+                                                style: TextStyle(fontSize: 12.0),
+                                                textAlign: TextAlign.left,
+                                              ),
+                                            )
+                                                : SizedBox.shrink(),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 15),
+                                  ],
                                 ),
                               ),
-                              child: Column(
-                                children: [
-                                  SizedBox(height: 30),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 18),
+                              child: AnimatedBuilder(
+                                animation: _controller,
+                                builder: (context, child) {
+                                  return Stack(
+                                    alignment: Alignment.center, // Align children to center
                                     children: [
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                            children: [
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  color: Color(0xFFb5e78c),
-                                                  border: Border.all(color: Color(0xFFb5e78c), width: 1.0),
-                                                  borderRadius: BorderRadius.circular(5),
-                                                ),
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(8.0),
-                                                  child: Text(
-                                                    deepPercentage != null ? '$deepPercentage' : '',
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: Apptextstyle.s10wbcB,
-                                                  ),
-                                                ),),
-                                              SizedBox(width: 5,),
-                                              Text(
-                                                'Deep Sleep - Restorative Stage',
-                                                style: Apptextstyle.s10wbcB,
-                                              ),
-                                            ],
+                                      Opacity(
+                                        opacity: _opacityAnimation.value, // Apply the opacity to the container
+                                        child: Container(
+                                          width: 45,
+                                          height: 45,
+                                          decoration: BoxDecoration(
+                                            //color: Color(0xFF367588),
+                                             color: Color(0xFF008080),
+                                            shape: BoxShape.rectangle, // Optional: make it circular
                                           ),
-                                          SizedBox(height: 7,),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                            children: [
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  color: Color(0xFFef989e),
-                                                  border: Border.all(color: Color(0xFFef989e), width: 1.0),
-                                                  borderRadius: BorderRadius.circular(5),
-                                                ),
-
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(8.0),
-                                                  child: Text(
-                                                    middlePercentage != null ? '$middlePercentage' : '',
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: Apptextstyle.s10wbcB,
-                                                  ),
-                                                ),),
-                                              SizedBox(width: 5,),
-                                              Text(
-                                                'Middle Sleep - Transitional Stage',
-                                                style: Apptextstyle.s10wbcB,
-                                              ),
-                                              //Text("Middle"),
-                                            ],
-                                          ),
-                                          SizedBox(height: 7,),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                            children: [
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  color: Color(0xFFa4bce7),
-                                                  border: Border.all(color: Color(0xFFa4bce7), width: 1.0),
-                                                  borderRadius: BorderRadius.circular(5),
-                                                ),
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(8.0),
-                                                  child: Text(
-                                                    lightPercentage != null ? '$lightPercentage' : '',
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: Apptextstyle.s10wbcB,
-                                                  ),
-                                                ),),
-                                              SizedBox(width: 5,),
-                                              Text(
-                                                'Light Sleep - Relaxing Stage',
-                                                style: Apptextstyle.s10wbcB,
-                                              ),
-                                            ],
-                                          ),
-                                          SizedBox(height: 7,),
-                                          if(target_visible)
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Container(
-                                                child: Text(
-                                                  'Target Daily Sleep is $day_target_sleep',
-                                                    style: Apptextstyle.s12wbcG
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          SizedBox(height: 7,),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Container(
-                                                child: Text(
-                                                    'Current Actual Daily Average Sleep is $totalsleep',
-                                                    style: Apptextstyle.s12wbcG
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 10),
-                                  // Optional animated description
-                                  Column(
-                                    children: [
-                                      AnimatedSize(
-                                        duration: Duration(milliseconds: 300),
-                                        curve: Curves.easeInCubic,
-                                        child: AnimatedOpacity(
-                                          opacity: is_steps ? 1.0 : 0.0,
-                                          duration: Duration(milliseconds: 300),
-                                          child: is_steps
-                                              ? Padding(
-                                            padding: const EdgeInsets.all(10),
-                                            child: Text(
-                                              _getTextBasedOnCondition(),
-                                              style: TextStyle(fontSize: 12.0),
-                                              textAlign: TextAlign.left,
-                                            ),
-                                          )
-                                              : SizedBox.shrink(),
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 15),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 18),
-                            child: AnimatedBuilder(
-                              animation: _controller,
-                              builder: (context, child) {
-                                return Stack(
-                                  alignment: Alignment.center, // Align children to center
-                                  children: [
-                                    Opacity(
-                                      opacity: _opacityAnimation.value, // Apply the opacity to the container
-                                      child: Container(
+                                      Container(
                                         width: 45,
                                         height: 45,
                                         decoration: BoxDecoration(
-                                          //color: Color(0xFF367588),
-                                           color: Color(0xFF008080),
-                                          shape: BoxShape.rectangle, // Optional: make it circular
+                                          image: DecorationImage(
+                                            image: AssetImage(Appimages.sleep_logo),
+                                            fit: BoxFit.cover, // Image remains static
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    Container(
-                                      width: 45,
-                                      height: 45,
-                                      decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                          image: AssetImage(Appimages.sleep_logo),
-                                          fit: BoxFit.cover, // Image remains static
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ), _isLoading ?
+                      Center(child: Image.asset(
+                        Appimages.applogo,
+                        height: 50,
+                        fit: BoxFit.contain,
+                      ),) :
+                      Padding(
+                        padding:  EdgeInsets.only(left: 20,right: 10, bottom: 10),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,// Card background color
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                              color: Colors.grey, // Border color
+                              width: 1.0, // Border width
                             ),
                           ),
-                        ],
-                      ),
-                    ), _isLoading ?
-                    Center(child: Image.asset(
-                      Appimages.applogo,
-                      height: 50,
-                      fit: BoxFit.contain,
-                    ),) :
-                    Padding(
-                      padding:  EdgeInsets.only(left: 20,right: 10, bottom: 10),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,// Card background color
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(
-                            color: Colors.grey, // Border color
-                            width: 1.0, // Border width
-                          ),
-                        ),
-                        child:  Card(
-                          elevation: 0,
-                          color: Colors.white,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5)
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              SizedBox(height: 10,),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    currentTitle,
-                                    style: TextStyle(
-                                        color: Colors.red, fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 30),
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(10, 8, 0, 0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  // Spreads children evenly
+                          child:  Card(
+                            elevation: 0,
+                            color: Colors.white,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5)
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                SizedBox(height: 10,),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Expanded(
-                                      child: Text(
-                                        "Date",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF275176),
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.left, // Centers the text within its space
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        AppText.deep,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF275176),
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-
-                                    Expanded(
-                                      child: Text(
-                                        AppText.middle,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF275176),
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        AppText.light,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF275176),
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        AppText.total_s1,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF275176),
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
-                                      ),
+                                    Text(
+                                      currentTitle,
+                                      style: TextStyle(
+                                          color: Colors.red, fontWeight: FontWeight.bold),
                                     ),
                                   ],
                                 ),
-                              ),
-                              SizedBox(height: 10),
-                              SizedBox(
-                                child: ListView.builder(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemCount: _sleepsData.length,
-                                  itemBuilder: (context, index) {
-                                    return Padding(
-                                      padding: const EdgeInsets.fromLTRB(0,8,0,0),
-                                      child: Column(
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                  Reports == 'Month'
-                                                      ? _sleepsData[index].month_name
-                                                      : Reports == 'Year'
-                                                      ? DateFormat("MMM").format(_sleepsData[index].time_s )
-                                                      : Reports == 'Multi-Year'
-                                                      ? DateFormat("yyyy").format(_sleepsData[index].time_s )
-                                                      : Reports == 'Week'? _sleepsData[index].day_name :DateFormat('MMM dd, yyyy').format(_sleepsData[index].time_s ),
-                                                  style: TextStyle(
-                                                    fontSize: 12
-                                                  ),
-                                                  //overflow: TextOverflow.ellipsis,
-                                                  // textAlign: TextAlign.left,
-                                                ),
-                                              ),
-                                              Expanded(
-                                                child: Center(
-                                                  child: Text(
-                                                    '${_sleepsData[index].totalDeep}',
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: TextStyle(
-                                                      fontSize: 12
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                child: Center(
-                                                  child: Text(
-                                                    '${_sleepsData[index].totalMiddle}',
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: TextStyle(
-                                                        fontSize: 12
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                child: Center(
-                                                  child: Text(
-                                                    '${_sleepsData[index].totalLight}',
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: TextStyle(
-                                                      fontSize: 12
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                child: Center(
-                                                  child: Text(
-                                                    '${_sleepsData[index].total_sleep}',
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: TextStyle(
-                                                      fontSize: 12
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
+                                SizedBox(height: 30),
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(10, 8, 0, 0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    // Spreads children evenly
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          "Date",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF275176),
                                           ),
-                                          Divider()
-                                        ],
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.left, // Centers the text within its space
+                                        ),
                                       ),
-                                    );
-                                  },
+                                      Expanded(
+                                        child: Text(
+                                          AppText.deep,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF275176),
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+        
+                                      Expanded(
+                                        child: Text(
+                                          AppText.middle,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF275176),
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          AppText.light,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF275176),
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          AppText.total_s1,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF275176),
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-
-                            ],
+                                SizedBox(height: 10),
+                                SizedBox(
+                                  child: ListView.builder(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                                    shrinkWrap: true,
+                                    physics: NeverScrollableScrollPhysics(),
+                                    itemCount: _sleepsData.length,
+                                    itemBuilder: (context, index) {
+                                      return Padding(
+                                        padding: const EdgeInsets.fromLTRB(0,8,0,0),
+                                        child: Column(
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    Reports == 'Month'
+                                                        ? _sleepsData[index].month_name
+                                                        : Reports == 'Year'
+                                                        ? DateFormat("MMM").format(_sleepsData[index].time_s )
+                                                        : Reports == 'Multi-Year'
+                                                        ? DateFormat("yyyy").format(_sleepsData[index].time_s )
+                                                        : Reports == 'Week'? _sleepsData[index].day_name :DateFormat('MMM dd, yyyy').format(_sleepsData[index].time_s ),
+                                                    style: TextStyle(
+                                                      fontSize: 12
+                                                    ),
+                                                    //overflow: TextOverflow.ellipsis,
+                                                    // textAlign: TextAlign.left,
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: Center(
+                                                    child: Text(
+                                                      '${_sleepsData[index].totalDeep}',
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: TextStyle(
+                                                        fontSize: 12
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: Center(
+                                                    child: Text(
+                                                      '${_sleepsData[index].totalMiddle}',
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: TextStyle(
+                                                          fontSize: 12
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: Center(
+                                                    child: Text(
+                                                      '${_sleepsData[index].totalLight}',
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: TextStyle(
+                                                        fontSize: 12
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: Center(
+                                                    child: Text(
+                                                      '${_sleepsData[index].total_sleep}',
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: TextStyle(
+                                                        fontSize: 12
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Divider()
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+        
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-          )
+                    ],
+                  ),
+            ),
+      )
       );
   }
+
+  Widget buildSleepChart({
+    required BuildContext context,
+    required String title,
+    required String xAxisTitle,
+    required List<SleepBarData> chartData,
+    required List<SleepDataChart1> fullSleepData,
+    required double yAxisMax,
+    double yAxisInterval = 1,
+    required double? targetSleepValue,
+    required bool ismonth,
+    required double xAxisInterval,
+    //required bool ischarts,
+    required void Function(TooltipArgs) onTooltipRenderCustom,
+  }) {
+    // Use MediaQuery to get screen dimensions
+    final screenSize = MediaQuery.of(context).size;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    // Always use portrait height (the larger of height or width)
+    final portraitHeight = screenSize.height > screenSize.width
+        ? screenSize.height
+        : screenSize.width;
+
+    final chartHeight = portraitHeight * 0.4;
+
+    return Container(
+      width: double.infinity,
+      height: chartHeight,
+      child: SfCartesianChart(
+        tooltipBehavior: TooltipBehavior(
+          enable: true,
+          canShowMarker: false,
+        ),
+        onTooltipRender: onTooltipRenderCustom,
+        title: ChartTitle(text: title),
+        backgroundColor: AppColors.White,
+        plotAreaBorderWidth: 0.0,
+        plotAreaBorderColor: AppColors.greyshaded100,
+        primaryXAxis: ismonth == true ? CategoryAxis(
+          majorGridLines: MajorGridLines(width: 0),
+          majorTickLines: MajorTickLines(width: 0),
+          axisLine: AxisLine(width: 1, color: AppColors.Grey),
+          labelStyle: const TextStyle(
+            fontSize: 9,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+          title: AxisTitle(
+            text: xAxisTitle
+          ),
+          interval: xAxisInterval,
+        ):
+        CategoryAxis(
+          majorGridLines: MajorGridLines(width: 0),
+          majorTickLines: MajorTickLines(width: 0),
+          axisLine: AxisLine(width: 1, color: AppColors.Grey),
+          labelStyle: const TextStyle(
+            fontSize: 9,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+          title: AxisTitle(
+              text: xAxisTitle
+          ),
+          labelIntersectAction: AxisLabelIntersectAction.none, // ✅ Prevents skipping
+          maximumLabels: 12,
+        ),
+        primaryYAxis: NumericAxis(
+          minimum: 0,
+          maximum: yAxisMax,
+          interval: yAxisInterval,
+          title: const AxisTitle(text: 'Hours'),
+          labelStyle: const TextStyle(
+            fontSize: 9,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+          majorGridLines: MajorGridLines(width: 0),
+          minorGridLines: MinorGridLines(width: 0),
+          majorTickLines: MajorTickLines(width: 0),
+          plotBands: [
+            if (targetSleepValue != null && targetSleepValue > 0)
+              PlotBand(
+                isVisible: true,
+                start: targetSleepValue,
+                end: targetSleepValue,
+                borderColor: Colors.green,
+                borderWidth: 2,
+                text: '',
+                horizontalTextAlignment: TextAnchor.end,
+                verticalTextAlignment: TextAnchor.middle,
+              ),
+          ],
+        ),
+        series: <RangeColumnSeries<SleepBarData, String>>[
+          RangeColumnSeries<SleepBarData, String>(
+            dataSource: chartData,
+            xValueMapper: (d, _) => d.label,
+            lowValueMapper: (d, _) => d.startHour,
+            highValueMapper: (d, _) => d.endHour,
+            pointColorMapper: (d, _) => _getColor(d.value),
+            //name: 'Sleep',
+          )
+        ],
+      ),
+    );
+  }
+
+
 
 }
 

@@ -362,6 +362,15 @@ class Apptextstyle {
     color: Colors.black,
   );
 
+  static const s16wbCo = TextStyle(
+    fontFamily: "Inter",
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    color: AppColors.others,
+  );
+
+
+
   static const s16wncGreen = TextStyle(
     fontFamily: "Inter",
     fontWeight: FontWeight.normal,

@@ -15,23 +15,26 @@ class CustomPinCodeField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PinCodeTextField(
-      appContext: appContext,
-      length: 5,
-      obscureText: false,
-      keyboardType: TextInputType.number,
-      autoFocus: true,
-      pinTheme: PinTheme(
-        shape: PinCodeFieldShape.underline,
-        borderRadius: BorderRadius.circular(5),
-        fieldHeight: 50,
-        fieldWidth: 40,
-        activeColor: Colors.black,
-        inactiveColor: Colors.black,
-        selectedColor: Colors.black,
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: 300),
+      child: PinCodeTextField(
+        appContext: appContext,
+        length: 5,
+        obscureText: false,
+        keyboardType: TextInputType.number,
+        autoFocus: true,
+        pinTheme: PinTheme(
+          shape: PinCodeFieldShape.underline,
+          borderRadius: BorderRadius.circular(5),
+          fieldHeight: 50,
+          fieldWidth: 40,
+          activeColor: Colors.black,
+          inactiveColor: Colors.black,
+          selectedColor: Colors.black,
+        ),
+        onChanged: onChanged,
+        onCompleted: onCompleted,
       ),
-      onChanged: onChanged,
-      onCompleted: onCompleted,
     );
   }
 }

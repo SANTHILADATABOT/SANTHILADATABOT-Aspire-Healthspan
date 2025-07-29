@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
-
+import 'package:oktoast/oktoast.dart';
 import '../utils/appimages.dart';
 
 class TargetSetting extends StatefulWidget {
@@ -319,7 +319,7 @@ class _TargetSettingState extends State<TargetSetting> {
                 const SizedBox(height: 16),
                 _buildTargetCard(
                   title: "Set Target BMI",
-                  description: "BMI (lbs/m\u00b2)",
+                  description: "BMI (lbs/in\u00b2)",
                   children: [
                     Expanded(
                       child: _buildInputField("BMI", BmiController),

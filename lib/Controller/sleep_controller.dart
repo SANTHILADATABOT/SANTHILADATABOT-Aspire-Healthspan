@@ -475,7 +475,7 @@ class SleepController extends GetxController{
 
       int totalDays = DateUtils.getDaysInMonth(monthStart.year, monthStart.month);
 
-      List<MonthlySleepModel> monthlyBars = [];
+      List<SleepBarData> monthlyBars = [];
       List<SleepDataChart1> monthlySummaryList = [];
       double maxTotalSleep = 0;
 
@@ -526,7 +526,7 @@ class SleepController extends GetxController{
         double deepEnd = deepStart + deep;
 
         if (light > 0) {
-          monthlyBars.add(MonthlySleepModel(
+          monthlyBars.add(SleepBarData(
             label: i.toString(),
             startHour: lightStart,
             endHour: lightEnd,
@@ -534,7 +534,7 @@ class SleepController extends GetxController{
           ));
         }
         if (rem > 0) {
-          monthlyBars.add(MonthlySleepModel(
+          monthlyBars.add(SleepBarData(
             label: i.toString(),
             startHour: remStart,
             endHour: remEnd,
@@ -542,7 +542,7 @@ class SleepController extends GetxController{
           ));
         }
         if (deep > 0) {
-          monthlyBars.add(MonthlySleepModel(
+          monthlyBars.add(SleepBarData(
             label: i.toString(),
             startHour: deepStart,
             endHour: deepEnd,
@@ -664,7 +664,7 @@ class SleepController extends GetxController{
         }
       }
 
-      List<YearlySleepModel> yearlyBars = [];
+      List<SleepBarData> yearlyBars = [];
       List<SleepDataChart1> yearlySummaryList = [];
       double maxTotalSleep = 0;
 
@@ -716,7 +716,7 @@ class SleepController extends GetxController{
             double start = 0;
 
             // Light (bottom)
-            yearlyBars.add(YearlySleepModel(
+            yearlyBars.add(SleepBarData(
               label: monthKey,
               startHour: start,
               endHour: start + light,
@@ -725,7 +725,7 @@ class SleepController extends GetxController{
             start += light;
 
             // REM (middle)
-            yearlyBars.add(YearlySleepModel(
+            yearlyBars.add(SleepBarData(
               label: monthKey,
               startHour: start,
               endHour: start + rem,
@@ -734,7 +734,7 @@ class SleepController extends GetxController{
             start += rem;
 
             // Deep (top)
-            yearlyBars.add(YearlySleepModel(
+            yearlyBars.add(SleepBarData(
               label: monthKey,
               startHour: start,
               endHour: start + deep,
@@ -861,7 +861,7 @@ Future<Map<String, dynamic>> MultiYear_Chart({
         }
       }
 
-      List<YearlySleepModel> multiYearBars = [];
+      List<SleepBarData> multiYearBars = [];
       List<SleepDataChart1> summaryList = [];
       double maxTotalSleep = 0;
 
@@ -888,7 +888,7 @@ Future<Map<String, dynamic>> MultiYear_Chart({
           double start = 0;
 
           // Light (bottom)
-          multiYearBars.add(YearlySleepModel(
+          multiYearBars.add(SleepBarData(
             label: yearKey,
             startHour: start,
             endHour: start + light,
@@ -897,7 +897,7 @@ Future<Map<String, dynamic>> MultiYear_Chart({
           start += light;
 
           // REM (middle)
-          multiYearBars.add(YearlySleepModel(
+          multiYearBars.add(SleepBarData(
             label: yearKey,
             startHour: start,
             endHour: start + rem,
@@ -906,7 +906,7 @@ Future<Map<String, dynamic>> MultiYear_Chart({
           start += rem;
 
           // Deep (top)
-          multiYearBars.add(YearlySleepModel(
+          multiYearBars.add(SleepBarData(
             label: yearKey,
             startHour: start,
             endHour: start + deep,

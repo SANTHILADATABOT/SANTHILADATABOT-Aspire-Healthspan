@@ -3,6 +3,38 @@
 import 'package:azpire_new/utils/apptextstyle.dart';
 import 'package:flutter/material.dart';
 
+ // class MyButton extends StatelessWidget {
+ //   final VoidCallback press;
+ //   final String text;
+ //
+ //   const MyButton({
+ //     Key? key,
+ //     required this.press,
+ //     required this.text,
+ //   }) : super(key: key);
+ //
+ //   @override
+ //   Widget build(BuildContext context) {
+ //     return Container(
+ //       width: MediaQuery.of(context).size.width * 0.5,
+ //       height: 50,
+ //       decoration: BoxDecoration(
+ //         borderRadius: BorderRadius.circular(8),
+ //         gradient: AppColors.button
+ //       ),
+ //       child: MaterialButton(
+ //         onPressed: press,
+ //         color: Colors.transparent,
+ //         elevation: 0,
+ //         child: Text(
+ //           text,
+ //           style: Apptextstyle.s20wbcW
+ //         ),
+ //       ),
+ //     );
+ //   }
+ // }
+
  class MyButton extends StatelessWidget {
    final VoidCallback press;
    final String text;
@@ -15,22 +47,32 @@ import 'package:flutter/material.dart';
 
    @override
    Widget build(BuildContext context) {
-     return Container(
-       width: MediaQuery.of(context).size.width * 0.7,
-       height: 50,
-       decoration: BoxDecoration(
-         borderRadius: BorderRadius.circular(8),
-         gradient: AppColors.button
-       ),
-       child: MaterialButton(
-         onPressed: press,
-         color: Colors.transparent,
-         elevation: 0,
-         child: Text(
-           text,
-           style: Apptextstyle.s20wbcW
+     return Center( // <--- important to ensure center alignment
+       child: ConstrainedBox(
+         constraints: const BoxConstraints(
+           maxWidth: 300, // Ensures it doesn't stretch too wide
+         ),
+         child: SizedBox(
+           height: 50,
+           width: double.infinity,
+           child: DecoratedBox(
+             decoration: BoxDecoration(
+               borderRadius: BorderRadius.circular(8),
+               gradient: AppColors.button,
+             ),
+             child: MaterialButton(
+               onPressed: press,
+               color: Colors.transparent,
+               elevation: 0,
+               child: Text(
+                 text,
+                 style: Apptextstyle.s20wbcW,
+               ),
+             ),
+           ),
          ),
        ),
      );
    }
  }
+

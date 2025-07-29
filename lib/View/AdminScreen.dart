@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class AdminSettings {
   static final AdminSettings _instance = AdminSettings._internal();
@@ -42,7 +43,15 @@ class _AdminscreenState extends State<Adminscreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Admin Settings")),
+      appBar: AppBar(
+          title: const Text("Admin Settings"),
+        leading:IconButton(
+          onPressed: (){
+            Get.back();
+          },
+          icon: Icon(Icons.arrow_back_ios),
+        ),
+      ),
       body: ListView(
         children: [
           SwitchListTile(

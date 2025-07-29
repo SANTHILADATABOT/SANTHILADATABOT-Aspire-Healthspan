@@ -176,7 +176,11 @@ class _AddWeightState extends State<AddWeight> {
       showToast("Kindly Select a Valid Date");
     } else if (weight.text.isEmpty) {
       showToast("Kindly Enter Your Weight");
-    } else {
+    }
+    else if (height.text.isEmpty) {
+      showToast("Kindly Enter Your height");
+    }
+    else {
       add_data();
     }
   }
@@ -221,174 +225,173 @@ class _AddWeightState extends State<AddWeight> {
       child: Column(
         children: [
           SizedBox(height: 40,),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //   children: [
-          //     Padding(
-          //       padding: const EdgeInsets.only(left: 20),
-          //       child: Container(
-          //         constraints: BoxConstraints(maxWidth: size.width * 0.6),
-          //         decoration: BoxDecoration(color: Colors.white,border: Border.all(color: Colors.transparent)),
-          //         width: size.width * 0.4,
-          //         child: TextFormField(
-          //           controller: _dateController,
-          //           style: TextStyle(fontSize: 14),
-          //           readOnly: true,
-          //           onTap: () {
-          //             _selectDate(context);
-          //           },
-          //           decoration: InputDecoration(
-          //
-          //             border: OutlineInputBorder(
-          //                 borderRadius: BorderRadius.all(Radius.circular(10))
-          //             ),
-          //             hintText: "Select Date",
-          //             suffixIcon: Icon(Icons.calendar_month,color: Color(0xFF365c7f),),
-          //           ),
-          //         ),
-          //       ),
-          //     ),
-          //     Padding(
-          //       padding: const EdgeInsets.only(right: 10),
-          //       child: Container(
-          //         constraints: BoxConstraints(maxWidth: size.width * 0.6),
-          //         decoration: BoxDecoration(color: Colors.white,border: Border.all(color: Colors.transparent)),
-          //         width: size.width * 0.5,
-          //         child: TextFormField(
-          //           controller: weight,
-          //           readOnly: false,
-          //           style: TextStyle(fontSize: 14),
-          //           keyboardType: TextInputType.number,
-          //           decoration: InputDecoration(
-          //             border: OutlineInputBorder(
-          //                 borderRadius: BorderRadius.all(Radius.circular(10))
-          //             ),
-          //
-          //             hintText: "Enter Weight(lbs)",
-          //             hintStyle: TextStyle(fontSize: 13),
-          //             suffixIcon: Icon(Icons.content_paste_rounded,color: Color(0xFF365c7f),),
-          //           ),
-          //         ),
-          //       ),
-          //     ),
-          //   ],
-          // ),
           // Padding(
-          //   padding: const EdgeInsets.only(left: 20),
+          //   padding: const EdgeInsets.only(left: 20,right: 10),
           //   child: Column(
-          //     mainAxisAlignment: MainAxisAlignment.start,
+          //     crossAxisAlignment: CrossAxisAlignment.start,
           //     children: [
-          //       Container(
-          //         constraints: BoxConstraints(maxWidth: size.width * 0.6),
-          //         decoration: BoxDecoration(color: Colors.white,border: Border.all(color: Colors.transparent)),
-          //         width: size.width * 0.5,
-          //         child: TextFormField(
-          //           controller: weight,
-          //           readOnly: false,
-          //           style: TextStyle(fontSize: 14),
-          //           keyboardType: TextInputType.number,
-          //           decoration: InputDecoration(
-          //             border: OutlineInputBorder(
-          //                 borderRadius: BorderRadius.all(Radius.circular(10))
+          //       Row(
+          //         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          //         children: [
+          //           Container(
+          //             constraints: BoxConstraints(maxWidth: size.width * 0.5),
+          //             decoration: BoxDecoration(
+          //               color: Colors.white,
+          //               border: Border.all(color: Colors.transparent),
           //             ),
-          //
-          //             hintText: "Enter Height (In Inches)",
-          //             hintStyle: TextStyle(fontSize: 13),
-          //             suffixIcon: Icon(Icons.content_paste_rounded,color: Color(0xFF365c7f),),
+          //             width: size.width * 0.45,
+          //             child: GestureDetector(
+          //               onTap: () => showHeightPicker(context),
+          //               child: AbsorbPointer(
+          //                 child: TextFormField(
+          //                   controller: height,
+          //                   readOnly: true,
+          //                   decoration: InputDecoration(
+          //                     hintText: "Select Height",
+          //                     hintStyle: TextStyle(fontSize: 11),
+          //                     border: OutlineInputBorder(
+          //                       borderRadius: BorderRadius.circular(10),
+          //                     ),
+          //                     suffixIcon: Icon(Icons.height, color: Color(0xFF365c7f)),
+          //                   ),
+          //                 ),
+          //               ),
+          //             ),
           //           ),
-          //         ),
+          //           SizedBox(width: 5,),
+          //           Container(
+          //             constraints: BoxConstraints(maxWidth: size.width * 0.5),
+          //             decoration: BoxDecoration(
+          //               color: Colors.white,
+          //               border: Border.all(color: Colors.transparent),
+          //             ),
+          //             width: size.width * 0.45,
+          //             child: TextFormField(
+          //               controller: weight,
+          //               style: TextStyle(fontSize: 14),
+          //               keyboardType: TextInputType.number,
+          //               decoration: InputDecoration(
+          //                 border: OutlineInputBorder(
+          //                   borderRadius: BorderRadius.all(Radius.circular(10)),
+          //                 ),
+          //                 hintText: "Enter Weight (lbs)",
+          //                 hintStyle: TextStyle(fontSize: 11),
+          //                 suffixIcon: Icon(
+          //                   Icons.content_paste_rounded,
+          //                   color: Color(0xFF365c7f),
+          //                 ),
+          //               ),
+          //             ),
+          //           ),
+          //         ],
+          //       ),
+          //       const SizedBox(height: 15),
+          //       Column(
+          //         crossAxisAlignment: CrossAxisAlignment.start,
+          //         children: [
+          //           Row(
+          //             children: [
+          //               Container(
+          //                 constraints: BoxConstraints(maxWidth: size.width * 0.5),
+          //                 decoration: BoxDecoration(
+          //                   color: Colors.white,
+          //                   border: Border.all(color: Colors.transparent),
+          //                 ),
+          //                 width: size.width * 0.45,
+          //                 child: TextFormField(
+          //                   controller: _dateController,
+          //                   style: TextStyle(fontSize: 14),
+          //                   readOnly: true,
+          //                   onTap: () => _selectDate(context),
+          //                   decoration: InputDecoration(
+          //                     border: OutlineInputBorder(
+          //                       borderRadius: BorderRadius.all(Radius.circular(10)),
+          //                     ),
+          //                     hintText: "Select Date",
+          //                     hintStyle: TextStyle(fontSize: 11),
+          //                     suffixIcon: Icon(
+          //                       Icons.calendar_month,
+          //                       color: Color(0xFF365c7f),
+          //                     ),
+          //                   ),
+          //                 ),
+          //               ),
+          //             ],
+          //           ),
+          //         ],
           //       ),
           //     ],
           //   ),
           // ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Container(
-                    constraints: BoxConstraints(maxWidth: size.width * 0.5),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: Colors.transparent),
-                    ),
-                    width: size.width * 0.48,
-                    child: GestureDetector(
-                      onTap: () => showHeightPicker(context),
-                      child: AbsorbPointer(
-                        child: TextFormField(
-                          controller: height,
-                          readOnly: true,
-                          decoration: InputDecoration(
-                            hintText: "Select Height",
-                            hintStyle: TextStyle(fontSize: 13),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
+          Padding(
+            padding: const EdgeInsets.only(left: 20, right: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      flex: 1,
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        child: GestureDetector(
+                          onTap: () => showHeightPicker(context),
+                          child: AbsorbPointer(
+                            child: TextFormField(
+                              controller: height,
+                              readOnly: true,
+                              decoration: InputDecoration(
+                                hintText: "Select Height",
+                                hintStyle: TextStyle(fontSize: 11),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                suffixIcon: Icon(Icons.height, color: Color(0xFF365c7f)),
+                              ),
                             ),
-                            suffixIcon: Icon(Icons.height, color: Color(0xFF365c7f)),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  Container(
-                    constraints: BoxConstraints(maxWidth: size.width * 0.5),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: Colors.transparent),
-                    ),
-                    width: size.width * 0.48,
-                    child: TextFormField(
-                      controller: weight,
-                      style: TextStyle(fontSize: 14),
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                        hintText: "Enter Weight (lbs)",
-                        hintStyle: TextStyle(fontSize: 13),
-                        suffixIcon: Icon(
-                          Icons.content_paste_rounded,
-                          color: Color(0xFF365c7f),
+                    Flexible(
+                      flex: 1,
+                      child: Container(
+                        margin: const EdgeInsets.only(left: 8),
+                        child: TextFormField(
+                          controller: weight,
+                          style: TextStyle(fontSize: 14),
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            hintText: "Enter Weight (lbs)",
+                            hintStyle: TextStyle(fontSize: 11),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            suffixIcon: Icon(Icons.content_paste_rounded, color: Color(0xFF365c7f)),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 15),
-              Padding(
-                padding: const EdgeInsets.only(left: 5),
-                child: Container(
-                  constraints: BoxConstraints(maxWidth: size.width * 0.5),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: Colors.transparent),
-                  ),
-                  width: size.width * 0.48,
-                  child: TextFormField(
-                    controller: _dateController,
-                    style: TextStyle(fontSize: 14),
-                    readOnly: true,
-                    onTap: () => _selectDate(context),
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                      ),
-                      hintText: "Select Date",
-                      suffixIcon: Icon(
-                        Icons.calendar_month,
-                        color: Color(0xFF365c7f),
-                      ),
+                  ],
+                ),
+                const SizedBox(height: 15),
+                TextFormField(
+                  controller: _dateController,
+                  style: TextStyle(fontSize: 14),
+                  readOnly: true,
+                  onTap: () => _selectDate(context),
+                  decoration: InputDecoration(
+                    hintText: "Select Date",
+                    hintStyle: TextStyle(fontSize: 11),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
+                    suffixIcon: Icon(Icons.calendar_month, color: Color(0xFF365c7f)),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-
           // isLoading == false
           //     ?
           SizedBox(height: 15,),

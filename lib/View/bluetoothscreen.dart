@@ -139,6 +139,7 @@ class _BluetoothPairState extends State<BluetoothPair> {
       home: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
+          centerTitle: true,
           title: Text(AppText.SDK_headings,
             style:Apptextstyle.s18wbap,),
           backgroundColor:Colors.white,
@@ -151,6 +152,15 @@ class _BluetoothPairState extends State<BluetoothPair> {
         ),
         body: Column(
           children: [
+            Container(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(AppText.nearbycling,style: Apptextstyle.s16wbCo,)
+                ],
+              ),
+            ),
+            SizedBox(height: 10,),
             ElevatedButton(
               onPressed: _startScanning,
               style: ElevatedButton.styleFrom(

@@ -2,20 +2,19 @@
 
 
 import 'dart:convert';
-
 import 'package:azpire_new/View/Dashboard_screen.dart';
-import 'package:azpire_new/alert_dialog.dart';
 import 'package:azpire_new/View/bluetoothscreen.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timer_count_down/timer_controller.dart';
-
+import 'package:oktoast/oktoast.dart';
 import '../root/root.dart';
 
-class LoginOtpController{
+class LoginOtpController {
 
   Future<void> otpVerify({
     required BuildContext context,
@@ -70,7 +69,12 @@ class LoginOtpController{
 
           showToast("Sign In Successful");
           controller.pause();
-         Get.to(() => BluetoothPair());
+          await Future.delayed(Duration(milliseconds: 300)); // <- This fixes it
+          Get.to(() => BluetoothPair());
+
+          //  showToast(context,"Sign In Successful");
+          //  controller.pause();
+          // Get.to(() => BluetoothPair());
           //Get.to(() => AlertDialogScreen());
 
         } else {
@@ -148,19 +152,52 @@ class LoginOtpController{
       print('Error: $e');
     }
   }
+
+  void showCustomToast(String msg) {
+    showToast(
+      msg,
+      duration: Duration(seconds: 2),
+      position: kIsWeb ? ToastPosition.top : ToastPosition.bottom,
+      backgroundColor: Colors.black,
+      radius: 8.0,
+      textPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+      textStyle: TextStyle(
+        fontSize: 16.0,
+        color: Colors.white,
+      ),
+      textAlign: TextAlign.center,
+      animationCurve: kIsWeb ? Curves.easeInOut : Curves.easeIn,
+      animationDuration: const Duration(milliseconds: 400),
+      animationBuilder: kIsWeb ? _slideFromRight : null,
+    );
+  }
+
+  Widget _slideFromRight(BuildContext context,
+      Widget child,
+      AnimationController controller,
+      double percent,) {
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: Offset(1.2, 0.0), // far right
+        end: Offset(-1.2, 0.0), // f // Slide to original position
+      ).animate(CurvedAnimation(
+        parent: controller,
+        curve: Curves.easeInOut,
+      )),
+      child: child,
+    );
+  }
+
+
+// showToast(String msg) {
+//   Fluttertoast.showToast(
+//     msg: msg,
+//     toastLength: Toast.LENGTH_SHORT,
+//     gravity: ToastGravity.BOTTOM,
+//     timeInSecForIosWeb: 1,
+//     backgroundColor: Colors.black,
+//     textColor: Colors.white,
+//     fontSize: 16.0,
+//   );
+// }
 }
-
-
-
-showToast(String msg) {
-  Fluttertoast.showToast(
-    msg: msg,
-    toastLength: Toast.LENGTH_SHORT,
-    gravity: ToastGravity.BOTTOM,
-    timeInSecForIosWeb: 1,
-    backgroundColor: Colors.black,
-    textColor: Colors.white,
-    fontSize: 16.0,
-  );
-}
-

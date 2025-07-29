@@ -12,6 +12,7 @@ import 'package:azpire_new/View/Heart_rate.dart';
 import 'package:azpire_new/View/Sleep_chart.dart';
 import 'package:azpire_new/View/blood_oxygenpressure.dart';
 import 'package:azpire_new/View/blood_pressure.dart';
+import 'package:azpire_new/View/profile.dart';
 import 'package:azpire_new/View/weight.dart';
 import 'package:azpire_new/utils/app_color.dart';
 import 'package:azpire_new/utils/appimages.dart';
@@ -25,6 +26,7 @@ import 'package:azpire_new/widgets/charts/dashboard_bloodoxygen.dart';
 import 'package:azpire_new/widgets/charts/dashboard_weight_chart.dart';
 import 'package:azpire_new/widgets/shimmer_effects.dart';
 import 'package:azpire_new/widgets/text_widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
@@ -36,6 +38,8 @@ import '../Cling Connections/health_data.dart';
 import '../menu/NavMneu.dart';
 import '../utils/apptext.dart';
 import '../widgets/custom_card.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show Platform;
 
 
 class DashboardScreen extends StatefulWidget {
@@ -122,6 +126,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _loadNotificationCount();
    // _healthDataService.startSyncTimer();
   }
+
+
 
   void _handleDailyDataReceived(Map<String, dynamic> dailyData) {
     setState(() {
@@ -238,7 +244,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
       isLoading = false;
     });
 
+    if (prefs.getString("name") != null) {
+      await prefs.setString("username", prefs.getString("name")!);
+    }
+
   }
+
+
+
+
   ExitAppDialog(){}
   @override
   Widget build(BuildContext context) {
@@ -264,7 +278,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   GestureDetector(
                     onTap: (){
-                      //Get.to(()=>MinuteDataScreen());
+                      Get.to(()=>Profile());
                     },
                     child: CircleAvatar(
                       backgroundImage: AssetImage(Appimages.profilelogo),
@@ -367,7 +381,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               datetime: 'Avg Sys/Dia Blood Pressure',
                               chart: BloodPressureChart(),
                               press: () {
-                                //Navigator.push(context, MaterialPageRoute(builder: (context) => BloodPressureChartPage()));
                                 Get.to(()=>BloodPressureChartPage());
                               },
                               color1: Color(0xFF5454FF),
@@ -388,7 +401,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               datetime: 'Avg Heart Rate',
                               chart: HeartRateChartPage(),
                               press: () {
-                                //Navigator.push(context, MaterialPageRoute(builder: (context) => HeartRateChart()));
                                 Get.to(()=>HeartRateChart());
                               },
                               color: Color(0xFFe13b4a),
@@ -408,7 +420,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               datetime: 'Avg Daily Steps',
                               chart: StepsChart(),
                               press: () {
-                                //Navigator.push(context, MaterialPageRoute(builder: (context) => StepsChartPage()));
                                 Get.to(()=>StepsChartPage());
                               },
                               color: Color(0xFF9C53C7),
@@ -428,7 +439,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               datetime: 'Avg Daily Total Sleep',
                               chart: SleepChart(),
                               press: () {
-                                //Navigator.push(context, MaterialPageRoute(builder: (context) => SleepChartPage()));
                                 Get.to(()=>SleepChartPage());
                               },
                               color: Color(0xFF38B1A0),
@@ -468,7 +478,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           datetime: 'Avg',
                           chart: WeightChartPage(),
                           press: () {
-                           // Navigator.push(context, MaterialPageRoute(builder: (context) => WeightChart()));
                             Get.to(()=>WeightChart());
                           },
                           color: Color(0xffF5B849),
@@ -480,7 +489,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ],
           ),
-          bottomNavigationBar: CustomBottomNavBar(controller: _controller),
+          //bottomNavigationBar: CustomBottomNavBar(controller: _controller),
+          bottomNavigationBar: (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+              ? CustomBottomNavBar(controller: _controller)
+              : null,
         ),
       ),
     );

@@ -100,104 +100,217 @@ class _MobileOtpScreenState extends State<MobileOtpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.White,
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 50),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // SizedBox(height: 200),
-                SizedBox(height: 30),
-                InkWell(
-                  onTap: () {
-                    Get.back();
-                    // Navigator.of(context).pop();
-                  },
-                  child: Icon(Icons.arrow_back,size: 18,),
-                ),
-                SizedBox(height: 30),
-                Text(
-                  AppText.verificationcode,
-                  style: Apptextstyle.s18wbcB
-                ),
-                SizedBox(height: 10),
-                Text(
-                    AppText.mobilesentotp,
-                  style: Apptextstyle.s14wncLb
-                ),
-                SizedBox(height: 20),
-                CustomPinCodeField(
-                  appContext: context,
-                  onChanged: (value) {
-                    print(value);
-                  },
-                  onCompleted: (value) {
-                    setState(() {
-                      enteredOtp = value;
-                    });
-                    print(value);
-                  },
-                ),
-                SizedBox(height: 30),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    resend == true ?
-                    GestureDetector(
-                      onTap: () {
-                        if (resend) {
-                          otp_resend();
-                        }
-                      },
-                      child: Text(
-                          AppText.resendmobileotp,
-                        style: Apptextstyle. s14wncblue
+    // return Scaffold(
+    //   backgroundColor: AppColors.White,
+    //   body: Center(
+    //     child: SingleChildScrollView(
+    //         child: Column(
+    //           mainAxisAlignment: MainAxisAlignment.center, // Center vertically
+    //           crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
+    //           mainAxisSize: MainAxisSize.min, // Shrinks to fit content
+    //           children: [
+    //             InkWell(
+    //               onTap: () {
+    //                 Get.back();
+    //               },
+    //               child: const Align(
+    //                 alignment: Alignment.centerLeft,
+    //                 child: Icon(Icons.arrow_back, size: 18),
+    //               ),
+    //             ),
+    //             const SizedBox(height: 30),
+    //             Text(
+    //               AppText.verificationcode,
+    //               style: Apptextstyle.s18wbcB,
+    //               textAlign: TextAlign.center,
+    //             ),
+    //             const SizedBox(height: 10),
+    //             Text(
+    //               AppText.mobilesentotp,
+    //               style: Apptextstyle.s14wncLb,
+    //               textAlign: TextAlign.center,
+    //             ),
+    //             const SizedBox(height: 20),
+    //             CustomPinCodeField(
+    //               appContext: context,
+    //               onChanged: (value) {
+    //                 print(value);
+    //               },
+    //               onCompleted: (value) {
+    //                 setState(() {
+    //                   enteredOtp = value;
+    //                 });
+    //                 print(value);
+    //               },
+    //             ),
+    //             const SizedBox(height: 30),
+    //             Row(
+    //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //               children: [
+    //                 resend
+    //                     ? GestureDetector(
+    //                   onTap: () {
+    //                     if (resend) {
+    //                       otp_resend();
+    //                     }
+    //                   },
+    //                   child: Text(
+    //                     AppText.resendmobileotp,
+    //                     style: Apptextstyle.s14wncblue,
+    //                   ),
+    //                 )
+    //                     : const SizedBox(),
+    //                 Countdown(
+    //                   controller: _controller,
+    //                   seconds: 60,
+    //                   build: (BuildContext context, double time) => Text(
+    //                     formatTime(time),
+    //                     style: Apptextstyle.s14wncB,
+    //                   ),
+    //                   interval: const Duration(seconds: 1),
+    //                   onFinished: () {
+    //                     setState(() {
+    //                       resend = true;
+    //                     });
+    //                     otp_timeout();
+    //                     print('Timer is done!');
+    //                   },
+    //                 ),
+    //               ],
+    //             ),
+    //             const SizedBox(height: 60),
+    //             isLoading == false
+    //                 ? MyButton(
+    //               press: () async {
+    //                 otpverify();
+    //               },
+    //               text: AppText.SUBMIT,
+    //             )
+    //                 : Center(
+    //               child: Image.asset(
+    //                 Appimages.applogo,
+    //                 height: 50,
+    //                 fit: BoxFit.contain,
+    //               ),
+    //             ),
+    //           ],
+    //         ),
+    //
+    //     ),
+    //   ),
+    // );
+      return Scaffold(
+        backgroundColor: AppColors.White,
+        body: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height,
+            ),
+            child: IntrinsicHeight(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center, // Vertically center
+                crossAxisAlignment: CrossAxisAlignment.center, // Horizontally center
+                children: [
+                  const SizedBox(height: 30),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: InkWell(
+                        onTap: () {
+                          Get.back();
+                        },
+                        child: const Icon(Icons.arrow_back, size: 18),
                       ),
-                    ) :
-                    SizedBox(),
-                    Countdown(
-                      controller: _controller,
-                      seconds: 60,
-                      build: (BuildContext context, double time) => Text(
-                        formatTime(time),
-                        style: Apptextstyle.s14wncB,
-                      ),
-                      interval: Duration(seconds: 1),
-                      onFinished: () {
-                        setState(() {
-                          resend = true;
-                        });
-                        otp_timeout();
-                        print('Timer is done!');
-                      },
                     ),
-                  ],
-                ),
-                SizedBox(height: 60),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 50),
-                  child: isLoading == false ? MyButton(
+                  ),
+                  const SizedBox(height: 30),
+                  Text(
+                    AppText.verificationcode,
+                    style: Apptextstyle.s18wbcB,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    AppText.mobilesentotp,
+                    style: Apptextstyle.s14wncLb,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  CustomPinCodeField(
+                    appContext: context,
+                    onChanged: (value) {
+                      print(value);
+                    },
+                    onCompleted: (value) {
+                      setState(() {
+                        enteredOtp = value;
+                      });
+                      print(value);
+                    },
+                  ),
+                  const SizedBox(height: 30),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        resend
+                            ? GestureDetector(
+                          onTap: () {
+                            if (resend) {
+                              otp_resend();
+                            }
+                          },
+                          child: Text(
+                            AppText.resendmobileotp,
+                            style: Apptextstyle.s14wncblue,
+                          ),
+                        )
+                            : const SizedBox(),
+                        Countdown(
+                          controller: _controller,
+                          seconds: 60,
+                          build: (BuildContext context, double time) => Text(
+                            formatTime(time),
+                            style: Apptextstyle.s14wncB,
+                          ),
+                          interval: const Duration(seconds: 1),
+                          onFinished: () {
+                            setState(() {
+                              resend = true;
+                            });
+                            otp_timeout();
+                            print('Timer is done!');
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 60),
+                  isLoading == false
+                      ? MyButton(
                     press: () async {
                       otpverify();
                     },
                     text: AppText.SUBMIT,
-                  ) : Center(child: Image.asset(
-                    Appimages.applogo,
-                    height: 50,
-                    fit: BoxFit.contain,
-                  ),),
-                ),
-              ],
+                  )
+                      : Center(
+                    child: Image.asset(
+                      Appimages.applogo,
+                      height: 50,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
+
   }
-}
+
 
 

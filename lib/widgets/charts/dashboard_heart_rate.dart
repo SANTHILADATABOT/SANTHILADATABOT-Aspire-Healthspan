@@ -70,7 +70,7 @@ class _HeartRateChartPageState extends State<HeartRateChartPage>
       backgroundColor: Colors.white,
       body: _isLoading
           ? _buildShimmerEffect() // Show shimmer effect while loading
-          :  buildWeeklyBloodPressureChart(
+          :  buildWeeklyHeartRateChart(
         chartData: chartData,
         targetHR: target_HR ?? 75,
       ),
@@ -104,13 +104,17 @@ class _HeartRateChartPageState extends State<HeartRateChartPage>
       ),
     );
   }
-  Widget buildWeeklyBloodPressureChart({
+  Widget buildWeeklyHeartRateChart({
     required List<HeartRateData> chartData,
     required int targetHR,
   }) {
+    final screenSize = MediaQuery.of(context).size;
+    final double portraitHeight = screenSize.height > screenSize.width
+        ? screenSize.height
+        : screenSize.width;
     return Container(
       width: double.infinity,
-      height: MediaQuery.of(context).size.height * 0.40,
+      height: portraitHeight * 0.28,
       // padding: EdgeInsets.all(8),
       child: SfCartesianChart(
         plotAreaBorderWidth: 0.0,

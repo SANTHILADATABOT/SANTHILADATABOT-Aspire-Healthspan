@@ -111,8 +111,6 @@ class _BloodOxygenChartPageState extends State<BloodOxygenChartPage>
     );
   }
 
-
-
   Widget WeeklybuildBloodOxygenChart({
     required BuildContext context,
     required List<BloodOxygenData> chartData,
@@ -123,69 +121,63 @@ class _BloodOxygenChartPageState extends State<BloodOxygenChartPage>
      children: [
        SizedBox(height: 20,),
        Expanded(
-         child: Container(
-           height: MediaQuery.of(context).size.height * 0.45,
-           child: SfCartesianChart(
-             //margin: const EdgeInsets.only(left: 10, right: 20),
-             plotAreaBorderWidth: 0.0,
-             backgroundColor: Color(0xFFffffff),
-             tooltipBehavior: TooltipBehavior(enable: true),
-             primaryXAxis: CategoryAxis(
-               title: AxisTitle(text: ''),
-               majorGridLines: const MajorGridLines(width: 0),
-               majorTickLines: MajorTickLines(width: 0),
-               labelStyle: const TextStyle(
+         child: SfCartesianChart(
+           //margin: const EdgeInsets.only(left: 10, right: 20),
+           plotAreaBorderWidth: 0.0,
+           backgroundColor: Color(0xFFffffff),
+           tooltipBehavior: TooltipBehavior(enable: true),
+           primaryXAxis: CategoryAxis(
+             title: AxisTitle(text: ''),
+             majorGridLines: const MajorGridLines(width: 0),
+             majorTickLines: MajorTickLines(width: 0),
+             labelStyle: const TextStyle(
 
-                   fontSize: 9,
-                   fontWeight: FontWeight.bold,
-                   color: Colors.black// Ensures no spacing
-               ),
+                 fontSize: 9,
+                 fontWeight: FontWeight.bold,
+                 color: Colors.black// Ensures no spacing
              ),
-             primaryYAxis: NumericAxis(
-               labelStyle: const TextStyle(
-                   fontSize: 9,
-                   fontWeight: FontWeight.bold,
-                   color: Colors.black// Ensures no spacing
-               ),
-               majorGridLines: const MajorGridLines(width: 0),
-               majorTickLines: MajorTickLines(width: 0),
-               minimum: 85,
-               maximum: 104,
-               interval: 5,
-               plotBands: <PlotBand>[
-                 PlotBand(isVisible: true, start: 95, end: 100, color: const Color(0xFFBFFABF)),
-                 PlotBand(isVisible: true, start: 91, end: 95, color: const Color(0xFFFFF4CC)),
-                 PlotBand(isVisible: true, start: 0, end: 91, color: const Color(0xFFF6CCCC)),
-                 // PlotBand(isVisible: true, start: targetspo2noraml.toDouble(), end: targetspo2noraml.toDouble(), color: const Color(0xFFE6FFE6)),
-                 // PlotBand(isVisible: true, start: targetspo2high.toDouble(), end: targetspo2high.toDouble(), color: const Color(0xFFFFF4CC)),
-                 // PlotBand(isVisible: true, start: 0, end: 91, color: const Color(0xFFFFE6E6)),
-               ],
+           ),
+           primaryYAxis: NumericAxis(
+             labelStyle: const TextStyle(
+                 fontSize: 9,
+                 fontWeight: FontWeight.bold,
+                 color: Colors.black// Ensures no spacing
              ),
-             series: <CartesianSeries>[
-               SplineSeries<BloodOxygenData, String>(
-                 name: 'SpO₂',
-                 dataSource: chartData,
-                 xValueMapper: (BloodOxygenData data, _) => data.day,
-                 yValueMapper: (data, _) => data.spo2,
-                 color: const Color(0xffFF0000),
-                 markerSettings: const MarkerSettings(
-                     isVisible: true,
-                     height: 12,width: 12
-                 ),
-                 // For better tooltips:
-                 dataLabelSettings: DataLabelSettings(
-                   isVisible: false,
-                   labelAlignment: ChartDataLabelAlignment.auto,
-                 ),
-               ),
+             majorGridLines: const MajorGridLines(width: 0),
+             majorTickLines: MajorTickLines(width: 0),
+             minimum: 85,
+             maximum: 104,
+             interval: 5,
+             plotBands: <PlotBand>[
+               PlotBand(isVisible: true, start: 95, end: 100, color: const Color(0xFFBFFABF)),
+               PlotBand(isVisible: true, start: 91, end: 95, color: const Color(0xFFFFF4CC)),
+               PlotBand(isVisible: true, start: 0, end: 91, color: const Color(0xFFF6CCCC)),
+               // PlotBand(isVisible: true, start: targetspo2noraml.toDouble(), end: targetspo2noraml.toDouble(), color: const Color(0xFFE6FFE6)),
+               // PlotBand(isVisible: true, start: targetspo2high.toDouble(), end: targetspo2high.toDouble(), color: const Color(0xFFFFF4CC)),
+               // PlotBand(isVisible: true, start: 0, end: 91, color: const Color(0xFFFFE6E6)),
              ],
            ),
+           series: <CartesianSeries>[
+             SplineSeries<BloodOxygenData, String>(
+               name: 'SpO₂',
+               dataSource: chartData,
+               xValueMapper: (BloodOxygenData data, _) => data.day,
+               yValueMapper: (data, _) => data.spo2,
+               color: const Color(0xffFF0000),
+               markerSettings: const MarkerSettings(
+                   isVisible: true,
+                   height: 12,width: 12
+               ),
+               // For better tooltips:
+               dataLabelSettings: DataLabelSettings(
+                 isVisible: false,
+                 labelAlignment: ChartDataLabelAlignment.auto,
+               ),
+             ),
+           ],
          ),
        ),
-
      ],
-
-
 
     );
   }

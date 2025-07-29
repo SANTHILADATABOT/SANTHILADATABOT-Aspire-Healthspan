@@ -81,48 +81,48 @@ class SleepBarData {
   });
 }
 
-class MonthlySleepModel {
-
-  final String label;
-  final double startHour;  // start time as double (e.g., 2.5 for 2:30 AM)
-  final double endHour;
-  final int value;
-
-  MonthlySleepModel({
-    required this.label,
-    required this.startHour,
-    required this.endHour,
-    required this.value,
-  });
-}
-
-class YearlySleepModel {
-  final String label;
-  final double startHour;  // start time as double (e.g., 2.5 for 2:30 AM)
-  final double endHour;
-  final int value;
-
-  YearlySleepModel({
-    required this.label,
-    required this.startHour,
-    required this.endHour,
-    required this.value,
-  });
-}
-
-class MultiYearlySleepModel {
-  final String label;  // year
-  final double light;
-  final double rem;
-  final double deep;
-
-  MultiYearlySleepModel({
-    required this.label,
-    required this.light,
-    required this.rem,
-    required this.deep,
-  });
-}
+// class MonthlySleepModel {
+//
+//   final String label;
+//   final double startHour;  // start time as double (e.g., 2.5 for 2:30 AM)
+//   final double endHour;
+//   final int value;
+//
+//   MonthlySleepModel({
+//     required this.label,
+//     required this.startHour,
+//     required this.endHour,
+//     required this.value,
+//   });
+// }
+//
+// class YearlySleepModel {
+//   final String label;
+//   final double startHour;  // start time as double (e.g., 2.5 for 2:30 AM)
+//   final double endHour;
+//   final int value;
+//
+//   YearlySleepModel({
+//     required this.label,
+//     required this.startHour,
+//     required this.endHour,
+//     required this.value,
+//   });
+// }
+//
+// class MultiYearlySleepModel {
+//   final String label;  // year
+//   final double light;
+//   final double rem;
+//   final double deep;
+//
+//   MultiYearlySleepModel({
+//     required this.label,
+//     required this.light,
+//     required this.rem,
+//     required this.deep,
+//   });
+// }
 
 
 
