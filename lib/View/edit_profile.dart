@@ -14,6 +14,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../utils/apptext.dart';
@@ -51,7 +52,7 @@ class _EditProfileState extends State<EditProfile> {
   TextEditingController mailController = TextEditingController();
   int? _groupValue = 0;
   File? shopImage;
-  var user_id = "102";
+
   final EditProfileController _profilecontroller = EditProfileController();
 
   @override
@@ -181,7 +182,7 @@ class _EditProfileState extends State<EditProfile> {
         appBar: AppBar(
           title: Text(
               AppText.editprofile,
-              style: Apptextstyle.s17wbcapp_b
+              style: Apptextstyle.s18wbap
           ),
           backgroundColor: Color(0xFFffffff),
           leading: IconButton(
@@ -608,7 +609,9 @@ class _EditProfileState extends State<EditProfile> {
                               // focusColor: Color(0xFF275176),
                               hintStyle: TextStyle(
                                   color: Colors.grey.shade500, fontSize: 14),
-                              suffixIcon: IconButton(onPressed: () {
+                              suffixIcon: IconButton(onPressed: () async{
+                                final SharedPreferences prefs = await SharedPreferences.getInstance();
+                                var user_id = prefs.getString('user_id') ?? "";
                                 Get.to(() =>
                                     edit_phone_number(
                                         mobnum: mobnumController.text,
@@ -638,7 +641,9 @@ class _EditProfileState extends State<EditProfile> {
                               focusColor: Color(0xFF275176),
                               hintStyle: TextStyle(
                                   color: Colors.grey.shade500, fontSize: 14),
-                              suffixIcon: IconButton(onPressed: () {
+                              suffixIcon: IconButton(onPressed: () async{
+                                final SharedPreferences prefs = await SharedPreferences.getInstance();
+                                var user_id = prefs.getString('user_id') ?? "";
                                 Get.to(() =>
                                     edit_email(email_id: mailController.text,
                                         user_id: user_id));

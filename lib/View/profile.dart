@@ -7,9 +7,12 @@ import 'package:azpire_new/View/edit_profile.dart';
 import 'package:azpire_new/utils/appimages.dart';
 import 'package:azpire_new/utils/apptextstyle.dart';
 import 'package:azpire_new/widgets/CustomBottomNavBar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show Platform;
 
 import '../utils/apptext.dart';
 
@@ -92,14 +95,16 @@ class _ProfileState extends State<Profile> {
         return true;
       },
       child: Scaffold(
-        backgroundColor: Color(0xFFffffff),
+          backgroundColor: Color(0xFFffffff),
         appBar: AppBar(
+          centerTitle: true,
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
+                textAlign: TextAlign.center,
                 AppText.profile,
-                style: Apptextstyle.s17wbcapp_b
+                style:Apptextstyle.s18wbap
               ),
               TextButton(
                 onPressed: () { Get.to(() => EditProfile()); }, child: Text( 'Edit',
@@ -120,7 +125,10 @@ class _ProfileState extends State<Profile> {
           ),
         ),
         body: isLoading ? buildShimmer() : buildProfileDetails(context),
-          bottomNavigationBar: CustomBottomNavBar(controller: _controller)
+          // bottomNavigationBar: CustomBottomNavBar(controller: _controller)
+        bottomNavigationBar: (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+            ? CustomBottomNavBar(controller: _controller)
+            : null,
       ),
     );
   }

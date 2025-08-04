@@ -1,7 +1,7 @@
 class Appimages {
   //Splash Screen
   static const applogo = 'assets/gif/logo.gif';
-  static const profilelogo = "assets/gif/avatar.png";
+  static const profilelogo = "assets/gif/blank_profile.jpg";
   static const bp_logo  = "assets/gif/blood_p1.jpeg";
   static const Hr_logo = "assets/gif/heart_rate_logo.png";
   static const Steps_logo  = "assets/gif/daily_steps_logo.png";

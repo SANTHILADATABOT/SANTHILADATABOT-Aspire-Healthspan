@@ -81,6 +81,7 @@ class Apptextstyle {
     fontWeight: FontWeight.normal,
     fontSize: 16,
     color: Colors.red,
+   // color: Color(0xFF275176)
   );
 
   static const s16wncG = TextStyle(

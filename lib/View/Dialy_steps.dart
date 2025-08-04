@@ -2,9 +2,14 @@
 import 'dart:ui';
 import 'package:azpire_new/Controller/steps_controller.dart';
 import 'package:azpire_new/Model/steps_model.dart';
+import 'package:azpire_new/View/profile.dart';
+import 'package:azpire_new/menu/NavMneu.dart';
 import 'package:azpire_new/utils/app_color.dart';
 import 'package:azpire_new/utils/appimages.dart';
+import 'package:azpire_new/widgets/Appexithelper.dart';
+import 'package:azpire_new/widgets/text_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:flutter_holo_date_picker/date_picker.dart';
 import 'package:flutter_holo_date_picker/i18n/date_picker_i18n.dart';
 import 'package:get/get.dart';
@@ -16,9 +21,15 @@ import 'package:http/http.dart' as http;
 import '../root/root.dart';
 import '../utils/apptext.dart';
 import '../utils/apptextstyle.dart';
+import '../widgets/shimmer_effects.dart';
 
 
 class StepsChartPage extends StatefulWidget {
+  var name;
+
+  var email, profile, noti_count;
+
+  StepsChartPage({Key? key, required this.name, required this.email, required this.profile, required this.noti_count,}) : super(key: key);
   @override
   State<StepsChartPage> createState() => _StepsChartPageState();
 }
@@ -51,6 +62,7 @@ class _StepsChartPageState extends State<StepsChartPage>
   int? target_steps,max_steps, day_target_steps;
   bool target_visible = false;
   final StepsController _stepscontroller = Get.put(StepsController());
+  final _advancedDrawerController = AdvancedDrawerController();
   DateTime? selectedDate;
   int? fromYear;
   int? toYear;
@@ -59,6 +71,10 @@ class _StepsChartPageState extends State<StepsChartPage>
   final numberFormatter = NumberFormat.decimalPattern('en_US');
   String _formattedTappedSteps = '';
   String? username;
+  var name;
+  var email;
+  var pofileimage;
+  var noti_count;
 
 
   void simulateLoading(Future<void> Function() chartFunction) async {
@@ -121,11 +137,13 @@ class _StepsChartPageState extends State<StepsChartPage>
   }
 
   Future<void> Day_Chart() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     setState(() => _isLoading = true);
     try {
       //final service = StepsService();
       final result = await _stepscontroller.Day_Chart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now()),
       );
 
@@ -163,11 +181,13 @@ class _StepsChartPageState extends State<StepsChartPage>
   }
 
   Future<void> Week_Chart() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     setState(() => _isLoading = true);
     try {
       //final service = StepsService();
       final result = await _stepscontroller.Week_Chart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now()),
       );
 
@@ -194,10 +214,12 @@ class _StepsChartPageState extends State<StepsChartPage>
 
   Future<void> Month_Chart() async {
     setState(() => _isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       // final service = StepsService();
       final result = await _stepscontroller.Month_Chart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM').format(selectedDate ?? DateTime.now()),
       );
 
@@ -227,10 +249,12 @@ class _StepsChartPageState extends State<StepsChartPage>
 
   Future<void> Year_Chart() async {
     setState(() => _isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       // final service = StepsService();
       final result = await _stepscontroller.Year_Chart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM').format(selectedDate ?? DateTime.now()),
       );
 
@@ -259,10 +283,12 @@ class _StepsChartPageState extends State<StepsChartPage>
 
   Future<void> MultiYear_Chart() async {
     setState(() => _isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       // final service = StepsService();
       final result = await _stepscontroller.MultiYear_Chart(
-          userId: '102',
+          userId: user_id,
           //fromYear: fromYear!,
           toYear: toYear!
       );
@@ -336,31 +362,50 @@ class _StepsChartPageState extends State<StepsChartPage>
     double maxinterval = ((maxSteps + 50 ) ~/ 50) * 50;
 
     Size size = MediaQuery.of(context).size;
-
-
-
-    return Scaffold(
+    return WillPopScope(
+        onWillPop: () async {
+          ExitAppDialog();
+          return true;
+        },
+        child:AdvancedDrawer(
+            controller: _advancedDrawerController,
+            backdropColor: Colors.grey.shade100,
+            drawer: NavMenu(name: widget.name, email : widget.email, profile:widget.profile, noti_count: widget.noti_count, ),
+    child: Scaffold(
         backgroundColor: Color(0xFFffffff),
         appBar: AppBar(
           centerTitle: true,
-          title: Row(
+          title: widget.profile == null ? ShimmerLoadingItem() : Row(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              // Center the text using the Center widget
-              Expanded(
-                child: Center(
-                  child: Text(
-                    username != null
-                        ? "${makePossessive(username)} Avg Daily Steps" : "",
-                    textAlign: TextAlign.center,
-                    style: Apptextstyle.s18wbap,
-                  ),
+              GestureDetector(
+                onTap: (){
+                  Get.to(()=>Profile());
+                },
+                child: CircleAvatar(
+                  backgroundImage: NetworkImage(widget.profile),
+                  radius: 20,
                 ),
               ),
-              // Spacer to push the zoom button to the right
+              SizedBox(width: 20),
+              TextTitle1(
+                title: "Hi, ${username.toString().capitalizeFirst}",
+                color: Colors.black,
+              ),
+              Spacer(),
+              IconButton(
+                onPressed: () {
+                  _advancedDrawerController.showDrawer();
+                },
+                icon: Icon(
+                  Icons.menu,
+                  color: Colors.black,
+                ),
+              ),
             ],
           ),
           leading: IconButton(
-            onPressed: (){
+            onPressed: () {
               Get.back();
             },
             icon: Icon(Icons.arrow_back_ios),
@@ -371,6 +416,11 @@ class _StepsChartPageState extends State<StepsChartPage>
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Text(
+                    'Avg Daily Steps',
+                    textAlign: TextAlign.center,
+                    style: Apptextstyle.s18wbap,
+                  ),
                   SizedBox(height: 10,),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -379,66 +429,6 @@ class _StepsChartPageState extends State<StepsChartPage>
                       // height: 50, // give it a fixed height
                       child: Column(
                         children: [
-                          //   Row(
-                          //   mainAxisAlignment: MainAxisAlignment.end,
-                          //   children: [
-                          //     InkWell(
-                          //       onTap: () async {
-                          //         var datePicked = await DatePicker.showSimpleDatePicker(
-                          //           context,
-                          //           initialDate: selectedDate ?? DateTime.now(),
-                          //           firstDate: DateTime(1960),
-                          //           lastDate: DateTime.now(),
-                          //           dateFormat: "MMMM dd, yyyy",
-                          //           locale: DateTimePickerLocale.en_us,
-                          //           looping: false,
-                          //         );
-                          //
-                          //         if (datePicked != null) {
-                          //           DateTime today = DateTime.now();
-                          //           // Remove time part for accurate date comparison
-                          //           DateTime selected = DateTime(
-                          //               datePicked.year, datePicked.month,
-                          //               datePicked.day);
-                          //           DateTime current = DateTime(
-                          //               today.year, today.month, today.day);
-                          //
-                          //           // if (selected.isAtSameMomentAs(current)) {
-                          //           setState(() {
-                          //             selectedDate = datePicked;
-                          //             mainDate = DateFormat('dd-MMMM-yyyy').format(datePicked);
-                          //             selectedPeriod = 'Day';
-                          //             currentTitle = 'Average Daily Data';
-                          //             Reports = 'Day';
-                          //           });
-                          //           simulateLoading(Day_Chart);
-                          //
-                          //         }
-                          //
-                          //       },
-                          //       child: Container(
-                          //         decoration: BoxDecoration(
-                          //           color: Color(0xff275176),
-                          //           borderRadius: BorderRadius.all(Radius.circular(8)),
-                          //         ),
-                          //         child: Padding(
-                          //           padding:
-                          //           const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          //           child: Text(
-                          //             selectedDate != null
-                          //                 ? DateFormat('MMMM dd, yyyy').format(selectedDate!)
-                          //                 : "Pick Date",
-                          //             style: TextStyle(
-                          //               color: Colors.white,
-                          //               fontWeight: FontWeight.bold,
-                          //             ),
-                          //           ),
-                          //         ),
-                          //       ),
-                          //     ),
-                          //   ],
-                          // ),
-                          // Date Picker button aligned right
                           SizedBox(
                             height: 10,
                           ),
@@ -1184,7 +1174,7 @@ class _StepsChartPageState extends State<StepsChartPage>
                                 Text(
                                   currentTitle,
                                   style: TextStyle(
-                                      color: Colors.red, fontWeight: FontWeight.bold),
+                                      color: Color(0xFF275176), fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
@@ -1325,6 +1315,9 @@ class _StepsChartPageState extends State<StepsChartPage>
                 ]
             )
         )
+
+    )
+        )
     );
   }
 
@@ -1355,6 +1348,10 @@ class _StepsChartPageState extends State<StepsChartPage>
       child: SfCartesianChart(
         tooltipBehavior: TooltipBehavior(
           enable: true,
+            textStyle: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold
+            )
           // ✅ Custom formatter for tooltip text
         ),
         //margin: const EdgeInsets.only(left: 10),
@@ -1384,6 +1381,7 @@ class _StepsChartPageState extends State<StepsChartPage>
           majorTickLines: const MajorTickLines(size: 0),
           majorGridLines: const MajorGridLines(width: 0),
           axisLine: const AxisLine(width: 1, color: Colors.grey),
+          labelPlacement: LabelPlacement.onTicks,
         ):
         CategoryAxis (
           title: AxisTitle(text: Xaxistitle),
@@ -1395,6 +1393,8 @@ class _StepsChartPageState extends State<StepsChartPage>
           majorTickLines: const MajorTickLines(size: 0),
           majorGridLines: const MajorGridLines(width: 0),
           axisLine: const AxisLine(width: 1, color: Colors.grey),
+          labelPlacement: LabelPlacement.betweenTicks, // 👈 Change this
+          edgeLabelPlacement: EdgeLabelPlacement.shift, // 👈 Keeps edge labels readable
           labelIntersectAction: AxisLabelIntersectAction.none, // ✅ Prevents skipping
           maximumLabels: 12,
         ),
@@ -1451,6 +1451,8 @@ class _StepsChartPageState extends State<StepsChartPage>
             dataLabelSettings: const DataLabelSettings(isVisible: false),
             color: AppColors.steps_graph,
             onPointTap: onPointTap,
+            width: 0.8,      // Bar width (0 to 1). 0.6 is typically good.
+            spacing: 0.1,
           ):
           ColumnSeries<StepsData, String>(
             name: 'Steps',
@@ -1461,6 +1463,8 @@ class _StepsChartPageState extends State<StepsChartPage>
             dataLabelSettings: const DataLabelSettings(isVisible: false),
             color: AppColors.steps_graph,
             onPointTap: onPointTap,
+            width: 0.8,      // Bar width (0 to 1). 0.6 is typically good.
+            spacing: 0.1,
           )
         ],
       ),

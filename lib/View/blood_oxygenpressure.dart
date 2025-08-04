@@ -2,8 +2,13 @@ import 'dart:convert';
 import 'dart:ui';
 import 'package:azpire_new/Controller/spo2_controller.dart';
 import 'package:azpire_new/Model/spo2_model.dart';
+import 'package:azpire_new/View/profile.dart';
+import 'package:azpire_new/menu/NavMneu.dart';
+import 'package:azpire_new/widgets/Appexithelper.dart';
+import 'package:azpire_new/widgets/text_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:flutter_holo_date_picker/date_picker.dart';
 import 'package:flutter_holo_date_picker/i18n/date_picker_i18n.dart';
 import 'package:get/get.dart';
@@ -14,9 +19,15 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import '../utils/appimages.dart';
 import '../utils/apptext.dart';
 import '../utils/apptextstyle.dart';
+import '../widgets/shimmer_effects.dart';
 
 
 class BloodoxygenPressureChartPage extends StatefulWidget {
+  var name;
+
+  var email, profile, noti_count;
+
+  BloodoxygenPressureChartPage({Key? key, required this.name, required this.email, required this.profile, required this.noti_count,}) : super(key: key);
   @override
   State<BloodoxygenPressureChartPage> createState() => _BloodoxygenPressureChartPageState();
 }
@@ -26,12 +37,12 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
   late AnimationController _controller;
   late Animation<Color?> _colorAnimation;
   late Animation<double> _opacityAnimation;
-
   var datetime;
   String currentTitle = 'Daily Blood Oxygen Average';
   String Reports = 'Day';
   List<BloodOxygenData> chartData = [];
   final spo2Controller _spo2controller = Get.put(spo2Controller());
+  final _advancedDrawerController = AdvancedDrawerController();
   int? recentSpo2;
   int? targetNormal;
   int? targetHigh;
@@ -56,6 +67,10 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
   String yearPickerLabel = "Pick Years";
   String? Upto;
   String? username;
+  var name;
+  var email;
+  var pofileimage;
+  var noti_count;
 
   Future<void> loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
@@ -169,9 +184,11 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
 
   Future<void> Day_Chart() async {
     setState(() => isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _spo2controller.fetchDayChart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now()),
         type: 'daily',
       );
@@ -202,9 +219,11 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
 
   Future<void> Week_Chart() async {
     setState(() => isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _spo2controller.Week_Chart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now()),
       );
 
@@ -233,9 +252,11 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
 
   Future<void> Month_Chart() async {
     setState(() => isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _spo2controller.Month_Chart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM').format(selectedDate ?? DateTime.now()),
       );
 
@@ -264,9 +285,11 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
 
   Future<void> Year_Chart() async {
     setState(() => isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _spo2controller.Year_Chart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM').format(selectedDate ?? DateTime.now()),
       );
 
@@ -297,9 +320,11 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
   Future<void> MultiYear_Chart() async {
 
     setState(() => isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _spo2controller.MultiYear_Chart(
-         '102',
+         user_id,
         //fromYear!,
         toYear!,
       );
@@ -340,28 +365,50 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    return Scaffold(
+    return WillPopScope(
+        onWillPop: () async {
+          ExitAppDialog();
+          return true;
+        },
+        child:AdvancedDrawer(
+            controller: _advancedDrawerController,
+            backdropColor: Colors.grey.shade100,
+            drawer: NavMenu(name: widget.name, email : widget.email, profile:widget.profile, noti_count: widget.noti_count, ),
+    child:  Scaffold(
         backgroundColor: Color(0xFFffffff),
         appBar: AppBar(
           centerTitle: true,
-          title: Row(
+          title: widget.profile == null ? ShimmerLoadingItem() : Row(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              // Center the text using the Center widget
-              Expanded(
-                child: Center(
-                  child: Text(
-                    username != null
-                        ? "${makePossessive(username)} Blood Oxygen" : "",
-                    textAlign: TextAlign.center,
-                    style: Apptextstyle.s18wbap,
-                  ),
+              GestureDetector(
+                onTap: (){
+                  Get.to(()=>Profile());
+                },
+                child: CircleAvatar(
+                  backgroundImage: NetworkImage(widget.profile),
+                  radius: 20,
                 ),
               ),
-              // Spacer to push the zoom button to the right
+              SizedBox(width: 20),
+              TextTitle1(
+                title: "Hi, ${username.toString().capitalizeFirst}",
+                color: Colors.black,
+              ),
+              Spacer(),
+              IconButton(
+                onPressed: () {
+                  _advancedDrawerController.showDrawer();
+                },
+                icon: Icon(
+                  Icons.menu,
+                  color: Colors.black,
+                ),
+              ),
             ],
           ),
           leading: IconButton(
-            onPressed: (){
+            onPressed: () {
               Get.back();
             },
             icon: Icon(Icons.arrow_back_ios),
@@ -372,6 +419,11 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
           child: SingleChildScrollView(
               child:
               Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Text(
+                  'Blood Oxygen',
+                  textAlign: TextAlign.center,
+                  style: Apptextstyle.s18wbap,
+                ),
                 SizedBox(
                   height: 10,
                 ),
@@ -635,7 +687,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                     chartData: chartData,
                     targetspo2noraml: targetNormal?.toInt() ?? 91,
                     targetspo2high: targetNormal?.toInt() ?? 95,
-                      ismonth: false,
+                      ismonth: true,
                       Xaxistitle: 'Time of Day',
                       title: 'Blood Oxygen for this Day',
                       xValueMapper: (d, _) => d.day // Your list of BloodOxygenData
@@ -647,7 +699,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                         targetspo2noraml: targetNormal?.toInt() ?? 91,
                         targetspo2high: targetNormal?.toInt() ?? 95 ,// Your
                         title: 'Avg Daily Blood Oxygen ',
-                      ismonth: false,
+                        ismonth: true,
                       Xaxistitle: 'Days',
                         xValueMapper: (d, _) => d.day
                     )
@@ -658,7 +710,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                           targetspo2noraml: targetNormal?.toInt() ?? 91,
                           targetspo2high: targetNormal?.toInt() ?? 95, // Your
                           title: 'Avg Weekly Blood Oxygen',
-                        ismonth: false,
+                          ismonth: true,
                         Xaxistitle: 'Weeks',
                           xValueMapper: (d, _) => d.months
                       )
@@ -1092,7 +1144,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                               Text(
                                 currentTitle,
                                 style: TextStyle(
-                                    color: Colors.red, fontWeight: FontWeight.bold),
+                                    color: Color(0xFF275176), fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -1212,6 +1264,8 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
               )
           ),
         )
+    )
+        )
     );
   }
 
@@ -1249,7 +1303,13 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
         //margin: const EdgeInsets.only(left: 10, right: 20),
         plotAreaBorderWidth: 0.0,
         backgroundColor: Colors.white,
-        tooltipBehavior: TooltipBehavior(enable: true),
+        tooltipBehavior: TooltipBehavior(
+            enable: true,
+            textStyle: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold
+            )
+        ),
         primaryXAxis: ismonth == true ? CategoryAxis(
           title: AxisTitle(text: Xaxistitle),
           // minimum: 0,
@@ -1258,6 +1318,9 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
           axisLine: const AxisLine(width: 0),
           majorGridLines: const MajorGridLines(width: 0),
           majorTickLines: const MajorTickLines(size: 0),
+          labelPlacement: LabelPlacement.onTicks,
+          edgeLabelPlacement: EdgeLabelPlacement.shift,
+          labelIntersectAction: AxisLabelIntersectAction.none, //
           axisLabelFormatter: (AxisLabelRenderDetails args) {
             return ChartAxisLabel(
               args.text, // args.text will be the time string like "08:05 AM"
@@ -1284,7 +1347,9 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
           ),
           majorGridLines: const MajorGridLines(width: 0),
           majorTickLines: const MajorTickLines(size: 0),
-          labelIntersectAction: AxisLabelIntersectAction.none, // ✅ Prevents skipping
+          labelPlacement: LabelPlacement.onTicks,
+          edgeLabelPlacement: EdgeLabelPlacement.shift,
+          labelIntersectAction: AxisLabelIntersectAction.none, // 👈 Prevents skipping
           maximumLabels: 12,
           // axisLabelFormatter: (AxisLabelRenderDetails args) {
         ),

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Cling Connections/minute_data.dart';
 
@@ -42,7 +43,8 @@ class _MinuteDataState extends State<MinuteData> {
 
   Future<void> sendBulkMinuteDataToApi(List<Map<String, dynamic>> dataList) async {
     final url = Uri.parse('https://app.aspirehealthspan.ai/aspire_api/minute_health_variable/add');
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     print("📤 Sending bulk minute data to API...");
 
     try {
@@ -52,7 +54,7 @@ class _MinuteDataState extends State<MinuteData> {
           "Content-Type": "application/json",
         },
         body: jsonEncode({
-          "user_id": "102",
+          "user_id": user_id,
           "data": dataList,
         }),
       );
@@ -202,7 +204,7 @@ class _MinuteDataState extends State<MinuteData> {
 //
 //         },
 //         body: jsonEncode({
-//           "user_id": "102",
+
 //           "data": dataList,
 //         }),
 //       );

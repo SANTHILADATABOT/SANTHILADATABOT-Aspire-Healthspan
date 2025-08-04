@@ -2,8 +2,13 @@
 import 'package:azpire_new/Controller/weight_controller.dart';
 import 'package:azpire_new/Model/weight_model.dart';
 import 'package:azpire_new/View/add_weight.dart';
+import 'package:azpire_new/View/profile.dart';
+import 'package:azpire_new/menu/NavMneu.dart';
 import 'package:azpire_new/utils/appimages.dart';
+import 'package:azpire_new/widgets/Appexithelper.dart';
+import 'package:azpire_new/widgets/text_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:flutter_holo_date_picker/date_picker.dart';
 import 'package:flutter_holo_date_picker/i18n/date_picker_i18n.dart';
 import 'package:get/get.dart';
@@ -13,11 +18,17 @@ import 'package:shimmer/shimmer.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../utils/apptext.dart';
 import '../utils/apptextstyle.dart';
+import '../widgets/shimmer_effects.dart';
 
 
 
 
 class WeightChart extends StatefulWidget {
+  var name;
+
+  var email, profile, noti_count;
+
+  WeightChart({Key? key, required this.name, required this.email, required this.profile, required this.noti_count,}) : super(key: key);
   @override
   State<WeightChart> createState() => _WeightChartState();
 }
@@ -41,6 +52,7 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
 
   //final WeightChartController controller = WeightChartController();
   final WeightController weightcontroller = Get.put(WeightController());
+  final _advancedDrawerController = AdvancedDrawerController();
   List<WeightChartData> weekChart = [];
   List<WeightChartData> monthChart = [];
   List<WeightChartData> yearChart = [];
@@ -52,6 +64,10 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
   String? Upto;
   int? target_weight, target_bmi;
   String? username;
+  var name;
+  var email;
+  var pofileimage;
+  var noti_count;
 
   Future<void> loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
@@ -111,10 +127,11 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
     setState(() {
       isLoading = true;
     });
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await weightcontroller.Week_Chart(
-          '102',
+          user_id,
           DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now())
       );
 
@@ -155,10 +172,11 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
     setState(() {
       isLoading = true;
     });
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await weightcontroller.Month_Chart(
-          '102',
+          user_id,
           DateFormat('yyyy-MM').format(selectedDate ?? DateTime.now())
       );
 
@@ -198,10 +216,11 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
     setState(() {
       isLoading = true;
     });
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await weightcontroller.Year_Chart(
-        '102',
+        user_id,
         DateFormat('yyyy-MM').format(selectedDate ?? DateTime.now()),
       );
 
@@ -244,10 +263,11 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
     setState(() {
       isLoading = true;
     });
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await weightcontroller.MultiYear_Chart(
-        '102',
+        user_id,
         toYear!,  // Only pass toYear
       );
 
@@ -301,24 +321,46 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
     Size size = MediaQuery
         .of(context)
         .size;
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        ExitAppDialog();
+        return true;
+      },
+      child:AdvancedDrawer(
+          controller: _advancedDrawerController,
+          backdropColor: Colors.grey.shade100,
+          drawer: NavMenu(name: widget.name, email : widget.email, profile:widget.profile, noti_count: widget.noti_count, ),
+    child:  Scaffold(
       backgroundColor: Color(0xFFffffff),
       appBar: AppBar(
         centerTitle: true,
-        title: Row(
+        title: widget.profile == null ? ShimmerLoadingItem() : Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // Center the text using the Center widget
-            Expanded(
-              child: Center(
-                child: Text(
-                  username != null
-                      ? "${makePossessive(username)} Weight" : "",
-                  textAlign: TextAlign.center,
-                  style: Apptextstyle.s18wbap,
-                ),
+            GestureDetector(
+              onTap: (){
+                Get.to(()=>Profile());
+              },
+              child: CircleAvatar(
+                backgroundImage: NetworkImage(widget.profile),
+                radius: 20,
               ),
             ),
-            // Spacer to push the zoom button to the right
+            SizedBox(width: 20),
+            TextTitle1(
+              title: "Hi, ${username.toString().capitalizeFirst}",
+              color: Colors.black,
+            ),
+            Spacer(),
+            IconButton(
+              onPressed: () {
+                _advancedDrawerController.showDrawer();
+              },
+              icon: Icon(
+                Icons.menu,
+                color: Colors.black,
+              ),
+            ),
           ],
         ),
         leading: IconButton(
@@ -335,6 +377,11 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Text(
+                'Weight',
+                textAlign: TextAlign.center,
+                style: Apptextstyle.s18wbap,
+              ),
               SizedBox(height: 10,),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -928,91 +975,6 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
                               ],
                             ),
                             SizedBox(height: 10),
-                            // Systolic Row
-                            // Row(
-                            //   crossAxisAlignment: CrossAxisAlignment.center,
-                            //   mainAxisAlignment: MainAxisAlignment.end,
-                            //   children: [
-                            //     Column(
-                            //       children: [
-                            //         Text(
-                            //             AppText.weight_lbs,
-                            //             style: Apptextstyle.s12wncB
-                            //         ),
-                            //         SizedBox(height: 10,),
-                            //         Container(
-                            //           padding: EdgeInsets.symmetric(
-                            //               horizontal: 8),
-                            //           decoration: BoxDecoration(
-                            //             border: Border.all(
-                            //               color: Color(0xffF5B849),
-                            //               // Border color for Systolic
-                            //               width: 1.0,
-                            //             ),
-                            //             borderRadius: BorderRadius.circular(
-                            //                 5), // Optional: Rounded corners
-                            //           ),
-                            //           child:
-                            //
-                            //           Text(
-                            //               '$weightrate lbs',
-                            //               style: Apptextstyle.s13wbcY
-                            //           ),
-                            //
-                            //         ),
-                            //
-                            //       ],
-                            //     ),
-                            //     SizedBox(width: 30),
-                            //     Column(
-                            //       children: [
-                            //         Text(
-                            //           AppText.bmi_1,
-                            //           style: Apptextstyle.s12wncB,
-                            //         ),
-                            //         SizedBox(height: 10,),
-                            //         Container(
-                            //           padding: EdgeInsets.symmetric(
-                            //               horizontal: 8),
-                            //           decoration: BoxDecoration(
-                            //             border: Border.all(
-                            //               color: Color(0xff1AB9EA),
-                            //               // Border color for Systolic
-                            //               width: 1.0,
-                            //             ),
-                            //             borderRadius: BorderRadius.circular(
-                            //                 5), // Optional: Rounded corners
-                            //           ),
-                            //           child: Text(
-                            //               bmi1 != null ? '$bmi1 lbs' : ' ',
-                            //               style: Apptextstyle.s13wbcBl
-                            //           ),
-                            //         ),
-                            //
-                            //       ],
-                            //     ),
-                            //     Padding(
-                            //       padding: const EdgeInsets.only(left: 15),
-                            //       child:
-                            //       Column(
-                            //         mainAxisAlignment: MainAxisAlignment.center,
-                            //         children: [
-                            //           InkWell(
-                            //             onTap: () => _toggletextinfo(),
-                            //             // Toggle text on icon click
-                            //             child: Icon(
-                            //               Icons.info_outline_rounded,
-                            //               color: is_weight
-                            //                   ? Color(0xff1AB9EA)
-                            //                   : Color(0xFF997f7f),
-                            //             ),
-                            //           ),
-                            //         ],
-                            //       ),
-                            //
-                            //     ),
-                            //   ],
-                            // ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -1043,7 +1005,9 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
                                   ),
                                 ),
                                 // right side: BMI + info icon
+                                // right side: BMI + info icon
                                 Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end, // Align icon with bottom of the container
                                   children: [
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1053,36 +1017,56 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
                                           style: Apptextstyle.s12wncB,
                                         ),
                                         SizedBox(height: 10),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(horizontal: 8),
-                                          decoration: BoxDecoration(
-                                            border: Border.all(color: Color(0xff1AB9EA), width: 1.0),
-                                            borderRadius: BorderRadius.circular(5),
-                                          ),
-                                          child: Text(
-                                            bmi1 != null ? '$bmi1 lbs/in\u00b2' : ' ',
-                                            style: Apptextstyle.s13wbcBl,
-                                          ),
+                                        Row(
+                                          children: [
+                                            Container(
+                                              padding: EdgeInsets.symmetric(horizontal: 8),
+                                              decoration: BoxDecoration(
+                                                border: Border.all(color: Color(0xff1AB9EA), width: 1.0),
+                                                borderRadius: BorderRadius.circular(5),
+                                              ),
+                                              child: Text(
+                                                bmi1 != null ? '$bmi1 lbs/in\u00b2' : ' ',
+                                                style: Apptextstyle.s13wbcBl,
+                                              ),
+                                            ),
+                                            SizedBox(width: 4),
+                                            Padding(
+                                              padding: const EdgeInsets.only(right: 10),
+                                              child: InkWell(
+                                                onTap: _toggletextinfo,
+                                                child: Icon(
+                                                  Icons.info_outline_rounded,
+                                                  color: is_weight ? Color(0xff1AB9EA) : Color(0xFF997f7f),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
-                                    SizedBox(width: 5),
-                                    Padding(
-                                      padding: const EdgeInsets.only(right: 10),
-                                      child: InkWell(
-                                        onTap: _toggletextinfo,
-                                        child: Icon(
-                                          Icons.info_outline_rounded,
-                                          color: is_weight
-                                              ? Color(0xff1AB9EA)
-                                              : Color(0xFF997f7f),
-                                        ),
-                                      ),
-                                    ),
                                   ],
                                 ),
-
                               ],
+                            ),
+                            SizedBox(height: 10),
+                            AnimatedSize(
+                              duration: Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                              child: AnimatedOpacity(
+                                opacity: is_weight ? 1.0 : 0.0,
+                                duration: Duration(milliseconds: 300),
+                                child: is_weight
+                                    ? Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Text(
+                                    AppText.weight_info,
+                                    style: Apptextstyle.s12wncb,
+                                    textAlign: TextAlign.left,
+                                  ),
+                                )
+                                    : SizedBox.shrink(),
+                              ),
                             ),
                             SizedBox(height: 5,),
                             Container(
@@ -1102,25 +1086,6 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
                                     ],
                                   ),
                                 ],
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            AnimatedSize(
-                              duration: Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                              child: AnimatedOpacity(
-                                opacity: is_weight ? 1.0 : 0.0,
-                                duration: Duration(milliseconds: 300),
-                                child: is_weight
-                                    ? Padding(
-                                  padding: const EdgeInsets.all(10),
-                                  child: Text(
-                                    AppText.weight_info,
-                                    style: Apptextstyle.s12wncb,
-                                    textAlign: TextAlign.left,
-                                  ),
-                                )
-                                    : SizedBox.shrink(),
                               ),
                             ),
                             // Info text
@@ -1207,7 +1172,7 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
                             Text(
                               currentTitle,
                               style: TextStyle(
-                                  color: Colors.red, fontWeight: FontWeight.bold),
+                                  color: Color(0xFF275176), fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
@@ -1358,6 +1323,8 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
           ),
         ),
       ),
+    )
+      )
     );
   }
 
@@ -1419,7 +1386,13 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
       width: double.infinity,
       height: chartHeight,
       child: SfCartesianChart(
-        tooltipBehavior: TooltipBehavior(enable: true),
+        tooltipBehavior: TooltipBehavior(
+            enable: true,
+            textStyle: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold
+            )
+        ),
         // title: ChartTitle(
         //   alignment: ChartAlignment.near,
         //   text: title,
@@ -1452,6 +1425,8 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
               fontWeight: FontWeight.bold,
               color: Colors.black
           ),
+          labelPlacement: LabelPlacement.onTicks,
+          edgeLabelPlacement: EdgeLabelPlacement.shift,
         ),
         primaryYAxis: NumericAxis(
           maximum: maxY ?? computedMax,
@@ -1468,32 +1443,56 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
           majorGridLines: const MajorGridLines(width: 0),
           minorGridLines: const MinorGridLines(width: 0),
           majorTickLines: MajorTickLines(width: 0),
-            plotBands: [
-              PlotBand(
-                isVisible: true,
-                start: targetweight.toDouble(),
-                end: targetweight.toDouble(),
-                borderWidth: 2,
-                borderColor: Colors.green,
-                text: '',
-                textStyle: TextStyle(color: Colors.green),
-                horizontalTextAlignment: TextAnchor.end,
-
-              ),
-              PlotBand(
-                isVisible: true,
-                start: targetBmi.toDouble(),
-                end: targetBmi.toDouble(),
-                borderWidth: 2,
-                borderColor: Colors.green,
-                text: '',
-                textStyle: TextStyle(color: Colors.green),
-                horizontalTextAlignment: TextAnchor.end,
-
-              ),
-            ]
+            // plotBands: [
+            //   PlotBand(
+            //     isVisible: true,
+            //     start: targetweight.toDouble(),
+            //     end: targetweight.toDouble(),
+            //     borderWidth: 2,
+            //     borderColor: Colors.green,
+            //     text: '',
+            //     textStyle: TextStyle(color: Colors.green),
+            //     horizontalTextAlignment: TextAnchor.end,
+            //
+            //   ),
+            //   PlotBand(
+            //     isVisible: true,
+            //     start: targetBmi.toDouble(),
+            //     end: targetBmi.toDouble(),
+            //     borderWidth: 2,
+            //     borderColor: Colors.green,
+            //     text: '',
+            //     textStyle: TextStyle(color: Colors.green),
+            //     horizontalTextAlignment: TextAnchor.end,
+            //
+            //   ),
+            // ]
         ),
         series: <CartesianSeries>[
+          LineSeries<WeightChartData, String>(
+            name: '',
+            dataSource: chartData,
+            xValueMapper: xMapper,
+            yValueMapper: (data, _) => targetweight.toDouble(),
+            color: Colors.green,
+            width: 2,
+            enableTooltip: false,
+            markerSettings: MarkerSettings(
+                isVisible: false
+            ),
+          ),
+          LineSeries<WeightChartData, String>(
+            name: '',
+            dataSource: chartData,
+            xValueMapper: xMapper,
+            yValueMapper: (data, _) => targetBmi.toDouble(),
+            color: Colors.green,
+            width: 2,
+            enableTooltip: false,
+            markerSettings: MarkerSettings(
+                isVisible: false
+            ),
+          ),
           SplineSeries<WeightChartData, String>(
             name: seriesName,
             dataSource: dataSource,

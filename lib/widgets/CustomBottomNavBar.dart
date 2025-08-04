@@ -35,7 +35,7 @@ class CustomBottomNavBar extends StatelessWidget {
                 removeMargins: false,
                 showShadow: true,
                 durationInMilliSeconds: 300,
-                itemLabelStyle: const TextStyle(fontSize: 9),
+                itemLabelStyle: const TextStyle(fontSize: 13),
                 elevation: 0.5,
                 bottomBarItems: const [
                   BottomBarItem(
@@ -44,7 +44,7 @@ class CustomBottomNavBar extends StatelessWidget {
                     //itemLabel: 'Home',
                     itemLabelWidget: Text(
                       'Home',
-                      style: TextStyle(fontSize: 9), // Increase font size
+                      style: TextStyle(fontSize: 13), // Increase font size
                     ),
                   ),
                   BottomBarItem(
@@ -52,8 +52,8 @@ class CustomBottomNavBar extends StatelessWidget {
                     activeItem: Icon(Icons.notifications, color: Colors.white),
                     //itemLabel: 'Notifications',
                     itemLabelWidget: Text(
-                      'Notifications',
-                      style: TextStyle(fontSize: 9), // Increase font size
+                      'Nudges',
+                      style: TextStyle(fontSize: 13), // Increase font size
                     ),
                   ),
                   BottomBarItem(
@@ -62,7 +62,7 @@ class CustomBottomNavBar extends StatelessWidget {
                     //itemLabel: 'Profile',
                     itemLabelWidget: Text(
                       'Profile',
-                      style: TextStyle(fontSize: 9), // Increase font size
+                      style: TextStyle(fontSize: 13), // Increase font size
                     ),
                   ),
                 ],

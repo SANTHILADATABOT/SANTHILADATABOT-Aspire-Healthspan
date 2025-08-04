@@ -3,6 +3,7 @@ import 'package:duration_picker/duration_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:oktoast/oktoast.dart';
 import '../utils/appimages.dart';
@@ -118,7 +119,8 @@ class _TargetSettingState extends State<TargetSetting> {
 
 
   Future<void> _targetsave() async {
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     setState(() => _isSaving = true);
 
     final parsedSleep = sleepDuration; // You already track this in state
@@ -131,7 +133,7 @@ class _TargetSettingState extends State<TargetSetting> {
       diastolic: diastolicController.text,
       heartRate: heartRateController.text,
       steps: stepTargetController.text,
-      userId: '102',
+      userId: user_id,
       strideLength: strideController.text,
       targetSleep: targetSleepString,
       targetweight: weightController.text,
@@ -142,7 +144,9 @@ class _TargetSettingState extends State<TargetSetting> {
   }
 
   Future<void> _viewtarget() async {
-    final response = await TargetController.viewTargetData(userId: '102');
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
+    final response = await TargetController.viewTargetData(userId: user_id);
 
     if (response != null) {
       final sleepText = response['sleep_target']?.toString() ?? '';
@@ -209,7 +213,7 @@ class _TargetSettingState extends State<TargetSetting> {
       backgroundColor: Colors.white,
       appBar: AppBar(
       title:  Text(
-          "Target Settings",
+          "Set Target",
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         centerTitle: true,

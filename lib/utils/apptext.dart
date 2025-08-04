@@ -137,9 +137,10 @@ class AppText {
   static const weight_heading = "Weight";
   static const add_weight_headings = "Add Weight";
   static const admin_headings = "Admin";
-  static const SDK_headings = "Cling SDK Device Scanner";
+  static const SDK_headings = "Near by Wearable Devices";
   static const sync_headings = "Syncing Data";
   static const sleep_heading = "Sleep Statistics";
+  static const notification_heading = "Nudges";
 
   //detailscreen textinfo
   static const bp_blue_info1 = 'The shaded area around the blue line represents the systolic standard deviation of the blood pressure readings. This indicates the variability or spread of the data points around the average value.';

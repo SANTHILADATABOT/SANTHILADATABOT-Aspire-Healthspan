@@ -97,25 +97,27 @@ class _SignupScreenState extends State<SignupScreen> {
     //   setLoading: (value) => setState(() => isLoading = value),
     //   setPhoneValid: (value) => setState(() => _isPhoneValid = value),
     // );
-
-   await registerController.registerUser(
-      context: context,
-      setState: setState,
-      formKey: _formkey,
-      usernameController: _usernameController,
-      emailController: _emailController,
-      completePhoneNumber: completePhoneNumber,
-      setLoading: (bool loading) {
-        setState(() {
-          isLoading = loading;
-        });
-      },
-      setPhoneValid: (bool valid) {
-        setState(() {
-          _isPhoneValid = valid;
-        });
-      },
-    );
+    print("completePhoneNumber${completePhoneNumber}");
+    print("usernameController${_usernameController.text}");
+    print("emailController${_emailController.text}");
+   // await registerController.registerUser(
+   //    context: context,
+   //    setState: setState,
+   //    formKey: _formkey,
+   //    usernameController: _usernameController,
+   //    emailController: _emailController,
+   //    completePhoneNumber: completePhoneNumber,
+   //    setLoading: (bool loading) {
+   //      setState(() {
+   //        isLoading = loading;
+   //      });
+   //    },
+   //    setPhoneValid: (bool valid) {
+   //      setState(() {
+   //        _isPhoneValid = valid;
+   //      });
+   //    },
+   //  );
 
   }
 

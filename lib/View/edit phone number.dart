@@ -150,10 +150,11 @@ class _edit_phone_numberState extends State<edit_phone_number> {
       isLoading_1 = true;
     });
     final String url = '$root/updt_mobmail_otp_verify';
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     final Map<String, String> userData = {
       'mobile_no': completePhoneNumber.toString(),
-      'user_id': "102",
+      'user_id': user_id,
       'mobile_email_otp': enteredOtp
     };
 

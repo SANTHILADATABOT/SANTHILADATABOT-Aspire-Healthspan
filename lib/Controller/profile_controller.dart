@@ -11,9 +11,9 @@ class ProfileController {
   Future<void> Profile_Details(Function setStateCallback) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String Url = "$root/get_user_profile";
-
+    var user_id = prefs.getString('user_id') ?? "";
     final Map<String, dynamic> userData = {
-      'user_id': '102'
+      'user_id': user_id
     };
 
     try {

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/app_color.dart';
 import '../utils/apptext.dart';
 import '../utils/apptextstyle.dart';
@@ -144,9 +145,10 @@ class _AddWeightState extends State<AddWeight> {
     setState(() {
       isLoading = true;
     });
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
-      final data = await addweightcontroller.Weight_Chart(userId: '102');
+      final data = await addweightcontroller.Weight_Chart(userId: user_id);
       setState(() {
         chartData = data;
         isLoading = false;

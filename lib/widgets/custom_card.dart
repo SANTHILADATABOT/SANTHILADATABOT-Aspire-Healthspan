@@ -15,6 +15,7 @@ class CustomCard1 extends StatelessWidget {
   final Color color1;
   final Color color2;
 
+
   CustomCard1({
     required this.title,
     required this.datetime,
@@ -82,7 +83,7 @@ class CustomCard1 extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Container(
-                      width: size.width * 0.65,
+                      width: size.width * 0.80,
                       height:portraitHeight *0.30,
                       child: chart,
                     ),
@@ -240,7 +241,7 @@ class CustomCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Container(
-                      width: size.width * 0.65,
+                      width: size.width * 0.80,
                       height: portraitHeight *0.28,
                       child: chart,
                     ),
@@ -369,7 +370,7 @@ class CustomCardspo2 extends StatelessWidget {
                       children: [
                         // Chart aligned to right
                         Container(
-                          width: size.width * 0.60,
+                          width: size.width * 0.80,
                         height: isLandscape
                         ? size.width * 0.30 // scale with width in landscape
                             : size.height * 0.30,
@@ -589,7 +590,7 @@ class CustomCardsleep extends StatelessWidget {
                     Column(
                       children: [
                         Container(
-                          width: size.width * 0.60,
+                          width: size.width * 0.80,
                           height: isLandscape
                               ? size.width * 0.30 // scale with width in landscape
                               : size.height * 0.30,

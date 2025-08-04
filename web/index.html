@@ -1,54 +1,149 @@
 <!DOCTYPE html>
 <html>
 <head>
-
-  <link rel="preload" href="main.dart.js" as="script">
-
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="$FLUTTER_BASE_HREF">
-
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta charset="UTF-8" />
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible" />
+  <meta name="description" content="Aspire Healthspan Web App" />
 
   <!-- iOS meta tags & icons -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Aspire Healthspan">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="apple-mobile-web-app-title" content="Aspire Healthspan" />
+  <link rel="apple-touch-icon" href="icons/Icon-192.png" />
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="favicon.png" />
+
+  <!-- Base path for Flutter web app (replace $FLUTTER_BASE_HREF if not using --base-href) -->
+  <base href="/web/" />
 
   <title>Aspire Healthspan</title>
-  <link rel="manifest" href="manifest.json">
 
-  <script>
-    if ('serviceWorker' in navigator) {
-   navigator.serviceWorker.register('firebase-messaging-sw.js')
-        .then(function(registration) {
-          console.log('Service Worker registered:', registration);
-        }).catch(function(err) {
-          console.error('Service Worker registration failed:', err);
-        });
-    }
-  </script>
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json" />
 
-
+  <!-- Flutter Bootstrap -->
+  <script src="flutter_bootstrap.js" defer></script>
 </head>
+
 <body>
-   <script src="flutter_bootstrap.js" defer></script>
+<script>
+  // Register Firebase Messaging Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+      .register('firebase-messaging-sw.js')
+      .then((registration) => {
+        console.log('✅ Service Worker registered:', registration);
+      })
+      .catch((err) => {
+        console.error('❌ Service Worker registration failed:', err);
+      });
+  }
+</script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+
+<!--&lt;!&ndash;  <link rel="preload" href="main.dart.js" as="script">&ndash;&gt;-->
+
+<!--  &lt;!&ndash;-->
+<!--    If you are serving your web app in a path other than the root, change the-->
+<!--    href value below to reflect the base path you are serving from.-->
+
+<!--    The path provided below has to start and end with a slash "/" in order for-->
+<!--    it to work correctly.-->
+
+<!--    For more details:-->
+<!--    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base-->
+
+<!--    This is a placeholder for base href that will be replaced by the value of-->
+<!--    the `&#45;&#45;base-href` argument provided to `flutter build`.-->
+<!--  &ndash;&gt;-->
+<!--  <base href="$FLUTTER_BASE_HREF">-->
+
+<!--  <meta charset="UTF-8">-->
+<!--  <meta content="IE=Edge" http-equiv="X-UA-Compatible">-->
+<!--  <meta name="description" content="A new Flutter project.">-->
+
+<!--  &lt;!&ndash; iOS meta tags & icons &ndash;&gt;-->
+<!--  <meta name="apple-mobile-web-app-capable" content="yes">-->
+<!--  <meta name="apple-mobile-web-app-status-bar-style" content="black">-->
+<!--  <meta name="apple-mobile-web-app-title" content="Aspire Healthspan">-->
+<!--  <link rel="apple-touch-icon" href="icons/Icon-192.png">-->
+
+<!--  &lt;!&ndash; Favicon &ndash;&gt;-->
+<!--  <link rel="icon" type="image/png" href="favicon.png"/>-->
+
+<!--  <title>Aspire Healthspan</title>-->
+<!--  <link rel="manifest" href="manifest.json">-->
+
+<!--&lt;!&ndash;  <script>&ndash;&gt;-->
+<!--&lt;!&ndash;    if ('serviceWorker' in navigator) {&ndash;&gt;-->
+<!--&lt;!&ndash;   navigator.serviceWorker.register('firebase-messaging-sw.js')&ndash;&gt;-->
+<!--&lt;!&ndash;        .then(function(registration) {&ndash;&gt;-->
+<!--&lt;!&ndash;          console.log('Service Worker registered:', registration);&ndash;&gt;-->
+<!--&lt;!&ndash;        }).catch(function(err) {&ndash;&gt;-->
+<!--&lt;!&ndash;          console.error('Service Worker registration failed:', err);&ndash;&gt;-->
+<!--&lt;!&ndash;        });&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;  </script>&ndash;&gt;-->
+
+
+<!--</head>-->
+
+<!--<body>-->
+
+<!--<script src="flutter_bootstrap.js" defer></script>-->
+
+<!--<script>-->
+<!--  if ('serviceWorker' in navigator) {-->
+<!--    navigator.serviceWorker.register('firebase-messaging-sw.js')-->
+<!--      .then(function(registration) {-->
+<!--        console.log('Service Worker registered:', registration);-->
+<!--      }).catch(function(err) {-->
+<!--        console.error('Service Worker registration failed:', err);-->
+<!--      });-->
+<!--  }-->
+<!--</script>-->
+
+<!--</body>-->
+
+<!--&lt;!&ndash;<body>&ndash;&gt;-->
+<!--&lt;!&ndash;   <script src="flutter_bootstrap.js" defer></script>&ndash;&gt;-->
+<!--&lt;!&ndash;</body>&ndash;&gt;-->
+<!--</html>-->
+
+

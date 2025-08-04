@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timer_count_down/timer_controller.dart';
 import '../root/root.dart';
 import 'package:oktoast/oktoast.dart';
@@ -28,12 +29,13 @@ class EditPhoneController {
     setState(() {
       isLoading_1 = true;
     });
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     final String url = '$root/update_mobile_email';
 
     final Map<String, String> userData = {
       'mobile_no': completePhoneNumber.toString(),
-      'user_id': "102"
+      'user_id': user_id
     };
 
     try {
@@ -80,10 +82,11 @@ class EditPhoneController {
       required String completePhoneNumber,
     }) async {
       final String url = '$root/update_otp_timeout';
-
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var user_id = prefs.getString('user_id') ?? "";
       final Map<String, String> userData = {
         'mobile_no': completePhoneNumber.toString(),
-        'user_id': "102"
+        'user_id': user_id
       };
 
       try {
@@ -113,12 +116,13 @@ class EditPhoneController {
     }) async {
       print('Resendno' + completePhoneNumber);
       print('Resendno2' + mobnum);
-
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var user_id = prefs.getString('user_id') ?? "";
       final String url = '$root/update_resend_otp';
 
       final Map<String, String> userData = {
         'mobile_no': completePhoneNumber.toString(),
-        'user_id': "102"
+        'user_id': user_id
       };
 
       try {
@@ -163,10 +167,11 @@ class EditPhoneController {
       });
 
       final String url = '$root/updt_mobmail_otp_verify';
-
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var user_id = prefs.getString('user_id') ?? "";
       final Map<String, String> userData = {
         'mobile_no': completePhoneNumber,
-        'user_id': "102",
+        'user_id': user_id,
         'mobile_email_otp': enteredOtp
       };
 

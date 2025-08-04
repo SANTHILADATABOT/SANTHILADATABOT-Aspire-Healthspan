@@ -2,7 +2,12 @@
 import 'dart:convert';
 import 'package:azpire_new/Controller/Heartrate_controller.dart';
 import 'package:azpire_new/Model/Heartrate_model.dart';
+import 'package:azpire_new/View/profile.dart';
+import 'package:azpire_new/menu/NavMneu.dart';
+import 'package:azpire_new/widgets/Appexithelper.dart';
+import 'package:azpire_new/widgets/text_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:flutter_holo_date_picker/date_picker.dart';
 import 'package:flutter_holo_date_picker/i18n/date_picker_i18n.dart';
 import 'package:get/get.dart';
@@ -14,8 +19,14 @@ import '../utils/app_color.dart';
 import '../utils/appimages.dart';
 import '../utils/apptext.dart';
 import '../utils/apptextstyle.dart';
+import '../widgets/shimmer_effects.dart';
 
 class HeartRateChart extends StatefulWidget {
+  var name;
+
+  var email, profile, noti_count;
+
+  HeartRateChart({Key? key, required this.name, required this.email, required this.profile, required this.noti_count,}) : super(key: key);
   @override
   State<HeartRateChart> createState() => _HeartRateChartState();
 }
@@ -36,6 +47,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
   double? sd_low;
   double? sd_high;
   final HeartRatecontroller _Heartratecontroller = Get.put(HeartRatecontroller());
+  final _advancedDrawerController = AdvancedDrawerController();
   //animation controller
   late Animation<double> _opacityAnimation;
   late AnimationController _controller;
@@ -48,6 +60,10 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
   String yearPickerLabel = "Pick Years";
   String? Upto;
   String? username;
+  var name;
+  var email;
+  var pofileimage;
+  var noti_count;
 
   Future<void> loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
@@ -114,10 +130,11 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
   }
   Future<void> Day_Chart() async {
     setState(() => isLoading = true);
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _Heartratecontroller.Day_Chart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now()),
       );
 
@@ -148,9 +165,11 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
 
   Future<void> Week_Chart() async {
     setState(() => isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _Heartratecontroller.Week_Chart(
-          '102',
+          user_id,
           DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now())
       );
 
@@ -175,9 +194,11 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
 
   Future<void> Month_Chart() async {
     setState(() => isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _Heartratecontroller.Month_Chart(
-          '102',
+          user_id,
           DateFormat('yyyy-MM').format(selectedDate ?? DateTime.now())
       );
 
@@ -203,9 +224,11 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
 
   Future<void> Year_Chart() async {
     setState(() => isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _Heartratecontroller.Year_Chart(
-          '102',
+          user_id,
           DateFormat('yyyy-MM').format(selectedDate ?? DateTime.now())
       );
 
@@ -231,6 +254,8 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
 
   Future<void> MultiYear_Chart() async {
     setState(() => isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     if (toYear == null) {
       print('toYear is null. Cannot call API.');
       return;
@@ -238,7 +263,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
 
     try {
       final result = await _Heartratecontroller.MultiYear_Chart(
-        '102',
+        user_id,
         toYear!,  // Only pass toYear
       );
 
@@ -279,24 +304,46 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
     Size size = MediaQuery
         .of(context)
         .size;
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        ExitAppDialog();
+        return true;
+      },
+      child:AdvancedDrawer(
+          controller: _advancedDrawerController,
+          backdropColor: Colors.grey.shade100,
+          drawer: NavMenu(name: widget.name, email : widget.email, profile:widget.profile, noti_count: widget.noti_count, ),
+    child: Scaffold(
       backgroundColor: Color(0xFFffffff),
       appBar: AppBar(
         centerTitle: true,
-        title: Row(
+        title: widget.profile == null ? ShimmerLoadingItem() : Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // Center the text using the Center widget
-            Expanded(
-              child: Center(
-                child: Text(
-                  username != null
-                      ? "${makePossessive(username)} Heart Rate" : "",
-                  textAlign: TextAlign.center,
-                  style: Apptextstyle.s18wbap,
-                ),
+            GestureDetector(
+              onTap: (){
+                Get.to(()=>Profile());
+              },
+              child: CircleAvatar(
+                backgroundImage: NetworkImage(widget.profile),
+                radius: 20,
               ),
             ),
-            // Spacer to push the zoom button to the right
+            SizedBox(width: 20),
+            TextTitle1(
+              title: "Hi, ${username.toString().capitalizeFirst}",
+              color: Colors.black,
+            ),
+            Spacer(),
+            IconButton(
+              onPressed: () {
+                _advancedDrawerController.showDrawer();
+              },
+              icon: Icon(
+                Icons.menu,
+                color: Colors.black,
+              ),
+            ),
           ],
         ),
         leading: IconButton(
@@ -312,6 +359,11 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
           physics: ScrollPhysics(),
           child: Column(
             children: [
+              Text(
+                'Heart Rate',
+                textAlign: TextAlign.center,
+                style: Apptextstyle.s18wbap,
+              ),
               SizedBox(height: 10,),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -915,7 +967,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                             Text(
                               currentTitle,
                               style: TextStyle(
-                                  color: Colors.red, fontWeight: FontWeight.bold),
+                                  color: Color(0xFF275176), fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
@@ -1020,6 +1072,8 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
           ),
         ),
       ),
+    )
+      )
     );
   }
 
@@ -1052,7 +1106,13 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
       height: chartHeight,
       child: SfCartesianChart(
         title: ChartTitle(text: title),
-        tooltipBehavior: TooltipBehavior(enable: true),
+        tooltipBehavior: TooltipBehavior(
+            enable: true,
+            textStyle: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold
+            )
+        ),
         plotAreaBorderWidth: 0.0,
         plotAreaBorderColor: AppColors.greyshaded100,
         backgroundColor: AppColors.White,
@@ -1065,6 +1125,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
           minimum: 0,
           maximum: 23,
           interval: 2,
+          labelPlacement: LabelPlacement.onTicks,
           axisLabelFormatter: (AxisLabelRenderDetails args) {
             final value = args.value.toInt();
             return ChartAxisLabel(
@@ -1082,6 +1143,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
           axisLine: const AxisLine(width: 1, color: AppColors.Grey),
           majorTickLines: MajorTickLines(width: 0),
           majorGridLines: const MajorGridLines(width: 0),
+          labelPlacement: LabelPlacement.onTicks,
           edgeLabelPlacement: EdgeLabelPlacement.shift,
           labelStyle: TextStyle(
             fontSize: 9,
@@ -1105,19 +1167,19 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
-          plotBands: [
-            PlotBand(
-              isVisible: true,
-              start: targetHR.toDouble(),
-              end: targetHR.toDouble(),
-              borderWidth: 2,
-              borderColor: Colors.green,
-              text: '',
-              textStyle: TextStyle(color: Colors.green),
-              horizontalTextAlignment: TextAnchor.end,
-            ),
-
-          ],
+          // plotBands: [
+          //   PlotBand(
+          //     isVisible: true,
+          //     start: targetHR.toDouble(),
+          //     end: targetHR.toDouble(),
+          //     borderWidth: 2,
+          //     borderColor: Colors.green,
+          //     text: '',
+          //     textStyle: TextStyle(color: Colors.green),
+          //     horizontalTextAlignment: TextAnchor.end,
+          //   ),
+          //
+          // ],
         ),
         series: <CartesianSeries>[
           if (sd_low != null && sd_high != null)
@@ -1130,6 +1192,18 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
               color: Colors.red.withOpacity(0.2),
               enableTooltip: false,
             ),
+          LineSeries<HeartRateData, String>(
+            name: '',
+            dataSource: chartData,
+            xValueMapper: xValueMapper,
+            yValueMapper: (_, __) => targetHR.toDouble(),
+            color: Colors.green,
+            width: 2,
+            enableTooltip: false,
+            markerSettings: MarkerSettings(
+                isVisible: false
+            ),
+          ),
           SplineSeries<HeartRateData, String>(
             name: 'Heart Rate',
             dataSource: chartData,

@@ -4,6 +4,7 @@ import 'package:azpire_new/View/edit_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timer_count_down/timer_controller.dart';
 import '../root/root.dart';
 import 'package:oktoast/oktoast.dart';
@@ -23,12 +24,13 @@ class EditEmailController {
     setState(() {
       isLoading_1 = true;
     });
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     final String url = '$root/update_mobile_email';
 
     final Map<String, String> userData = {
       'email': emailController.text,
-      'user_id': "102"
+      'user_id': user_id
     };
 
     try {
@@ -73,11 +75,13 @@ class EditEmailController {
     Future<void> otp_timeout_email({
      required TextEditingController emailController,
    }) async {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var user_id = prefs.getString('user_id') ?? "";
      final String url = '$root/update_otp_timeout';
 
      final Map<String, String> userData = {
        'email': emailController.text,
-       'user_id': "102"
+       'user_id': user_id
      };
 
      try {
@@ -105,12 +109,13 @@ class EditEmailController {
      required bool resend,
    }) async {
      print(emailController.text);
-
+     final SharedPreferences prefs = await SharedPreferences.getInstance();
+     var user_id = prefs.getString('user_id') ?? "";
      final String url = '$root/email_update_resend_otp';
 
      final Map<String, String> userData = {
        'email': emailController.text,
-       'user_id': "102"
+       'user_id': user_id
      };
 
      try {
@@ -149,12 +154,13 @@ class EditEmailController {
      setState(() {
        isLoading_1 = true;
      });
-
+     final SharedPreferences prefs = await SharedPreferences.getInstance();
+     var user_id = prefs.getString('user_id') ?? "";
      final String url = '$root/updt_mobmail_otp_verify';
 
      final Map<String, String> userData = {
        'email': emailController.text,
-       'user_id': "102",
+       'user_id': user_id,
        'mobile_email_otp': enteredOtp
      };
 

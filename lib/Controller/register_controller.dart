@@ -29,6 +29,9 @@ class RegisterController{
     }
 
     if (formKey.currentState!.validate()) {
+      print("completePhoneNumber$completePhoneNumber");
+      print("usernameController$usernameController");
+      print("emailController$emailController");
       final RegisterModel user = RegisterModel(
         username: usernameController.text.trim(),
         email: emailController.text.trim(),

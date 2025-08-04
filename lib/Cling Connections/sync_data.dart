@@ -8,9 +8,10 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:hive/hive.dart';
 import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SyncService {
-  static const String userId = "102";
+
   Timer? _periodicSyncTimer; // 2-minute periodic sync timer
   final Duration periodicSyncDuration = Duration(minutes: 2);
   Timer? _debounceTimer;
@@ -143,12 +144,14 @@ class SyncService {
     required int diastolicBP,
     required int totalSleep,
   }) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     print("sendHeartRateToAPI");
     final url = Uri.parse("https://app.aspirehealthspan.ai/aspire_api/health_variable/add");
 
     final body = {
       "heart_rate": heartRate.toString(),
-      "user_id": userId,
+      "user_id": user_id,
       "datetime": DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now()),
       "blood_pressure_systolic": systolicBP.toString(),
       "blood_pressure_diastolic": diastolicBP.toString(),
@@ -210,13 +213,15 @@ class SyncService {
 
   Future<bool> sendBulkMinuteDataToApi(List<Map<String, dynamic>> dataList) async {
     print("sendBulkMinuteDataToApi");
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     final url = Uri.parse('https://app.aspirehealthspan.ai/aspire_api/minute_health_variable/add');
 
     try {
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"user_id": userId, "data": dataList}),
+        body: jsonEncode({"user_id": user_id, "data": dataList}),
       );
 
       print("Minute data API response: ${response.body}");

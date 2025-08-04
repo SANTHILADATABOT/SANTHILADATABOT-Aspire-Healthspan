@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 
@@ -90,9 +91,10 @@ class AddWeightController extends GetxController{
     try {
       DateTime parsedDate = dateFormat.parse(dateController.text);
       String formattedDate = DateFormat("yyyy-MM-dd").format(parsedDate);
-
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var user_id = prefs.getString('user_id') ?? "";
       final Map<String, dynamic> userdata = {
-        'user_id': '102',
+        'user_id': user_id,
         'selected_date': formattedDate,
         'weight': int.parse(weightController.text),
         'feet': heightFeet,

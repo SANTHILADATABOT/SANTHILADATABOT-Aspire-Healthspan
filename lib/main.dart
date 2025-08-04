@@ -680,6 +680,10 @@ class _SplashPageState extends State<SplashPage> {
           // No device found, navigate to BluetoothPair
           Future.delayed(Duration(seconds: 1), () {
             Get.offAll(() => BluetoothPair());
+           //  Get.offUntil(
+           //    MaterialPageRoute(builder: (_) => BluetoothPair()),
+           //        (route) => false,
+           //  );
           });
         }
       } on PlatformException catch (e) {
@@ -692,6 +696,10 @@ class _SplashPageState extends State<SplashPage> {
       // Not logged in, show login
       Future.delayed(Duration(seconds: 1), () {
         Get.offAll(() => LoginScreen());
+        // Get.offUntil(
+        //   MaterialPageRoute(builder: (_) => LoginScreen()),
+        //       (route) => false,
+        // );
       });
     }
 

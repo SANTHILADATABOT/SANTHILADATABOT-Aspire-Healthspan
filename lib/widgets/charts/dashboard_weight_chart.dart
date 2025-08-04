@@ -8,6 +8,7 @@ import 'package:azpire_new/utils/apptextstyle.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:http/http.dart' as http;
@@ -38,10 +39,11 @@ class _WeightChartPageState extends State<WeightChartPage>
     setState(() {
       _isLoading = true;
     });
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _weightcontroller.Week_Chart(
-        '102',
+        user_id,
         DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now()),
       );
 
@@ -150,7 +152,13 @@ class _WeightChartPageState extends State<WeightChartPage>
     double interval = 30,
   }) {
     return SfCartesianChart(
-      tooltipBehavior: TooltipBehavior(enable: true),
+      tooltipBehavior: TooltipBehavior(
+          enable: true,
+          textStyle: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold
+          )
+      ),
       //tooltipBehavior: TooltipBehavior(enable: true),
       title: ChartTitle(
         alignment: ChartAlignment.near,
@@ -163,6 +171,11 @@ class _WeightChartPageState extends State<WeightChartPage>
       primaryXAxis: CategoryAxis(
         majorTickLines: MajorTickLines(width: 0),
         majorGridLines: const MajorGridLines(width: 0),
+        labelPlacement: LabelPlacement.onTicks,
+        interval: 1,
+        maximumLabels: 7,
+        labelIntersectAction: AxisLabelIntersectAction.none,
+        edgeLabelPlacement: EdgeLabelPlacement.shift,
         title: AxisTitle(
           text: '',
           textStyle: TextStyle(color: AppColors.contentColorBlack),

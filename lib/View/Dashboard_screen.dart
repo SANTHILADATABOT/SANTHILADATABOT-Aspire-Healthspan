@@ -66,6 +66,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int weight = 0;
   String sleep = "";
   String bps = "";
+  var profilephoto ;
   String bpd = "";
   String sys = "";
   String Dia = "";
@@ -167,7 +168,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> loadDashboardData() async {
-    final data = await _dashboardcontroller.fetchDashboardload('102');
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
+    final data = await _dashboardcontroller.fetchDashboardload(user_id);
     if (data != null) {
 
       DateTime originalDateTime = DateFormat('yyyy-MM-dd hh:mm:ss a').parse(data['collection_date']);
@@ -195,9 +198,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         }
       }
 
-
+      profile_image: https://app.aspirehealthspan.ai/media/profile_image/image_gsAPP53.jpg
       if (mounted)
       setState(() {
+        profilephoto = data['profile_image'].toString();
         bps = data['blood_pressure_systolic'].toString();
         bpd = data['blood_pressure_diastolic'].toString();
         heartRate = data['heart_rate'].toString();
@@ -216,7 +220,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
 
   Future<void> _loadNotificationCount() async {
-    final count = await _notifycontroller.getNotificationCount('102');
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
+    final count = await _notifycontroller.getNotificationCount(user_id);
     if (mounted) {
       setState(() {
         noti_count = count;
@@ -265,7 +271,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: AdvancedDrawer(
         controller: _advancedDrawerController,
         backdropColor: Colors.grey.shade100,
-        drawer: NavMenu(name: name, email : email, profile:pofileimage, noti_count: noti_count, ),
+        drawer: NavMenu(name: name, email : email, profile:profilephoto, noti_count: noti_count, ),
         child: Scaffold(
           backgroundColor: AppColors.White,
           appBar: AppBar(
@@ -280,7 +286,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     onTap: (){
                       Get.to(()=>Profile());
                     },
-                    child: CircleAvatar(
+                    child:profilephoto !=null ? CircleAvatar(
+                      backgroundImage: NetworkImage(profilephoto),
+                      radius: 20,
+                    ):CircleAvatar(
                       backgroundImage: AssetImage(Appimages.profilelogo),
                       radius: 20,
                     ),
@@ -381,7 +390,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               datetime: 'Avg Sys/Dia Blood Pressure',
                               chart: BloodPressureChart(),
                               press: () {
-                                Get.to(()=>BloodPressureChartPage());
+                                Get.to(()=>BloodPressureChartPage(name: name, email : email, profile:profilephoto, noti_count: noti_count,));
                               },
                               color1: Color(0xFF5454FF),
                               color2: Color(0xFFF6803D),
@@ -401,7 +410,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               datetime: 'Avg Heart Rate',
                               chart: HeartRateChartPage(),
                               press: () {
-                                Get.to(()=>HeartRateChart());
+                                Get.to(()=>HeartRateChart(name: name, email : email,profile:profilephoto, noti_count: noti_count,));
                               },
                               color: Color(0xFFe13b4a),
                             )
@@ -420,7 +429,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               datetime: 'Avg Daily Steps',
                               chart: StepsChart(),
                               press: () {
-                                Get.to(()=>StepsChartPage());
+                                Get.to(()=>StepsChartPage(name: name, email : email,profile:profilephoto, noti_count: noti_count));
                               },
                               color: Color(0xFF9C53C7),
                             )
@@ -439,7 +448,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               datetime: 'Avg Daily Total Sleep',
                               chart: SleepChart(),
                               press: () {
-                                Get.to(()=>SleepChartPage());
+                                Get.to(()=>SleepChartPage(name: name, email : email,profile:profilephoto, noti_count: noti_count));
                               },
                               color: Color(0xFF38B1A0),
                               deepPercentage: _formatPercentage(deepPercentage),
@@ -463,7 +472,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               chart: BloodOxygenChartPage(),
                               press: () {
                                 //Navigator.push(context, MaterialPageRoute(builder: (context) => BloodoxygenPressureChartPage()));
-                                Get.to(()=>BloodoxygenPressureChartPage());
+                                Get.to(()=>BloodoxygenPressureChartPage(name: name, email : email,profile:profilephoto, noti_count: noti_count));
                               },
                               color: Color(0xFFe13b4a),
                             )
@@ -478,7 +487,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           datetime: 'Avg',
                           chart: WeightChartPage(),
                           press: () {
-                            Get.to(()=>WeightChart());
+                            Get.to(()=>WeightChart(name: name, email : email,profile:profilephoto, noti_count: noti_count));
                           },
                           color: Color(0xffF5B849),
                         ),

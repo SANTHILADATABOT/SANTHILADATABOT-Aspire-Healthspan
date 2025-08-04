@@ -7,6 +7,7 @@ import 'package:azpire_new/utils/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:http/http.dart' as http;
@@ -34,9 +35,11 @@ class _HeartRateChartPageState extends State<HeartRateChartPage>
   final HeartRatecontroller _Heartratecontroller = Get.put(HeartRatecontroller());
   Future<void> Week_Chart() async {
     setState(() => _isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _Heartratecontroller.Week_Chart(
-          '102',
+          user_id,
           DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now())
       );
 
@@ -119,12 +122,21 @@ class _HeartRateChartPageState extends State<HeartRateChartPage>
       child: SfCartesianChart(
         plotAreaBorderWidth: 0.0,
         backgroundColor: Color(0xFFffffff),
-        tooltipBehavior: TooltipBehavior(enable: true),
+        tooltipBehavior: TooltipBehavior(
+            enable: true,
+           textStyle: TextStyle(
+               color: Colors.white,
+             fontWeight: FontWeight.bold
+           )
+        ),
         primaryXAxis: CategoryAxis(
-         //labelPlacement: LabelPlacement.onTicks,
           edgeLabelPlacement: EdgeLabelPlacement.shift,
           majorTickLines: MajorTickLines(width: 0),
           majorGridLines: const MajorGridLines(width: 0),
+          labelPlacement: LabelPlacement.onTicks,
+          interval: 1,
+          maximumLabels: 7,
+          labelIntersectAction: AxisLabelIntersectAction.none,
           title: const AxisTitle(
             text: '',
             textStyle: TextStyle(color: AppColors.contentColorBlack),
@@ -144,41 +156,21 @@ class _HeartRateChartPageState extends State<HeartRateChartPage>
               fontWeight: FontWeight.bold,
               color: Colors.black
           ),
-          //title: AxisTitle(text: 'BPM'),
           majorGridLines: const MajorGridLines(width: 0),
           minorGridLines: const MinorGridLines(width: 0),
           majorTickLines: MajorTickLines(width: 0),
-          plotBands: <PlotBand>[
-            PlotBand(
-              isVisible: true,
-              start: targetHR.toDouble(),
-              end: targetHR.toDouble(),
-              borderWidth: 2,
-              borderColor: Colors.green,
-              text: '',
-              textStyle: TextStyle(color: Colors.green),
-              horizontalTextAlignment: TextAnchor.end,
-            ),
-            // Target line
-            // PlotBand(
-            //     isVisible: true,
-            //     start: targetHR.toDouble(),
-            //     end: targetHR.toDouble(),
-            //     borderWidth: 2,
-            //     borderColor: Color(0xff1B601EFF),
-            //     text: '',
-            //     textStyle: TextStyle(color: Color(0xff38B73DFF),)),
-            // SD Band - only add if values are valid
-            // if (heartrate_sd_high != null && heartrate_sd_low != null && heartrate_sd_high! > 0 && heartrate_sd_low! > 0)
-            //   PlotBand(
-            //     isVisible: true,
-            //     start: heartrate_sd_low!,
-            //     end: heartrate_sd_high!,
-            //     color: Colors.red.withOpacity(0.2),
-            //     text: '',
-            //     textStyle: TextStyle(color: Colors.red),
-            //   ),
-          ],
+          // plotBands: <PlotBand>[
+          //   PlotBand(
+          //     isVisible: true,
+          //     start: targetHR.toDouble(),
+          //     end: targetHR.toDouble(),
+          //     borderWidth: 2,
+          //     borderColor: Colors.green,
+          //     text: '',
+          //     textStyle: TextStyle(color: Colors.green),
+          //     horizontalTextAlignment: TextAnchor.end,
+          //   ),
+          // ],
         ),
         series: <CartesianSeries>[
           SplineRangeAreaSeries<HeartRateData, String>(
@@ -190,6 +182,18 @@ class _HeartRateChartPageState extends State<HeartRateChartPage>
             color: Colors.red.withOpacity(0.2),
             name: '',
             enableTooltip: false,
+          ),
+          LineSeries<HeartRateData, String>(
+            name: 'Target Diastolic',
+            dataSource: chartData,
+            xValueMapper: (data, _) => data.day,
+            yValueMapper: (data, _) => targetHR,
+            color: Colors.green,
+            width: 2,
+            enableTooltip: false,
+            markerSettings: MarkerSettings(
+                isVisible: false
+            ),
           ),
           SplineSeries<HeartRateData, String>(
             name: 'Heart Rate',
@@ -203,18 +207,6 @@ class _HeartRateChartPageState extends State<HeartRateChartPage>
                 height: 12,width: 12
             ),
           ),
-          // LineSeries<HeartRateData, String>(
-          //   enableTooltip: false,
-          //   name: 'Target',
-          //   dataSource: chartData,
-          //   xValueMapper: (data, _) => data.day,
-          //   yValueMapper: (data, _) => targetHR,
-          //   color: Colors.green,
-          //   width: 2,
-          //   markerSettings: MarkerSettings(
-          //     isVisible: false
-          //   ),
-          // ),
         ],
       ),
     );

@@ -71,6 +71,7 @@ class LoginOtpController {
           controller.pause();
           await Future.delayed(Duration(milliseconds: 300)); // <- This fixes it
           Get.to(() => BluetoothPair());
+          //Get.offAll(() => BluetoothPair());
 
           //  showToast(context,"Sign In Successful");
           //  controller.pause();

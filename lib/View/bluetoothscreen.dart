@@ -6,6 +6,7 @@ import 'package:azpire_new/utils/apptext.dart';
 import 'package:azpire_new/utils/apptextstyle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 
 import 'syncing data screen.dart';
 
@@ -145,21 +146,17 @@ class _BluetoothPairState extends State<BluetoothPair> {
           backgroundColor:Colors.white,
           leading: IconButton(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
+              //Get.to(() => LoginScreen());
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => LoginScreen()),
+              );
             },
             icon: Icon(Icons.arrow_back_ios),
           ),
         ),
         body: Column(
           children: [
-            Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(AppText.nearbycling,style: Apptextstyle.s16wbCo,)
-                ],
-              ),
-            ),
             SizedBox(height: 10,),
             ElevatedButton(
               onPressed: _startScanning,
