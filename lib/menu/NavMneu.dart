@@ -39,6 +39,10 @@ class _NavMenuState extends State<NavMenu> {
   String notificationMessage = "Waiting for data...";
   bool is_loading = false;
   String? _registeredDevice;
+  var name;
+  var email;
+  var pofileimage;
+  var noti_count;
   @override
   void initState(){
     print("Hello");
@@ -94,27 +98,17 @@ class _NavMenuState extends State<NavMenu> {
             padding: EdgeInsets.symmetric(horizontal: 15),
             child: Column(
               children: [
-                ListTile(
-                  leading: Icon(Icons.person,color: Color(0xFF254a6c),size: 25,),
-                  title: Text('Admin',style: TextStyle(
-                      fontFamily: "Inter",
-                      color: Color(0xFF505970)
-                  ),),
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => Adminscreen()));
-
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.settings,color: Color(0xFF254a6c),size: 25,),
-                  title: Text('Target Settings',style: TextStyle(
-                      fontFamily: "Inter",
-                      color: Color(0xFF505970)
-                  ),),
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => TargetSetting()));
-                  },
-                ),
+                // ListTile(
+                //   leading: Icon(Icons.person,color: Color(0xFF254a6c),size: 25,),
+                //   title: Text('Admin',style: TextStyle(
+                //       fontFamily: "Inter",
+                //       color: Color(0xFF505970)
+                //   ),),
+                //   onTap: () {
+                //     Navigator.push(context, MaterialPageRoute(builder: (context) => Adminscreen()));
+                //
+                //   },
+                // ),
                 ListTile(
                   leading: Icon(Icons.home,color: Color(0xFF254a6c),size: 25,),
                   title: Text('Dashboard',style: TextStyle(
@@ -122,18 +116,18 @@ class _NavMenuState extends State<NavMenu> {
                       color: Color(0xFF505970)
                   ),),
                   onTap: (){
-                    Get.to(() => DashboardScreen(deviceID:_registeredDevice!));
+                    //Get.to(() => DashboardScreen(deviceID:_registeredDevice!));
+                    Get.to(() => DashboardScreen(deviceID:''));
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.bluetooth_connected,color: Color(0xFF254a6c),size: 25,),
-                  title: Text('Unpaired Device',style: TextStyle(
+                  leading: Icon(Icons.settings,color: Color(0xFF254a6c),size: 25,),
+                  title: Text('Set Target',style: TextStyle(
                       fontFamily: "Inter",
                       color: Color(0xFF505970)
                   ),),
-                  onTap: (){
-                    //Get.to(() => Bluetoothscreen());
-                    _deregisterDevice();
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => TargetSetting()));
                   },
                 ),
                 // SizedBox(height: 10,),
@@ -144,7 +138,7 @@ class _NavMenuState extends State<NavMenu> {
                       color: Color(0xFF505970)
                   ),),
                   onTap: (){
-                    Get.to(() => BloodPressureChartPage());
+                    Get.to(() => BloodPressureChartPage(name: widget.name, email : widget.email, profile:widget.profile, noti_count: noti_count,));
                   },
                 ),
                 // SizedBox(height: 10,),
@@ -155,7 +149,7 @@ class _NavMenuState extends State<NavMenu> {
                       color: Color(0xFF505970)
                   ),),
                   onTap: (){
-                    Get.to(() => HeartRateChart());
+                    Get.to(() => HeartRateChart(name: widget.name, email : widget.email,profile:widget.profile, noti_count: noti_count));
 
                   },
                 ),
@@ -167,7 +161,7 @@ class _NavMenuState extends State<NavMenu> {
                       color: Color(0xFF505970)
                   ),),
                   onTap: (){
-                    Get.to(() => StepsChartPage());
+                    Get.to(() => StepsChartPage(name: widget.name, email : widget.email,profile:widget.profile, noti_count: noti_count));
 
                   },
                 ),
@@ -180,7 +174,7 @@ class _NavMenuState extends State<NavMenu> {
                       color: Color(0xFF505970)
                   ),),
                   onTap: (){
-                    Get.to(() => SleepChartPage());
+                    Get.to(() => SleepChartPage(name: widget.name, email : widget.email,profile:widget.profile, noti_count: noti_count));
 
                   },
                 ),
@@ -199,7 +193,7 @@ class _NavMenuState extends State<NavMenu> {
                     ),
                   ),
                   onTap: () {
-                    Get.to(() => BloodoxygenPressureChartPage());
+                    Get.to(() => BloodoxygenPressureChartPage(name: widget.name, email : widget.email,profile:widget.profile, noti_count: noti_count));
                   },
                 ),
                 // SizedBox(height: 10,),
@@ -210,7 +204,7 @@ class _NavMenuState extends State<NavMenu> {
                       color: Color(0xFF505970)
                   ),),
                   onTap: (){
-                    Get.to(() => WeightChart());
+                    Get.to(() => WeightChart(name: widget.name, email : widget.email,profile:widget.profile, noti_count: noti_count));
 
                   },
                 ),
@@ -220,7 +214,7 @@ class _NavMenuState extends State<NavMenu> {
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Notifications',style: TextStyle(
+                      Text('Nudges',style: TextStyle(
                           fontFamily: "Inter",
                           color: Color(0xFF505970)
                       ),),
@@ -237,6 +231,7 @@ class _NavMenuState extends State<NavMenu> {
 
                   },
                 ),
+
                 ListTile(
                   leading: Icon(Icons.person_4,color: Color(0xFF254a6c),size: 25),
                   title: Text('Profile',style: TextStyle(
@@ -246,6 +241,17 @@ class _NavMenuState extends State<NavMenu> {
                   onTap: (){
                     Get.to(() => Profile());
 
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.bluetooth_connected,color: Color(0xFF254a6c),size: 25,),
+                  title: Text('Unpaired Device',style: TextStyle(
+                      fontFamily: "Inter",
+                      color: Color(0xFF505970)
+                  ),),
+                  onTap: (){
+                    //Get.to(() => Bluetoothscreen());
+                    _deregisterDevice();
                   },
                 ),
                 // ListTile(
@@ -280,7 +286,7 @@ class _NavMenuState extends State<NavMenu> {
                      Get.to(()=>Profile());
                    },
                    child: CircleAvatar(
-                     backgroundImage: AssetImage("assets/gif/avatar.png"),
+                     backgroundImage: AssetImage("assets/gif/blank_profile.jpg"),
                      radius: 25,
                    ),
                  )
@@ -491,11 +497,12 @@ class _NavMenuState extends State<NavMenu> {
     );
   }
   Future<void> logout_api() async {
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     final String Url = "$root/logout";
 
     final Map<String, dynamic> userData = {
-      'user_id': '102'
+      'user_id': user_id
     };
     try {
       final response = await http.post(

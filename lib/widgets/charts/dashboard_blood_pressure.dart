@@ -5,6 +5,7 @@ import 'package:azpire_new/utils/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../../root/root.dart';
@@ -34,9 +35,11 @@ class _BloodPressureChartState extends State<BloodPressureChart>
 
   Future<void> Week_Chart() async {
     setState(() => _isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _bloodpressurecontroller.Week_Chart(
-          '102',
+          user_id,
           DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now())
       );
 
@@ -129,13 +132,22 @@ class _BloodPressureChartState extends State<BloodPressureChart>
       child: SfCartesianChart(
         plotAreaBorderWidth: 0.0,
         backgroundColor: Color(0xFFffffff),
-        tooltipBehavior: TooltipBehavior(enable: true),
+        tooltipBehavior: TooltipBehavior(
+            enable: true,
+            textStyle: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold
+            )
+        ),
         primaryXAxis: CategoryAxis(
           title: const AxisTitle(
             text: '',
             textStyle: TextStyle(color: AppColors.contentColorBlack),
           ),
-         // labelPlacement: LabelPlacement.onTicks,
+         labelPlacement: LabelPlacement.onTicks,
+          interval: 1,
+          maximumLabels: 7,
+          labelIntersectAction: AxisLabelIntersectAction.none,
           edgeLabelPlacement: EdgeLabelPlacement.shift,
           //plotOffset: 1,
           majorTickLines: MajorTickLines(width: 0),
@@ -159,29 +171,29 @@ class _BloodPressureChartState extends State<BloodPressureChart>
               fontWeight: FontWeight.bold,
               color: Colors.black
           ),
-            plotBands: <PlotBand>[
-              PlotBand(
-                isVisible: true,
-                start: targetSystolic.toDouble(),
-                end: targetSystolic.toDouble(),
-                borderWidth: 2,
-                textStyle: TextStyle(color: Colors.green),
-               // color: Colors.green,
-                borderColor: Colors.green,
-                text: '',
-                horizontalTextAlignment: TextAnchor.end,
-              ),
-              PlotBand(
-                isVisible: true,
-                start: targetDiastolic.toDouble(),
-                end: targetDiastolic.toDouble(),
-                borderWidth: 2,
-                text: '',
-                color: Colors.green,
-                borderColor: Colors.green,
-                horizontalTextAlignment: TextAnchor.end,
-              ),
-            ]
+            // plotBands: <PlotBand>[
+            //   PlotBand(
+            //     isVisible: true,
+            //     start: targetSystolic.toDouble(),
+            //     end: targetSystolic.toDouble(),
+            //     borderWidth: 2,
+            //     textStyle: TextStyle(color: Colors.green),
+            //    // color: Colors.green,
+            //     borderColor: Colors.green,
+            //     text: '',
+            //     horizontalTextAlignment: TextAnchor.end,
+            //   ),
+            //   PlotBand(
+            //     isVisible: true,
+            //     start: targetDiastolic.toDouble(),
+            //     end: targetDiastolic.toDouble(),
+            //     borderWidth: 2,
+            //     text: '',
+            //     color: Colors.green,
+            //     borderColor: Colors.green,
+            //     horizontalTextAlignment: TextAnchor.end,
+            //   ),
+            // ]
         ),
         series: <CartesianSeries>[
           SplineRangeAreaSeries<BloodPressureData, String>(
@@ -204,6 +216,33 @@ class _BloodPressureChartState extends State<BloodPressureChart>
             name: '',
             enableTooltip: false,
           ),
+          // Target Lines
+          LineSeries<BloodPressureData, String>(
+            name: 'Target Systolic',
+            dataSource: chartData,
+            xValueMapper: (data, _) => data.day,
+            yValueMapper: (data, _) => targetSystolic,
+            color: Colors.green,
+            width: 2,
+            enableTooltip: false,
+            markerSettings: MarkerSettings(
+                isVisible: false
+            ),
+          ),
+
+          LineSeries<BloodPressureData, String>(
+            name: 'Target Diastolic',
+            dataSource: chartData,
+            xValueMapper: (data, _) => data.day,
+            yValueMapper: (data, _) => targetDiastolic,
+            color: Colors.green,
+            // dashArray: [5, 5],
+            width: 2,
+            enableTooltip: false,
+            markerSettings: MarkerSettings(
+                isVisible: false
+            ),
+          ),
           // Systolic Line
           SplineSeries<BloodPressureData, String>(
             name: 'Systolic',
@@ -216,7 +255,6 @@ class _BloodPressureChartState extends State<BloodPressureChart>
                 height: 12,width: 12
             ),
           ),
-
           // Diastolic Line
           SplineSeries<BloodPressureData, String>(
             name: 'Diastolic',
@@ -229,34 +267,7 @@ class _BloodPressureChartState extends State<BloodPressureChart>
                 height: 12,width: 12
             ),
           ),
-          //Target Lines
-          // LineSeries<BloodPressureData, String>(
-          //   name: 'Target Systolic',
-          //   dataSource: chartData,
-          //   xValueMapper: (data, _) => data.day,
-          //   yValueMapper: (data, _) => targetSystolic,
-          //   color: Colors.green,
-          //   // dashArray: [5, 5],
-          //   width: 2,
-          //   //enableTooltip: false,
-          //   // markerSettings: MarkerSettings(
-          //   //     isVisible: false
-          //   // ),
-          // ),
-          //
-          // LineSeries<BloodPressureData, String>(
-          //   name: 'Target Diastolic',
-          //   dataSource: chartData,
-          //   xValueMapper: (data, _) => data.day,
-          //   yValueMapper: (data, _) => targetDiastolic,
-          //   color: Colors.green,
-          //   // dashArray: [5, 5],
-          //   width: 2,
-          //   //enableTooltip: false,
-          //   // markerSettings: MarkerSettings(
-          //   //     isVisible: false
-          //   // ),
-          // ),
+
         ],
       ),
     );

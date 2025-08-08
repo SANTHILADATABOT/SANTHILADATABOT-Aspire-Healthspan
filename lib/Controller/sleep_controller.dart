@@ -483,9 +483,18 @@ class SleepController extends GetxController{
         DateTime current = DateTime(monthStart.year, monthStart.month, i);
         String dateKey = DateFormat('yyyy-MM-dd').format(current);
 
+        // final data = dateMap[dateKey];
+        // final sessions = data != null ? data['sleep_sessions'] as List : [];
+        // final summary = data['sleep_summary'] ?? {};
         final data = dateMap[dateKey];
-        final sessions = data != null ? data['sleep_sessions'] as List : [];
-        final summary = data['sleep_summary'] ?? {};
+
+        final sessions = (data != null && data['sleep_sessions'] != null)
+            ? data['sleep_sessions'] as List
+            : [];
+
+        final summary = (data != null && data['sleep_summary'] != null)
+            ? data['sleep_summary']
+            : {};
         final totalSleepRaw = summary['total'] ?? '0h 0m';
 
         double light = 0, deep = 0, rem = 0, total = 0;
@@ -788,12 +797,178 @@ class SleepController extends GetxController{
 
 
 
-Future<Map<String, dynamic>> MultiYear_Chart({
+// Future<Map<String, dynamic>> MultiYear_Chart({
+//     required String userId,
+//    // required int fromYear,
+//     required int toYear,
+//   }) async
+// {
+//     String formatHourMinute(double hours) {
+//       final int h = hours.floor();
+//       final int m = ((hours - h) * 60).round();
+//       return '${h}h ${m}m';
+//     }
+//
+//     double parseDurationFromString(String duration) {
+//       try {
+//         duration = duration.replaceAll('\u00a0', ' ').replaceAll('\u200b', '').trim();
+//         final regex = RegExp(r'(\d+)h\s*(\d+)m');
+//         final match = regex.firstMatch(duration);
+//         if (match != null) {
+//           final hours = int.tryParse(match.group(1)!) ?? 0;
+//           final minutes = int.tryParse(match.group(2)!) ?? 0;
+//           return hours + (minutes / 60.0);
+//         }
+//       } catch (e) {
+//         print("Error parsing duration: $duration");
+//       }
+//       return 0.0;
+//     }
+//
+//     final response = await http.post(
+//       Uri.parse("$root/get_multiyear_sleep_data"),
+//       headers: {'Content-Type': 'application/json'},
+//       body: jsonEncode({
+//         'user_id': userId,
+//         //'from_year': '${fromYear.toString()}',
+//         'to_year': '${toYear.toString()}',
+//       }),
+//     );
+//
+//     if (response.statusCode == 200) {
+//       final jsonResponse = json.decode(response.body);
+//       print("MultiYear Sleep Response: $jsonResponse");
+//
+//       final Map<String, dynamic> yearData = jsonResponse['sleep_data'] ?? {};
+//       final List<dynamic> recentSleepList = jsonResponse['sleep_list'] ?? [];
+//       final targetsleep = jsonResponse['target_sleep'];
+//       final avgsleep = jsonResponse['daily_avg_sleep'];
+//
+//       print("avgsleep:$avgsleep");
+//
+//       String? recentDeepPercent;
+//       String? recentLightPercent;
+//       String? recentMiddlePercent;
+//       String? recentTotalPercent;
+//
+//       for (var item in recentSleepList) {
+//         if (item is Map<String, dynamic>) {
+//           switch (item['sleep_value']) {
+//             case 2:
+//               recentLightPercent = item['percentage'];
+//               break;
+//             case 3:
+//               recentDeepPercent = item['percentage'];
+//               break;
+//             case 4:
+//               recentMiddlePercent = item['percentage'];
+//               break;
+//             case 6:
+//               recentTotalPercent = item['percentage'];
+//               break;
+//           }
+//         }
+//       }
+//
+//       List<SleepBarData> multiYearBars = [];
+//       List<SleepDataChart1> summaryList = [];
+//       double maxTotalSleep = 0;
+//
+//       for (var yearKey in yearData.keys) {
+//         final yearSleep = yearData[yearKey];
+//
+//         if (yearSleep is Map<String, dynamic>) {
+//           final lightStr = yearSleep['2']?.toString() ?? '0h 0m';
+//           final deepStr  = yearSleep['3']?.toString() ?? '0h 0m';
+//           final remStr   = yearSleep['4']?.toString() ?? '0h 0m';
+//           final totalStr = yearSleep['total']?.toString() ?? '0h 0m';
+//
+//           final light = parseDurationFromString(lightStr);
+//           final deep  = parseDurationFromString(deepStr);
+//           final rem   = parseDurationFromString(remStr);
+//           final total = parseDurationFromString(totalStr);
+//
+//           print("📅 Year: $yearKey → Light: $lightStr → $light, Deep: $deepStr → $deep, REM: $remStr → $rem");
+//
+//           if (total > maxTotalSleep) {
+//             maxTotalSleep = total;
+//           }
+//
+//           double start = 0;
+//
+//           // Light (bottom)
+//           multiYearBars.add(SleepBarData(
+//             label: yearKey,
+//             startHour: start,
+//             endHour: start + light,
+//             value: 2,
+//           ));
+//           start += light;
+//
+//           // REM (middle)
+//           multiYearBars.add(SleepBarData(
+//             label: yearKey,
+//             startHour: start,
+//             endHour: start + rem,
+//             value: 4,
+//           ));
+//           start += rem;
+//
+//           // Deep (top)
+//           multiYearBars.add(SleepBarData(
+//             label: yearKey,
+//             startHour: start,
+//             endHour: start + deep,
+//             value: 3,
+//           ));
+//
+//           final yearDate = DateTime(int.parse(yearKey));
+//
+//           summaryList.add(SleepDataChart1(
+//             time_s: yearDate,
+//             day_name: DateFormat('EEEE').format(yearDate),
+//             month_name: '',
+//             years: yearKey,
+//             awake_s: 0,
+//             lightSleep_s: 0,
+//             deepSleep_s: 0,
+//             remSleep_s: 0,
+//             awake_s1: 0,
+//             lightSleep_s1: 0,
+//             remSleep_s1: 0,
+//             total_sleep: totalStr,
+//             totalLight: formatHourMinute(light),
+//             totalMiddle: formatHourMinute(rem),
+//             totalDeep: formatHourMinute(deep),
+//             light2: 0,
+//             week_names: '',
+//           ));
+//         }
+//       }
+//
+//       final yAxisMax = ((maxTotalSleep + 2) / 2).ceil() * 2;
+//
+//       return {
+//         'chartData': multiYearBars,
+//         'summaryData': summaryList,
+//         'y_axis_max': yAxisMax,
+//         'recent_light_percent': recentLightPercent,
+//         'recent_deep_percent': recentDeepPercent,
+//         'recent_rem_percent': recentMiddlePercent,
+//         'recent_total_percent': recentTotalPercent,
+//         'target_sleep':targetsleep,
+//         'daily_avg_sleep':avgsleep
+//       };
+//     } else {
+//       throw Exception('Failed to fetch multiyear sleep chart');
+//     }
+//   }
+
+
+  Future<Map<String, dynamic>> MultiYear_Chart({
     required String userId,
-   // required int fromYear,
     required int toYear,
-  }) async
-{
+  }) async {
     String formatHourMinute(double hours) {
       final int h = hours.floor();
       final int m = ((hours - h) * 60).round();
@@ -821,8 +996,7 @@ Future<Map<String, dynamic>> MultiYear_Chart({
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'user_id': userId,
-        //'from_year': '${fromYear.toString()}',
-        'to_year': '${toYear.toString()}',
+        'to_year': '$toYear',
       }),
     );
 
@@ -834,8 +1008,6 @@ Future<Map<String, dynamic>> MultiYear_Chart({
       final List<dynamic> recentSleepList = jsonResponse['sleep_list'] ?? [];
       final targetsleep = jsonResponse['target_sleep'];
       final avgsleep = jsonResponse['daily_avg_sleep'];
-
-      print("avgsleep:$avgsleep");
 
       String? recentDeepPercent;
       String? recentLightPercent;
@@ -867,16 +1039,15 @@ Future<Map<String, dynamic>> MultiYear_Chart({
 
       for (var yearKey in yearData.keys) {
         final yearSleep = yearData[yearKey];
-
         if (yearSleep is Map<String, dynamic>) {
           final lightStr = yearSleep['2']?.toString() ?? '0h 0m';
-          final deepStr  = yearSleep['3']?.toString() ?? '0h 0m';
-          final remStr   = yearSleep['4']?.toString() ?? '0h 0m';
+          final deepStr = yearSleep['3']?.toString() ?? '0h 0m';
+          final remStr = yearSleep['4']?.toString() ?? '0h 0m';
           final totalStr = yearSleep['total']?.toString() ?? '0h 0m';
 
           final light = parseDurationFromString(lightStr);
-          final deep  = parseDurationFromString(deepStr);
-          final rem   = parseDurationFromString(remStr);
+          final deep = parseDurationFromString(deepStr);
+          final rem = parseDurationFromString(remStr);
           final total = parseDurationFromString(totalStr);
 
           print("📅 Year: $yearKey → Light: $lightStr → $light, Deep: $deepStr → $deep, REM: $remStr → $rem");
@@ -887,7 +1058,6 @@ Future<Map<String, dynamic>> MultiYear_Chart({
 
           double start = 0;
 
-          // Light (bottom)
           multiYearBars.add(SleepBarData(
             label: yearKey,
             startHour: start,
@@ -896,7 +1066,6 @@ Future<Map<String, dynamic>> MultiYear_Chart({
           ));
           start += light;
 
-          // REM (middle)
           multiYearBars.add(SleepBarData(
             label: yearKey,
             startHour: start,
@@ -905,7 +1074,6 @@ Future<Map<String, dynamic>> MultiYear_Chart({
           ));
           start += rem;
 
-          // Deep (top)
           multiYearBars.add(SleepBarData(
             label: yearKey,
             startHour: start,
@@ -947,15 +1115,14 @@ Future<Map<String, dynamic>> MultiYear_Chart({
         'recent_deep_percent': recentDeepPercent,
         'recent_rem_percent': recentMiddlePercent,
         'recent_total_percent': recentTotalPercent,
-        'target_sleep':targetsleep,
-        'daily_avg_sleep':avgsleep
+        'target_sleep': targetsleep,
+        'daily_avg_sleep': avgsleep,
+        'mainDate': DateFormat('yyyy-MM-dd').format(DateTime.now()),
       };
     } else {
       throw Exception('Failed to fetch multiyear sleep chart');
     }
   }
-
-
 
 
 

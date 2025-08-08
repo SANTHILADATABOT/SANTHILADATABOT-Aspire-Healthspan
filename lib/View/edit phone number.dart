@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:azpire_new/View/edit_profile.dart';
 import 'package:azpire_new/Controller/editPhone_controller.dart';
+import 'package:azpire_new/utils/app_color.dart';
 import 'package:azpire_new/utils/appimages.dart';
 import 'package:azpire_new/utils/apptextstyle.dart';
 import 'package:azpire_new/widgets/custom_button/My_Button.dart';
@@ -61,11 +62,17 @@ class _edit_phone_numberState extends State<edit_phone_number> {
   //   setState(() {
   //     isLoading_1 = true;
   //   });
+  //
+  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   var user_id = prefs.getString('user_id') ?? "";
+  //   final String url = '$root/update_mobile_email';
+  //
+  //
   //   final String url = '$root/update_mobile_email';
   //
   //   final Map<String, String> userData = {
   //     'mobile_no': completePhoneNumber.toString(),
-  //     'user_id': "102"
+  //     'user_id': user_id
   //   };
   //
   //   try {
@@ -110,32 +117,36 @@ class _edit_phone_numberState extends State<edit_phone_number> {
   //   }
   // }
 
+
   Future<void> verify_mob() async {
 
-    await _editphonecontroller.verify_mob(
+    // await _editphonecontroller.verify_mob(
+    //   context: context,
+    //   setState: setState,
+    //   completePhoneNumber: completePhoneNumber.toString(),
+    //   mobnum: widget.mobnum,
+    //   isLoading: isLoading,
+    //   isLoading_1: isLoading_1,
+    //   verify: verify = true,
+    //   controller: _controller,
+    // );
+
+    setState(() => isLoading_1 = true);
+
+    final result = await _editphonecontroller.verify_mob(
       context: context,
-      setState: setState,
       completePhoneNumber: completePhoneNumber.toString(),
       mobnum: widget.mobnum,
-      isLoading: isLoading,
-      isLoading_1: isLoading_1,
-      verify: verify = true,
       controller: _controller,
     );
 
+    setState(() {
+      verify = result; // Only show OTP UI if phone is not registered
+      isLoading_1 = false;
+    });
+
   }
 
-  // showToast(String msg) {
-  //   Fluttertoast.showToast(
-  //     msg: msg,
-  //     toastLength: Toast.LENGTH_SHORT,
-  //     gravity: ToastGravity.BOTTOM,
-  //     timeInSecForIosWeb: 1,
-  //     backgroundColor: Colors.black,
-  //     textColor: Colors.white,
-  //     fontSize: 16.0,
-  //   );
-  // }
 
   void _onTextChanged(String value) {
     setState(() {
@@ -150,10 +161,11 @@ class _edit_phone_numberState extends State<edit_phone_number> {
       isLoading_1 = true;
     });
     final String url = '$root/updt_mobmail_otp_verify';
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     final Map<String, String> userData = {
       'mobile_no': completePhoneNumber.toString(),
-      'user_id': "102",
+      'user_id': user_id,
       'mobile_email_otp': enteredOtp
     };
 
@@ -275,18 +287,29 @@ class _edit_phone_numberState extends State<edit_phone_number> {
   //   }
   // }
 
-  Future<void> otp_resend() async{
+  // Future<void> otp_resend() async{
+  //
+  //   await _editphonecontroller.otp_resend(
+  //     context: context,
+  //     setState: setState,
+  //     completePhoneNumber: completePhoneNumber.toString(),
+  //     mobnum: widget.mobnum,
+  //     controller: _controller,
+  //     newotp: newotp.toString(),
+  //     resend: resend
+  //   );
+  // }
 
+  Future<void> otp_resend() async {
     await _editphonecontroller.otp_resend(
       context: context,
       setState: setState,
       completePhoneNumber: completePhoneNumber.toString(),
       mobnum: widget.mobnum,
-      controller: _controller,
-      newotp: newotp.toString(),
-      resend: resend
+      controller: _controller, newotp: newotp.toString(), resend: resend,
     );
   }
+
 
 
 
@@ -300,11 +323,8 @@ class _edit_phone_numberState extends State<edit_phone_number> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          'Edit Profile',
-          style: TextStyle(
-            color: Color(0xFF365c7f),
-            fontSize: 17,
-          ),
+            AppText.editprofile,
+            style: Apptextstyle.s18wbap
         ),
         backgroundColor: Color(0xFFffffff),
 
@@ -368,21 +388,16 @@ class _edit_phone_numberState extends State<edit_phone_number> {
                         }
                       },
                       child: isLoading_1 == true ? Center(
-                        child: CircularProgressIndicator(),) : Container(
+                        child: CircularProgressIndicator(),) :  Container(
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
-                            color: Colors.blue
+                            gradient: AppColors.button
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.fromLTRB(15, 4, 15, 4),
+                          padding: const EdgeInsets.fromLTRB(30, 8, 30, 8),
                           child: Text(
-                            "Verify",
-                            style: TextStyle(
-                                fontFamily: "Inter",
-                                fontSize: 16,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold
-                            ),
+                           AppText.verify,
+                            style: Apptextstyle.s16wbcW
                           ),
                         ),
                       ),
@@ -428,7 +443,7 @@ class _edit_phone_numberState extends State<edit_phone_number> {
                               ),
                               SizedBox(height: 10),
                               Text(
-                                  AppText.mobilesentotp,
+                                  AppText.sentotp,
                                 style: Apptextstyle.s14wncLb
                               ),
                               SizedBox(height: 20),
@@ -459,6 +474,9 @@ class _edit_phone_numberState extends State<edit_phone_number> {
                           onTap: () {
                             if (verify == true) {
                               if (resend) {
+                                setState(() {
+                                  resend = false;
+                                });
                                 otp_resend();
                               }
                             }

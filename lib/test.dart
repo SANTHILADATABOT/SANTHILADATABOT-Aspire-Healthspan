@@ -13,49 +13,70 @@ import 'package:flutter/foundation.dart'; // for kIsWeb
 
 class EditPhoneController {
 
-  Future<bool> verify_mob({
-    required BuildContext context,
+  Future<void> verify_mob({
+    //required BuildContext context,
+    //required StateSetter setState,
     required String completePhoneNumber,
     required String mobnum,
+    //required bool isLoading_1,
+    //required bool isLoading,
+    //required bool verify,
     required CountdownController controller,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
+    print('PHONE' + mobnum);
+    print("Phone number : ${completePhoneNumber.toString()}");
+
+    // setState(() {
+    //   isLoading_1 = true;
+    // });
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     var user_id = prefs.getString('user_id') ?? "";
     final String url = '$root/update_mobile_email';
 
     final Map<String, String> userData = {
-      'mobile_no': completePhoneNumber,
+      'mobile_no': completePhoneNumber.toString(),
       'user_id': user_id
     };
 
     try {
       final response = await http.post(
         Uri.parse(url),
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
         body: userData,
       );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        print(response.body);
 
         if (jsonResponse["status"] == "SUCCESS") {
-          controller.restart();
+          // setState(() {
+          //   verify = true;
+          //   controller.restart();
+          //   isLoading_1 = false;
+          // });
           showToast("OTP Sent Successfully");
-          return true;
         } else {
           showToast("Mobile number already exists");
-          return false;
+          print(response.body);
+          // setState(() {
+          //   isLoading_1 = false;
+          //   verify = false;
+          // });
         }
       } else {
         showToast("Request failed with status: ${response.statusCode}.");
-        return false;
       }
     } catch (e) {
       showToast("Error: $e");
-      return false;
+    } finally {
+      // setState(() {
+      //   isLoading = false;
+      // });
     }
   }
-
 
   Future<void> otp_timeout({
     required String completePhoneNumber,
@@ -67,7 +88,6 @@ class EditPhoneController {
       'mobile_no': completePhoneNumber.toString(),
       'user_id': user_id
     };
-
 
     try {
       final response = await http.post(
@@ -90,49 +110,45 @@ class EditPhoneController {
     required StateSetter setState,
     required String completePhoneNumber,
     required String mobnum,
+    required CountdownController controller,
     required String newotp,
     required bool resend,
-    required CountdownController controller,
   }) async {
-    print('Resendno: $completePhoneNumber');
-    print('Resendno2: $mobnum');
+    print('Resendno' + completePhoneNumber);
+    print('Resendno2' + mobnum);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var user_id = prefs.getString('user_id') ?? "";
     final String url = '$root/update_resend_otp';
 
     final Map<String, String> userData = {
       'mobile_no': completePhoneNumber.toString(),
-      'user_id': user_id,
+      'user_id': user_id
     };
-
-    print("userData:$userData");
 
     try {
       final response = await http.post(
         Uri.parse(url),
         body: userData,
       );
-
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
         print('OTP Resend Response: $jsonResponse');
 
         if (jsonResponse["status"] == "SUCCESS") {
           setState(() {
-            newotp = jsonResponse['data']['mobile_otp'].toString(); // now updates widget state
-            resend = false; // now updates widget state
+            newotp=jsonResponse['data']['mobile_otp'].toString();
+            resend=false;
           });
 
-          controller.restart(); // ✅ This will now work
+          controller.restart(); // Restart countdown
         }
       } else {
         print('Request failed with status: ${response.statusCode}.');
       }
     } catch (e) {
-      print('Error: $e');
+      print('Error:2 $e');
     }
   }
-
 
   Future<void> verify_submit({
     required BuildContext context,
@@ -199,9 +215,6 @@ class EditPhoneController {
   }
 
 }
-
-
-
 
 void showCustomToast(String msg) {
   showToast(

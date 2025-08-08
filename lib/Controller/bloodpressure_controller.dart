@@ -286,64 +286,6 @@ import 'package:intl/intl.dart';
             ));
           }
 
-          //Iterate over weeks (W1 to W5)
-          // for (int i = 1; i <= 5; i++) {
-          //   String weekKey = 'W$i';
-          //   if (monthlyData.containsKey(weekKey)) {
-          //     final data = monthlyData[weekKey];
-          //
-          //     // If the API includes a specific date per week, use it. Otherwise, estimate it:
-          //     String startDate = data['start_date'] ?? ''; // <- ideally, use this if available
-          //
-          //     double systolicAvg = data['average_systolic']?.toDouble() ?? 0;
-          //     double diastolicAvg = data['average_diastolic']?.toDouble() ?? 0;
-          //
-          //     chartData.add(BloodPressureData(
-          //       date: DateTime.tryParse(startDate) ?? DateTime.now().add(Duration(days: (i - 1) * 7)),
-          //       systolic: systolicAvg.round(),
-          //       diastolic: diastolicAvg.round(),
-          //       day: 'Week $i',
-          //       months: weekKey,
-          //       Year: '',
-          //       targetSystolic: targetSystolic,
-          //       targetDiastolic: targetDiastolic,
-          //       diastolic_sd_high: 0,
-          //       diastolic_sd_low: 0,
-          //       systolic_sd_high: 0,
-          //       systolic_sd_low: 0,
-          //     ));
-          //   }
-          // }
-
-          // final now = DateTime.now();
-          //
-          // monthlyData.forEach((weekLabel, weekData) {
-          //   final String startDateStr = weekData['start_date'] ?? '';
-          //   final DateTime startDate = DateTime.tryParse(startDateStr) ?? now;
-          //
-          //   // Filter only weeks starting on or before today
-          //   if (startDate.isBefore(now) || startDate.isAtSameMomentAs(now)) {
-          //     double systolicAvg = weekData['average_systolic']?.toDouble() ?? 0;
-          //     double diastolicAvg = weekData['average_diastolic']?.toDouble() ?? 0;
-          //
-          //     chartData.add(BloodPressureData(
-          //       months: weekLabel.toUpperCase(), // W1, W2, etc.
-          //       date: startDate,
-          //       systolic: systolicAvg.round(),
-          //       diastolic: diastolicAvg.round(),
-          //       day: '', // Not used for monthly
-          //       Year: '',
-          //       targetSystolic: targetSystolic,
-          //       targetDiastolic: targetDiastolic,
-          //       systolic_sd_high: 0,
-          //       systolic_sd_low: 0,
-          //       diastolic_sd_high: 0,
-          //       diastolic_sd_low: 0,
-          //     ));
-          //   }
-          // });
-
-
           int monthlySystolic = jsonResponse['recent_systolic_bp']?.toInt() ?? 0;
           int monthlyDiastolic = jsonResponse['recent_diastolic_bp']?.toInt() ?? 0;
 

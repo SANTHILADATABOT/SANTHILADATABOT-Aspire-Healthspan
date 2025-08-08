@@ -56,12 +56,15 @@ class DashboardController {
         Uri.parse(url),
         body: userData,
       );
+      print('userId: $userId');
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
         print('JsonResponse: $jsonResponse');
+        print('userId1: $userId');
 
         if (jsonResponse['status'] == "SUCCESS") {
+          print('userId2: $userId');
           return jsonResponse;
         } else {
           throw Exception('Failed to load dashboard data');

@@ -2,8 +2,14 @@ import 'dart:convert';
 import 'dart:ui';
 import 'package:azpire_new/Controller/spo2_controller.dart';
 import 'package:azpire_new/Model/spo2_model.dart';
+import 'package:azpire_new/View/profile.dart';
+import 'package:azpire_new/menu/NavMneu.dart';
+import 'package:azpire_new/utils/app_color.dart';
+import 'package:azpire_new/widgets/Appexithelper.dart';
+import 'package:azpire_new/widgets/text_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:flutter_holo_date_picker/date_picker.dart';
 import 'package:flutter_holo_date_picker/i18n/date_picker_i18n.dart';
 import 'package:get/get.dart';
@@ -14,9 +20,15 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import '../utils/appimages.dart';
 import '../utils/apptext.dart';
 import '../utils/apptextstyle.dart';
+import '../widgets/shimmer_effects.dart';
 
 
 class BloodoxygenPressureChartPage extends StatefulWidget {
+  var name;
+
+  var email, profile, noti_count;
+
+  BloodoxygenPressureChartPage({Key? key, required this.name, required this.email, required this.profile, required this.noti_count,}) : super(key: key);
   @override
   State<BloodoxygenPressureChartPage> createState() => _BloodoxygenPressureChartPageState();
 }
@@ -26,12 +38,12 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
   late AnimationController _controller;
   late Animation<Color?> _colorAnimation;
   late Animation<double> _opacityAnimation;
-
   var datetime;
   String currentTitle = 'Daily Blood Oxygen Average';
   String Reports = 'Day';
   List<BloodOxygenData> chartData = [];
   final spo2Controller _spo2controller = Get.put(spo2Controller());
+  final _advancedDrawerController = AdvancedDrawerController();
   int? recentSpo2;
   int? targetNormal;
   int? targetHigh;
@@ -56,6 +68,10 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
   String yearPickerLabel = "Pick Years";
   String? Upto;
   String? username;
+  var name;
+  var email;
+  var pofileimage;
+  var noti_count;
 
   Future<void> loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
@@ -169,9 +185,11 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
 
   Future<void> Day_Chart() async {
     setState(() => isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _spo2controller.fetchDayChart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now()),
         type: 'daily',
       );
@@ -202,9 +220,11 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
 
   Future<void> Week_Chart() async {
     setState(() => isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _spo2controller.Week_Chart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now()),
       );
 
@@ -233,9 +253,11 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
 
   Future<void> Month_Chart() async {
     setState(() => isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _spo2controller.Month_Chart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM').format(selectedDate ?? DateTime.now()),
       );
 
@@ -264,9 +286,11 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
 
   Future<void> Year_Chart() async {
     setState(() => isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _spo2controller.Year_Chart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM').format(selectedDate ?? DateTime.now()),
       );
 
@@ -297,9 +321,11 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
   Future<void> MultiYear_Chart() async {
 
     setState(() => isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _spo2controller.MultiYear_Chart(
-         '102',
+         user_id,
         //fromYear!,
         toYear!,
       );
@@ -340,28 +366,50 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    return Scaffold(
+    return WillPopScope(
+        onWillPop: () async {
+          ExitAppDialog();
+          return true;
+        },
+        child:AdvancedDrawer(
+            controller: _advancedDrawerController,
+            backdropColor: Colors.grey.shade100,
+            drawer: NavMenu(name: widget.name, email : widget.email, profile:widget.profile, noti_count: widget.noti_count, ),
+    child:  Scaffold(
         backgroundColor: Color(0xFFffffff),
         appBar: AppBar(
           centerTitle: true,
-          title: Row(
+          title: widget.profile == null ? ShimmerLoadingItem() : Row(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              // Center the text using the Center widget
-              Expanded(
-                child: Center(
-                  child: Text(
-                    username != null
-                        ? "${makePossessive(username)} Blood Oxygen" : "",
-                    textAlign: TextAlign.center,
-                    style: Apptextstyle.s18wbap,
-                  ),
+              GestureDetector(
+                onTap: (){
+                  Get.to(()=>Profile());
+                },
+                child: CircleAvatar(
+                  backgroundImage: NetworkImage(widget.profile),
+                  radius: 20,
                 ),
               ),
-              // Spacer to push the zoom button to the right
+              SizedBox(width: 20),
+              TextTitle1(
+                title: "Hi, ${username.toString().capitalizeFirst}",
+                color: Colors.black,
+              ),
+              Spacer(),
+              IconButton(
+                onPressed: () {
+                  _advancedDrawerController.showDrawer();
+                },
+                icon: Icon(
+                  Icons.menu,
+                  color: Colors.black,
+                ),
+              ),
             ],
           ),
           leading: IconButton(
-            onPressed: (){
+            onPressed: () {
               Get.back();
             },
             icon: Icon(Icons.arrow_back_ios),
@@ -372,6 +420,11 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
           child: SingleChildScrollView(
               child:
               Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Text(
+                  AppText.blood_oxygen,
+                  textAlign: TextAlign.center,
+                  style: Apptextstyle.s18wbap,
+                ),
                 SizedBox(
                   height: 10,
                 ),
@@ -391,7 +444,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                               children: [
                                 InkWell(
                                   child: Text(
-                                    'Day',
+                                    AppText.day,
                                     style: Reports == 'Day'
                                         ? Apptextstyle.s16wncR
                                         : Apptextstyle.s16wncG,
@@ -407,7 +460,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                                 SizedBox(width: 20),
                                 InkWell(
                                   child: Text(
-                                    'Week',
+                                    AppText.week,
                                     style: Reports == 'Week'
                                         ? Apptextstyle.s16wncR
                                         : Apptextstyle.s16wncG,
@@ -423,7 +476,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                                 SizedBox(width: 20),
                                 InkWell(
                                   child: Text(
-                                    'Month',
+                                    AppText.month,
                                     style: Reports == 'Month'
                                         ? Apptextstyle.s16wncR
                                         : Apptextstyle.s16wncG,
@@ -439,7 +492,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                                 SizedBox(width: 20),
                                 InkWell(
                                   child: Text(
-                                    'Year',
+                                    AppText.year,
                                     style: Reports == 'Year'
                                         ? Apptextstyle.s16wncR
                                         : Apptextstyle.s16wncG,
@@ -456,7 +509,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                                 SizedBox(width: 20),
                                 InkWell(
                                   child: Text(
-                                    'Multi-Year',
+                                    AppText.multiyear,
                                     style: Reports == 'Multi-Year'
                                         ? Apptextstyle.s16wncR
                                         : Apptextstyle.s16wncG,
@@ -582,7 +635,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                               },
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: Color(0xff275176),
+                                  color: AppColors.othersT,
                                   borderRadius: BorderRadius.all(Radius.circular(8)),
                                 ),
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -635,7 +688,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                     chartData: chartData,
                     targetspo2noraml: targetNormal?.toInt() ?? 91,
                     targetspo2high: targetNormal?.toInt() ?? 95,
-                      ismonth: false,
+                      isMonth: false,
                       Xaxistitle: 'Time of Day',
                       title: 'Blood Oxygen for this Day',
                       xValueMapper: (d, _) => d.day // Your list of BloodOxygenData
@@ -647,7 +700,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                         targetspo2noraml: targetNormal?.toInt() ?? 91,
                         targetspo2high: targetNormal?.toInt() ?? 95 ,// Your
                         title: 'Avg Daily Blood Oxygen ',
-                      ismonth: false,
+                        isMonth: false,
                       Xaxistitle: 'Days',
                         xValueMapper: (d, _) => d.day
                     )
@@ -658,7 +711,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                           targetspo2noraml: targetNormal?.toInt() ?? 91,
                           targetspo2high: targetNormal?.toInt() ?? 95, // Your
                           title: 'Avg Weekly Blood Oxygen',
-                        ismonth: false,
+                          isMonth: false,
                         Xaxistitle: 'Weeks',
                           xValueMapper: (d, _) => d.months
                       )
@@ -669,7 +722,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                             targetspo2noraml: targetNormal?.toInt() ?? 91,
                             targetspo2high: targetNormal?.toInt() ?? 95, // Your
                             title: 'Avg Monthly Blood Oxygen',
-                          ismonth: false,
+                            isMonth: true,
                           Xaxistitle: 'Months',
                             xValueMapper: (d, _) => d.months
                         )
@@ -680,7 +733,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                               targetspo2noraml: targetNormal?.toInt() ?? 91,
                               targetspo2high: targetNormal?.toInt() ?? 95, // Your
                               title: 'Avg Yearly Blood Oxygen',
-                            ismonth: true,
+                              isMonth: false,
                             Xaxistitle: 'Years',
                               xValueMapper: (d, _) => d.Year
                           ),
@@ -715,99 +768,30 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                                       children: [
                                         _buildLegendspo2(
                                           context,
-                                          const Color(0xFFD1FCD1),
-                                          const Color(0xFF64EE64),
+                                          AppColors.spo2_n1,
+                                          AppColors.spo2_n2,
                                           AppText.spo2_n,
                                           AppText.spo2_np,
                                         ),
                                         const SizedBox(height: 5),
                                         _buildLegendspo2(
                                           context,
-                                          const Color(0xFFFAF0CC),
-                                          const Color(0xFFF5D666),
+                                          AppColors.spo2_h1,
+                                          AppColors.spo2_h2,
                                           AppText.spo2_h,
                                           AppText.spo2_mp,
                                         ),
                                         const SizedBox(height: 5),
                                         _buildLegendspo2(
                                           context,
-                                          const Color(0xFFF6CCCC),
-                                          const Color(0xFFF38F8F),
+                                          AppColors.spo2_l1,
+                                          AppColors.spo2_l2,
                                           AppText.spo2_l,
                                           AppText.spo2_lp,
                                         ),
                                       ],
                                     )
-                                    // Column(
-                                    //   crossAxisAlignment: CrossAxisAlignment.start,
-                                    //   children: [
-                                    //     Row(
-                                    //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    //       children: [
-                                    //         Container(
-                                    //           width: size.width * 0.1,
-                                    //           height: 10,
-                                    //           decoration: BoxDecoration(
-                                    //             color: Color(0xFFD1FCD1),
-                                    //             border: Border.all(color: Color(0xFF64EE64), width: 1),
-                                    //           ),
-                                    //         ),
-                                    //         SizedBox(width: 5),
-                                    //         Text(
-                                    //           AppText.spo2_n,
-                                    //           style: Apptextstyle.s11wbcB,
-                                    //           overflow: TextOverflow.ellipsis,
-                                    //           softWrap: false,
-                                    //         ),
-                                    //       ],
-                                    //     ),
-                                    //     SizedBox(height: 8),
-                                    //     Row(
-                                    //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    //       children: [
-                                    //         Container(
-                                    //           width: size.width * 0.1,
-                                    //           height: 10,
-                                    //           decoration: BoxDecoration(
-                                    //             color: Color(0xFFFAF0CC),
-                                    //             border: Border.all(color: Color(0xFFF5D666), width: 1),
-                                    //           ),
-                                    //         ),
-                                    //         SizedBox(width: 5),
-                                    //         Text(
-                                    //           AppText.spo2_h,
-                                    //           style: Apptextstyle.s11wbcB,
-                                    //           overflow: TextOverflow.ellipsis,
-                                    //           softWrap: false,
-                                    //         ),
-                                    //       ],
-                                    //     ),
-                                    //     SizedBox(height: 8),
-                                    //     Row(
-                                    //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    //       children: [
-                                    //         Container(
-                                    //           width: size.width * 0.1,
-                                    //           height: 10,
-                                    //           decoration: BoxDecoration(
-                                    //             color: Color(0xFFF6CCCC),
-                                    //             border: Border.all(color: Color(0xFFF38F8F), width: 1),
-                                    //           ),
-                                    //         ),
-                                    //         SizedBox(width: 5),
-                                    //         Text(
-                                    //           AppText.spo2_l,
-                                    //           style: Apptextstyle.s11wbcB,
-                                    //           maxLines: 2,
-                                    //           softWrap: true,
-                                    //           // textAlign: TextAlign.left,
-                                    //         ),
-                                    //       ],
-                                    //     ),
-                                    //
-                                    //   ],
-                                    // ),
-          
+
                                   ],
                                 ),
           
@@ -953,7 +937,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                                               horizontal: 8),
                                           decoration: BoxDecoration(
                                             border: Border.all(
-                                              color: Color(0xffFF0000),
+                                              color: AppColors.Heartrate_color,
                                               // Border color for Systolic
                                               width: 1.0,
                                             ),
@@ -977,8 +961,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                                               // Toggle text on icon click
                                               child: Icon(
                                                 Icons.info_outline_rounded,
-                                                color: is_heart_rate ? Color(
-                                                    0xffFF0000) : Color(0xFF997f7f),
+                                                color: is_heart_rate ? AppColors.Heartrate_color : AppColors.info_changing,
                                               ),
                                             ),
                                           ],
@@ -1029,7 +1012,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                                     width: 45,
                                     height: 45,
                                     decoration: BoxDecoration(
-                                      color: Color(0xffFF0000),
+                                      color: AppColors.Heartrate_color,
                                       // Background color remains constant
                                       shape: BoxShape
                                           .rectangle, // Optional: make it circular
@@ -1092,7 +1075,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                               Text(
                                 currentTitle,
                                 style: TextStyle(
-                                    color: Colors.red, fontWeight: FontWeight.bold),
+                                    color: AppColors.othersT, fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -1107,7 +1090,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                                     Reports,
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        color: Color(0xFF275176)),
+                                        color: AppColors.othersT),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
@@ -1193,24 +1176,11 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                     ),
                   ),
                 )
-                // else if (Reports == "Week")
-                //   buildBloodPressureChart(
-                //     chartData: chartData,
-                //     xValueMapper: (BloodPressureData data, _) => data.day,
-                //   )
-                //   else if (Reports == "Month")
-                //       buildBloodPressureChart(
-                //         chartData: chartData,
-                //         xValueMapper: (BloodPressureData data, _) => data.months,
-                //       )
-                //     else if (Reports == "Year")
-                //         buildBloodPressureChart(
-                //           chartData: chartData,
-                //           xValueMapper: (BloodPressureData data, _) => data.Year,
-                //         ),
               ]
               )
           ),
+        )
+    )
         )
     );
   }
@@ -1227,7 +1197,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
     double minY = 85,
     double maxY = 104,
     double interval = 5,
-    required bool ismonth,
+    required bool isMonth,
     required String Xaxistitle,
 
   }) {
@@ -1249,44 +1219,79 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
         //margin: const EdgeInsets.only(left: 10, right: 20),
         plotAreaBorderWidth: 0.0,
         backgroundColor: Colors.white,
-        tooltipBehavior: TooltipBehavior(enable: true),
-        primaryXAxis: ismonth == true ? CategoryAxis(
-          title: AxisTitle(text: Xaxistitle),
-          // minimum: 0,
-          // maximum: 23,
-          // interval: 1,
-          axisLine: const AxisLine(width: 0),
-          majorGridLines: const MajorGridLines(width: 0),
-          majorTickLines: const MajorTickLines(size: 0),
-          axisLabelFormatter: (AxisLabelRenderDetails args) {
-            return ChartAxisLabel(
-              args.text, // args.text will be the time string like "08:05 AM"
-              const TextStyle(fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black
-              ),
-            );
-          },
-          // axisLabelFormatter: (AxisLabelRenderDetails args) {
-          //   return ChartAxisLabel(
-          //     args.value.toInt().toString(), // show 0 to 23
-          //     const TextStyle(fontSize: 7),
-          //   );
-          // },
-        ):
+        tooltipBehavior: TooltipBehavior(
+            enable: true,
+            textStyle: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold
+            )
+        ),
+        // primaryXAxis: ismonth == true ? CategoryAxis(
+        //   title: AxisTitle(text: Xaxistitle),
+        //   // minimum: 0,
+        //   // maximum: 23,
+        //   // interval: 1,
+        //   axisLine: const AxisLine(width: 0),
+        //   majorGridLines: const MajorGridLines(width: 0),
+        //   majorTickLines: const MajorTickLines(size: 0),
+        //   labelPlacement: LabelPlacement.onTicks,
+        //   edgeLabelPlacement: EdgeLabelPlacement.shift,
+        //   labelIntersectAction: AxisLabelIntersectAction.none, //
+        //   axisLabelFormatter: (AxisLabelRenderDetails args) {
+        //     return ChartAxisLabel(
+        //       args.text, // args.text will be the time string like "08:05 AM"
+        //       const TextStyle(fontSize: 9,
+        //           fontWeight: FontWeight.bold,
+        //           color: Colors.black
+        //       ),
+        //     );
+        //   },
+        //   // axisLabelFormatter: (AxisLabelRenderDetails args) {
+        //   //   return ChartAxisLabel(
+        //   //     args.value.toInt().toString(), // show 0 to 23
+        //   //     const TextStyle(fontSize: 7),
+        //   //   );
+        //   // },
+        // ):
+        // CategoryAxis(
+        //   title: AxisTitle(text: Xaxistitle),
+        //   axisLine: const AxisLine(width: 0),
+        //   labelStyle: TextStyle(
+        //     fontSize: 9,
+        //     fontWeight: FontWeight.bold,
+        //     color: Colors.black,
+        //   ),
+        //   majorGridLines: const MajorGridLines(width: 0),
+        //   majorTickLines: const MajorTickLines(size: 0),
+        //   labelPlacement: LabelPlacement.onTicks,
+        //   //edgeLabelPlacement: EdgeLabelPlacement.shift,
+        //   labelIntersectAction: AxisLabelIntersectAction.none,
+        //   maximumLabels: 12,
+        //   // axisLabelFormatter: (AxisLabelRenderDetails args) {
+        // ),
+        primaryXAxis: isMonth == true ?
         CategoryAxis(
           title: AxisTitle(text: Xaxistitle),
-          axisLine: const AxisLine(width: 0),
-          labelStyle: TextStyle(
-            fontSize: 9,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
+          labelStyle: TextStyle(fontSize: 9,
+              fontWeight: FontWeight.bold,
+              color: Colors.black
           ),
-          majorGridLines: const MajorGridLines(width: 0),
-          majorTickLines: const MajorTickLines(size: 0),
-          labelIntersectAction: AxisLabelIntersectAction.none, // ✅ Prevents skipping
           maximumLabels: 12,
-          // axisLabelFormatter: (AxisLabelRenderDetails args) {
+          labelIntersectAction: AxisLabelIntersectAction.none,
+          labelPlacement: LabelPlacement.onTicks,
+          majorTickLines: MajorTickLines(width: 0),
+          majorGridLines: MajorGridLines(width: 0),
+        )
+            : CategoryAxis(
+          title: AxisTitle(text: Xaxistitle),
+          labelStyle: TextStyle(fontSize: 9,
+              fontWeight: FontWeight.bold,
+              color: Colors.black
+          ),
+          majorTickLines: MajorTickLines(width: 0),
+          majorGridLines: MajorGridLines(width: 0),
+          labelPlacement: LabelPlacement.onTicks,
+          edgeLabelPlacement: EdgeLabelPlacement.shift,
         ),
         primaryYAxis: NumericAxis(
           title: AxisTitle(text: 'SpO₂ (%)'),
@@ -1312,12 +1317,12 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
 
         series: <CartesianSeries>[
           SplineSeries<BloodOxygenData, String>(
-            name: 'SpO₂',
+            name: AppText.spo2,
             dataSource: chartData,
             xValueMapper: xValueMapper,
             yValueMapper: (BloodOxygenData data, _) =>
             data.spo2 == 0 ? null : data.spo2,
-            color: const Color(0xffFF0000),
+            color: AppColors.Heartrate_color,
             markerSettings: const MarkerSettings(
                 isVisible: true,
                 height: 12,width: 12

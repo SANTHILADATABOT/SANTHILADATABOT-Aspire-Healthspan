@@ -8,9 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/app_color.dart';
 import '../utils/apptext.dart';
 import '../utils/apptextstyle.dart';
+import 'package:oktoast/oktoast.dart';
+import 'package:flutter/foundation.dart';
 import 'package:cupertino_height_picker/cupertino_height_picker.dart';
 
 
@@ -144,9 +147,10 @@ class _AddWeightState extends State<AddWeight> {
     setState(() {
       isLoading = true;
     });
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
-      final data = await addweightcontroller.Weight_Chart(userId: '102');
+      final data = await addweightcontroller.Weight_Chart(userId: user_id);
       setState(() {
         chartData = data;
         isLoading = false;
@@ -159,18 +163,54 @@ class _AddWeightState extends State<AddWeight> {
     }
   }
 
-
-  showToast(String msg) {
-    Fluttertoast.showToast(
-      msg: msg,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
+  void showCustomToast(String msg) {
+    showToast(
+      msg,
+      duration: Duration(seconds: 2),
+      position: kIsWeb ? ToastPosition.top : ToastPosition.bottom,
       backgroundColor: Colors.black,
-      textColor: Colors.white,
-      fontSize: 16.0,
+      radius: 8.0,
+      textPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+      textStyle: TextStyle(
+        fontSize: 16.0,
+        color: Colors.white,
+      ),
+      textAlign: TextAlign.center,
+      animationCurve: kIsWeb ? Curves.easeInOut : Curves.easeIn,
+      animationDuration: const Duration(milliseconds: 400),
+      animationBuilder: kIsWeb ? _slideFromRight : null,
     );
   }
+
+  Widget _slideFromRight(
+      BuildContext context,
+      Widget child,
+      AnimationController controller,
+      double percent,
+      ) {
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: Offset(1.2, 0.0), // far right
+        end: Offset(-1.2, 0.0),  // f // Slide to original position
+      ).animate(CurvedAnimation(
+        parent: controller,
+        curve: Curves.easeInOut,
+      )),
+      child: child,
+    );
+  }
+
+  // showToast(String msg) {
+  //   Fluttertoast.showToast(
+  //     msg: msg,
+  //     toastLength: Toast.LENGTH_SHORT,
+  //     gravity: ToastGravity.BOTTOM,
+  //     timeInSecForIosWeb: 1,
+  //     backgroundColor: Colors.black,
+  //     textColor: Colors.white,
+  //     fontSize: 16.0,
+  //   );
+  // }
   void check() {
     if (_dateController.text.isEmpty || _dateController.text == "Select Date") {
       showToast("Kindly Select a Valid Date");
@@ -220,6 +260,12 @@ class _AddWeightState extends State<AddWeight> {
         backgroundColor: Colors.white,
         centerTitle: true,
         title: Text(AppText.add_weight_headings,style: Apptextstyle.s18wbap),
+        leading: IconButton(
+          onPressed: () {
+            Get.back();
+          },
+          icon: Icon(Icons.arrow_back_ios),
+        ),
       ),
     body: SingleChildScrollView(
       child: Column(
@@ -452,7 +498,7 @@ class _AddWeightState extends State<AddWeight> {
                       children: [
                         Text(
                          AppText.dailyweightavg,
-                          style:Apptextstyle.s14wbcR,
+                          style:Apptextstyle.s14wbcO,
                         ),
                       ],
                     ),

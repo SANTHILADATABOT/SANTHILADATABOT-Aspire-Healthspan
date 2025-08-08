@@ -87,40 +87,67 @@ class _LoginScreenState extends State<LoginScreen> {
 
   }
 
+  // Future<void> login() async {
+  //
+  //   await _controller.login(
+  //     context: context,
+  //     setState: setState,
+  //     formKey: _formKey,
+  //     completePhoneNumber: completePhoneNumber,
+  //     token: token,
+  //     setLoading: (value) => setState(() => isLoading = value),
+  //     setPhoneValid: (value) => setState(() => _isPhoneValid = value),
+  //     onOtpReceived: (otp) => MobileOTP = otp,
+  //     onUserReceived: (user) => user = user,
+  //     onMobileNoReceived: (mobileNo) => mobileNo = mobileNo,
+  //   );
+  //
+  //
+  // }
+
   Future<void> login() async {
 
-    await _controller.login(
-      context: context,
-      setState: setState,
-      formKey: _formKey,
-      completePhoneNumber: completePhoneNumber,
-      token: token,
-      setLoading: (value) => setState(() => isLoading = value),
-      setPhoneValid: (value) => setState(() => _isPhoneValid = value),
-      onOtpReceived: (otp) => MobileOTP = otp,
-      onUserReceived: (user) => user = user,
-      onMobileNoReceived: (mobileNo) => mobileNo = mobileNo,
-    );
+    if (!_isPhoneValid || completePhoneNumber == null || completePhoneNumber!.isEmpty) {
+      setState(() {
+        _isPhoneValid = false; // ✅ Force error display
+      });
+      return;
+    }
 
-    // await _apiService.login(
-    //   context: context,
-    //   setState: setState,
-    //   formKey: _formKey,
-    //   completePhoneNumber: completePhoneNumber,
-    //   token: token,
-    //   setLoading: (value) => setState(() => isLoading = value),
-    //   setPhoneValid: (value) => setState(() => _isPhoneValid = value),
-    //   onOtpReceived: (otp) => MobileOTP = otp,
-    //   onUserReceived: (usr) => user = usr,
-    //   onMobileNoReceived: (mob) => mobileno = mob,
-    // );
+    setState(() {
+      isLoading = true;
+    });
 
+    try {
+      await _controller.login(
+        completePhoneNumber: completePhoneNumber ?? '',
+        token: token ?? '',
+        onOtpReceived: MobileOTP.toString(),
+        onUserReceived: user.toString(),
+        onMobileNoReceived: mobileno.toString(),
+      );
 
-
+      // setState(() {
+      //   MobileOTP = MobileOTP.toString();
+      //   user = user.toString();
+      //   mobileno = mobileno.toString();
+      // });
+    } catch (e) {
+      print('Login error: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return WillPopScope(
         onWillPop: () async {
       bool shouldExit = await showExitConfirmationDialog(context);
@@ -144,7 +171,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       SizedBox(height: 180),
                       Image.asset(
                         Appimages.applogo,
-                        height: 115,
+                        height: size.height * 0.15,
                         fit: BoxFit.cover,
                       ),
                       SizedBox(height: 20),

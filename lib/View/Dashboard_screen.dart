@@ -66,6 +66,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int weight = 0;
   String sleep = "";
   String bps = "";
+  var profilephoto ;
   String bpd = "";
   String sys = "";
   String Dia = "";
@@ -118,8 +119,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       }, shouldSync:true ,
     );
     _syncService.startSync();
-
-
     loadDashboardData();
     checkSession();
     loaddata();
@@ -167,7 +166,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> loadDashboardData() async {
-    final data = await _dashboardcontroller.fetchDashboardload('102');
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
+    print("user_id:$user_id");
+    final data = await _dashboardcontroller.fetchDashboardload(user_id);
     if (data != null) {
 
       DateTime originalDateTime = DateFormat('yyyy-MM-dd hh:mm:ss a').parse(data['collection_date']);
@@ -195,9 +197,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         }
       }
 
-
       if (mounted)
       setState(() {
+        profilephoto = data['profile_image'].toString();
         bps = data['blood_pressure_systolic'].toString();
         bpd = data['blood_pressure_diastolic'].toString();
         heartRate = data['heart_rate'].toString();
@@ -216,7 +218,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
 
   Future<void> _loadNotificationCount() async {
-    final count = await _notifycontroller.getNotificationCount('102');
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
+    final count = await _notifycontroller.getNotificationCount(user_id);
     if (mounted) {
       setState(() {
         noti_count = count;
@@ -265,7 +269,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: AdvancedDrawer(
         controller: _advancedDrawerController,
         backdropColor: Colors.grey.shade100,
-        drawer: NavMenu(name: name, email : email, profile:pofileimage, noti_count: noti_count, ),
+        drawer: NavMenu(name: name, email : email, profile:profilephoto, noti_count: noti_count, ),
         child: Scaffold(
           backgroundColor: AppColors.White,
           appBar: AppBar(
@@ -280,7 +284,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     onTap: (){
                       Get.to(()=>Profile());
                     },
-                    child: CircleAvatar(
+                    child:profilephoto !=null ? CircleAvatar(
+                      backgroundImage: NetworkImage(profilephoto),
+                      radius: 20,
+                    ):CircleAvatar(
                       backgroundImage: AssetImage(Appimages.profilelogo),
                       radius: 20,
                     ),
@@ -302,7 +309,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ],
               ),
-
       ),
           body: isLoading
               ? Padding(
@@ -374,17 +380,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               title: AppText.bp,
                               t1: bps,
                               t2: '$bpd',
-                              Bps: 'Sys',
-                              Bpd: '/Dia ',
-                              bpunit: ' mmHg',
+                              Bps: AppText.SYS,
+                              Bpd: AppText.DIA,
+                              bpunit: AppText.bp_unit,
                               t2fontsize: 24,
-                              datetime: 'Avg Sys/Dia Blood Pressure',
+                              datetime: AppText.avg_bp,
                               chart: BloodPressureChart(),
                               press: () {
-                                Get.to(()=>BloodPressureChartPage());
+                                Get.to(()=>BloodPressureChartPage(name: name, email : email, profile:profilephoto, noti_count: noti_count,));
                               },
-                              color1: Color(0xFF5454FF),
-                              color2: Color(0xFFF6803D),
+                              color1: AppColors.color1,
+                              color2: AppColors.color2,
                             )
                                 : SizedBox.shrink();
                           },
@@ -396,14 +402,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ? CustomCard(
                               title: AppText.HR,
                               t1: heartRate,
-                              t2: "BPM",
+                              t2: AppText.HR_unit,
                               t2fontsize: 15,
-                              datetime: 'Avg Heart Rate',
+                              datetime: AppText.avg_hr,
                               chart: HeartRateChartPage(),
                               press: () {
-                                Get.to(()=>HeartRateChart());
+                                Get.to(()=>HeartRateChart(name: name, email : email,profile:profilephoto, noti_count: noti_count,));
                               },
-                              color: Color(0xFFe13b4a),
+                              color: Color(0xFFe13b4a), heading: 'heart',
                             )
                                 : SizedBox.shrink();
                           },
@@ -417,12 +423,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               t1: NumberFormat.decimalPattern('en_US').format(int.tryParse(steps) ?? 0),
                               t2: AppText.D_Steps,
                               t2fontsize: 15,
-                              datetime: 'Avg Daily Steps',
+                              datetime:  AppText.avg_steps,
                               chart: StepsChart(),
                               press: () {
-                                Get.to(()=>StepsChartPage());
+                                Get.to(()=>StepsChartPage(name: name, email : email,profile:profilephoto, noti_count: noti_count));
                               },
-                              color: Color(0xFF9C53C7),
+                              color: Color(0xFF9C53C7), heading: 'steps',
                             )
                                 : SizedBox.shrink();
                           },
@@ -436,12 +442,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               t1: sleep,
                               t2: "",
                               t2fontsize: 15,
-                              datetime: 'Avg Daily Total Sleep',
+                              datetime: AppText.avg_sleep,
                               chart: SleepChart(),
                               press: () {
-                                Get.to(()=>SleepChartPage());
+                                Get.to(()=>SleepChartPage(name: name, email : email,profile:profilephoto, noti_count: noti_count));
                               },
-                              color: Color(0xFF38B1A0),
+                              color: AppColors.color3,
                               deepPercentage: _formatPercentage(deepPercentage),
                               middlePercentage: _formatPercentage(middlePercentage),
                               lightPercentage: _formatPercentage(lightPercentage),
@@ -456,16 +462,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             return show
                                 ? CustomCardspo2(
                               title: AppText.blood_oxygen,
-                              t1: "96 %",
+                              t1: "96%",
                               t2: "",
                               t2fontsize: 15,
-                              datetime: 'Avg',
+                              datetime: AppText.avg,
                               chart: BloodOxygenChartPage(),
                               press: () {
                                 //Navigator.push(context, MaterialPageRoute(builder: (context) => BloodoxygenPressureChartPage()));
-                                Get.to(()=>BloodoxygenPressureChartPage());
+                                Get.to(()=>BloodoxygenPressureChartPage(name: name, email : email,profile:profilephoto, noti_count: noti_count));
                               },
-                              color: Color(0xFFe13b4a),
+                              color: AppColors.color4,
                             )
                                 : SizedBox.shrink();
                           },
@@ -475,12 +481,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           t1: weight.toString(),
                           t2: AppText.pounds,
                           t2fontsize: 15,
-                          datetime: 'Avg',
+                          datetime: AppText.avg,
                           chart: WeightChartPage(),
                           press: () {
-                            Get.to(()=>WeightChart());
+                            Get.to(()=>WeightChart(name: name, email : email,profile:profilephoto, noti_count: noti_count));
                           },
-                          color: Color(0xffF5B849),
+                          color: Color(0xffF5B849), heading: 'weight',
                         ),
                       ],
                     ),

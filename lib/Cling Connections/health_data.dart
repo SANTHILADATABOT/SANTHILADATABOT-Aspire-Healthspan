@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../View/Dashboard_screen.dart';
 
 class HealthDataController {
@@ -39,12 +40,13 @@ class HealthDataController {
   Future<void> sendHeartRateToAPI(int heartRate, int totalSteps, int systolicBP, int diastolicBP, int totalSleep) async {
     String formattedDate = DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now());
     String formattedDate1 = DateFormat('yyyy-MM-dd').format(DateTime.now());
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     final url = Uri.parse("https://app.aspirehealthspan.ai/aspire_api/health_variable/add");
 
     final body = {
       "heart_rate": heartRate.toString(),
-      "user_id": "102",
+      "user_id": user_id,
       "datetime": formattedDate,
       "blood_pressure_systolic": systolicBP.toString(),
       "blood_pressure_diastolic": diastolicBP.toString(),

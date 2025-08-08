@@ -133,6 +133,81 @@ class WeightController extends GetxController {
   }
 
 
+  // Future<Map<String, dynamic>> Month_Chart(String userId, String date) async {
+  //   final String url = "$root/weight";
+  //   final Map<String, dynamic> payload = {
+  //     'user_id': userId,
+  //     'date': date,
+  //     'filter': 'month',
+  //   };
+  //
+  //   print('Sending payload: $payload');
+  //
+  //   try {
+  //     final response = await http.post(Uri.parse(url), body: payload);
+  //
+  //     print("Response Status: ${response.statusCode}");
+  //     print("Response Body: ${response.body}");
+  //
+  //     if (response.statusCode == 200) {
+  //       final Map<String, dynamic> jsonResponse = json.decode(response.body);
+  //       print("Monthly Weight Response: $jsonResponse");
+  //
+  //       if (jsonResponse['status'] == "SUCCESS") {
+  //         final Map<String, dynamic> monthChartData = jsonResponse['month_chart_weight'] ?? {};
+  //         List<WeightChartData> chartData = [];
+  //         int weighttarget = jsonResponse['weight_target'] ?? 215;
+  //         int bmitarget = jsonResponse['bmi_target'] ?? 30;
+  //
+  //         monthChartData.forEach((weekKey, weekData) {
+  //           String startDateStr = weekData['start_date'] ?? '';
+  //           String endDateStr = weekData['end_date'] ?? '';
+  //
+  //           DateTime startDate = DateTime.tryParse(startDateStr) ?? DateTime.now();
+  //           DateTime endDate = DateTime.tryParse(endDateStr) ?? DateTime.now();
+  //
+  //           double avgWeight = (weekData['average_weight'] as num?)?.toDouble() ?? 0.0;
+  //           double avgBmi = (weekData['average_bmi'] as num?)?.toDouble() ?? 0.0;
+  //
+  //           double weightVal = avgWeight.roundToDouble();
+  //           int bmiVal = avgBmi.truncate();
+  //
+  //           print(
+  //               "$weekKey [${DateFormat('MMM dd').format(startDate)} - ${DateFormat('MMM dd').format(endDate)}] → weight: $weightVal, bmi: $bmiVal");
+  //
+  //           chartData.add(
+  //             WeightChartData(
+  //               date: startDate.toLocal(),
+  //               day: '', // you can label them as "W1", "W2", etc. in the chart
+  //               weightrate: weightVal,
+  //               bmidata: bmiVal.toDouble(),
+  //               months: weekKey,
+  //               Years: '',
+  //             ),
+  //           );
+  //         });
+  //
+  //         return {
+  //           'chartData': chartData,
+  //           'weight': jsonResponse['month_weight'],
+  //           'bmi': jsonResponse['bmi'],
+  //           'mainDate': jsonResponse['month_date_time'],
+  //           'weight_target':weighttarget,
+  //           'bmi_target':bmitarget
+  //         };
+  //       } else {
+  //         throw Exception('API Error: ${jsonResponse['message']}');
+  //       }
+  //     } else {
+  //       throw Exception(
+  //           'Failed to load month weight data. Status: ${response.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     print('Error fetching monthly weight data: $e');
+  //     rethrow;
+  //   }
+  // }
+
   Future<Map<String, dynamic>> Month_Chart(String userId, String date) async {
     final String url = "$root/weight";
     final Map<String, dynamic> payload = {
@@ -142,6 +217,21 @@ class WeightController extends GetxController {
     };
 
     print('Sending payload: $payload');
+
+    List<String> generateWeekLabels(String yearMonth) {
+      final parts = yearMonth.split("-");
+      final year = int.parse(parts[0]);
+      final month = int.parse(parts[1]);
+
+      final firstDay = DateTime(year, month, 1);
+      final lastDay = DateTime(year, month + 1, 0); // Last day of month
+
+      int totalDays = lastDay.day;
+      int offsetDays = firstDay.weekday - 1; // Days before 1st to align with week
+      int numWeeks = ((offsetDays + totalDays) / 7).ceil();
+
+      return List.generate(numWeeks, (index) => 'W${index + 1}');
+    }
 
     try {
       final response = await http.post(Uri.parse(url), body: payload);
@@ -159,54 +249,73 @@ class WeightController extends GetxController {
           int weighttarget = jsonResponse['weight_target'] ?? 215;
           int bmitarget = jsonResponse['bmi_target'] ?? 30;
 
-          monthChartData.forEach((weekKey, weekData) {
-            String startDateStr = weekData['start_date'] ?? '';
-            String endDateStr = weekData['end_date'] ?? '';
+          // 🔁 Dynamically generate week labels based on the selected month
+          final List<String> weekLabels = generateWeekLabels(date);
 
-            DateTime startDate = DateTime.tryParse(startDateStr) ?? DateTime.now();
-            DateTime endDate = DateTime.tryParse(endDateStr) ?? DateTime.now();
+          for (String weekKey in weekLabels) {
+            if (monthChartData.containsKey(weekKey)) {
+              final weekData = monthChartData[weekKey];
 
-            double avgWeight = (weekData['average_weight'] as num?)?.toDouble() ?? 0.0;
-            double avgBmi = (weekData['average_bmi'] as num?)?.toDouble() ?? 0.0;
+              String startDateStr = weekData['start_date'] ?? '';
+              String endDateStr = weekData['end_date'] ?? '';
 
-            double weightVal = avgWeight.roundToDouble();
-            int bmiVal = avgBmi.truncate();
+              DateTime startDate = DateTime.tryParse(startDateStr) ?? DateTime.now();
+              DateTime endDate = DateTime.tryParse(endDateStr) ?? DateTime.now();
 
-            print(
-                "$weekKey [${DateFormat('MMM dd').format(startDate)} - ${DateFormat('MMM dd').format(endDate)}] → weight: $weightVal, bmi: $bmiVal");
+              double avgWeight = (weekData['average_weight'] as num?)?.toDouble() ?? 0.0;
+              double avgBmi = (weekData['average_bmi'] as num?)?.toDouble() ?? 0.0;
 
-            chartData.add(
-              WeightChartData(
-                date: startDate.toLocal(),
-                day: '', // you can label them as "W1", "W2", etc. in the chart
-                weightrate: weightVal,
-                bmidata: bmiVal.toDouble(),
-                months: weekKey,
-                Years: '',
-              ),
-            );
-          });
+              double weightVal = avgWeight.roundToDouble();
+              int bmiVal = avgBmi.truncate();
+
+              print(
+                  "$weekKey [${DateFormat('MMM dd').format(startDate)} - ${DateFormat('MMM dd').format(endDate)}] → weight: $weightVal, bmi: $bmiVal");
+
+              chartData.add(
+                WeightChartData(
+                  date: startDate.toLocal(),
+                  day: '',
+                  weightrate: weightVal,
+                  bmidata: bmiVal.toDouble(),
+                  months: weekKey,
+                  Years: '',
+                ),
+              );
+            } else {
+              // No data for this week → fill with 0
+              chartData.add(
+                WeightChartData(
+                  date: DateTime.now(), // Optional placeholder
+                  day: '',
+                  weightrate: 0.0,
+                  bmidata: 0.0,
+                  months: weekKey,
+                  Years: '',
+                ),
+              );
+            }
+          }
 
           return {
             'chartData': chartData,
             'weight': jsonResponse['month_weight'],
             'bmi': jsonResponse['bmi'],
             'mainDate': jsonResponse['month_date_time'],
-            'weight_target':weighttarget,
-            'bmi_target':bmitarget
+            'weight_target': weighttarget,
+            'bmi_target': bmitarget
           };
         } else {
           throw Exception('API Error: ${jsonResponse['message']}');
         }
       } else {
-        throw Exception(
-            'Failed to load month weight data. Status: ${response.statusCode}');
+        throw Exception('Failed to load month weight data. Status: ${response.statusCode}');
       }
     } catch (e) {
       print('Error fetching monthly weight data: $e');
       rethrow;
     }
   }
+
 
 
   Future<Map<String, dynamic>> Year_Chart(String userId, String date) async {

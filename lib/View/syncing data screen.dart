@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../View/Dashboard_screen.dart';
 import '../utils/app_color.dart';
 
@@ -233,7 +234,8 @@ class _SyncDataScreenState extends State<SyncDataScreen> {
     final url = Uri.parse('https://app.aspirehealthspan.ai/aspire_api/minute_health_variable/add');
 
     print("📤 Sending raw bulk minute data to API");
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final response = await http.post(
         url,
@@ -241,7 +243,7 @@ class _SyncDataScreenState extends State<SyncDataScreen> {
           "Content-Type": "application/json",
         },
         body: jsonEncode({
-          "user_id": "102",
+          "user_id": user_id,
           "data": dataList,
         }),
       );
@@ -266,11 +268,12 @@ class _SyncDataScreenState extends State<SyncDataScreen> {
     print("formattedDate1${formattedDate1}");
     print("formattedDate${formattedDate}");
     final url = Uri.parse("https://app.aspirehealthspan.ai/aspire_api/health_variable/add");
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
 
     final body = {
       "heart_rate": heartRate.toString(),
-      "user_id": "102",
+      "user_id":user_id,
       "datetime": formattedDate,
       "blood_pressure_systolic": systolicBP.toString(),
       "blood_pressure_diastolic": diastolicBP.toString(),

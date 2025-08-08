@@ -1,14 +1,15 @@
-import 'package:fluttertoast/fluttertoast.dart';
+
 import 'dart:convert';
+import 'package:azpire_new/email_screen/verification_otp.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timer_count_down/timer_controller.dart';
-
+import 'package:oktoast/oktoast.dart';
+import 'package:flutter/foundation.dart'; // for kIsWeb
 import '../View/Dashboard_screen.dart';
-import '../email_screen/verification_otp.dart';
 import '../root/root.dart';
 
 class EmailController {
@@ -43,13 +44,13 @@ class EmailController {
         if(jsonResponse['status'] == "SUCCESS"){
            emailOtp = jsonResponse['data']['email_otp'].toString()  ;
            email = jsonResponse['data']["email"];
-          showToast("OTP sent to Email");
+           showCustomToast("OTP sent to Email");
           Get.to(() => VerificationOtpScreen(
             email: email!,
             emailOtp: emailOtp,
           ));
         } else {
-          showToast("Email not Registered");
+          showCustomToast("Email not Registered");
           setState(() {
             isLoading(false);
           });
@@ -121,7 +122,7 @@ class EmailController {
           await prefs.setString('email', email);
           await prefs.setString('pofile', pofile);
 
-          showToast("Sign In Successful");
+          showCustomToast("Sign In Successful");
           controller.pause();
 
           setState(() {
@@ -134,7 +135,7 @@ class EmailController {
           setState(() {
             setLoading(false);
           });
-          showToast("OTP Mismatch. Please try again.");
+          showCustomToast("OTP Mismatch. Please try again.");
         }
       } else {
         print('Request failed with status: ${response.statusCode}.');
@@ -144,7 +145,7 @@ class EmailController {
       }
     } catch (e) {
       print('Error:1 $e');
-      showToast("An error occurred. Please try again.");
+      showCustomToast("An error occurred. Please try again.");
     }
   }
 
@@ -216,17 +217,59 @@ class EmailController {
 
 }
 
-showToast(String msg) {
-  Fluttertoast.showToast(
-      msg: msg,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
-      backgroundColor: Colors.black,
-      textColor: Colors.white,
-      fontSize: 16.0
-  );
+// showToast(String msg) {
+//   Fluttertoast.showToast(
+//       msg: msg,
+//       toastLength: Toast.LENGTH_SHORT,
+//       gravity: ToastGravity.BOTTOM,
+//       timeInSecForIosWeb: 1,
+//       backgroundColor: Colors.black,
+//       textColor: Colors.white,
+//       fontSize: 16.0
+//   );
+//
+// }
 
+void showCustomToast(String msg) {
+  showToastWidget(
+    Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 75),
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Text(
+        msg,
+        textAlign: TextAlign.center,
+        style: TextStyle(fontSize: 16.0, color: Colors.white),
+      ),
+    ),
+    position: ToastPosition.bottom,
+    duration: Duration(seconds: 2),
+    animationCurve: kIsWeb ? Curves.easeInOut : Curves.easeIn,
+    animationDuration: const Duration(milliseconds: 400),
+    animationBuilder: kIsWeb ? _slideFromRight : null,
+  );
+}
+
+
+Widget _slideFromRight(
+    BuildContext context,
+    Widget child,
+    AnimationController controller,
+    double percent,
+    ) {
+  return SlideTransition(
+    position: Tween<Offset>(
+      begin: Offset(1.2, 0.0), // far right
+      end: Offset(-1.2, 0.0),  // f // Slide to original position
+    ).animate(CurvedAnimation(
+      parent: controller,
+      curve: Curves.easeInOut,
+    )),
+    child: child,
+  );
 }
 
 

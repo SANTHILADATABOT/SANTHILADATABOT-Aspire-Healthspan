@@ -294,6 +294,7 @@
 //
 //
 
+import 'package:azpire_new/Cling%20Connections/hive_model.dart';
 import 'package:azpire_new/root/root.dart';
 import 'package:azpire_new/web_app/platform_utils_stub.dart';
 import 'package:flutter/foundation.dart';
@@ -302,6 +303,7 @@ import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
@@ -534,6 +536,18 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    print('Flutter Error: ${details.exceptionAsString()}');
+  };
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    print('Uncaught platform error: $error');
+    return true;
+  };
+
+
   if (kIsWeb) {
     await Firebase.initializeApp(
       options: const FirebaseOptions(
@@ -548,6 +562,7 @@ Future<void> main() async {
     );
   } else {
     await Firebase.initializeApp();
+
   }
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -561,6 +576,11 @@ Future<void> main() async {
       print("ATT already determined: $status");
     }
   }
+
+  await Hive.initFlutter();
+  await Hive.openBox('minuteDataBox');
+  await Hive.initFlutter(); // initialize Hive for Flutter
+  Hive.registerAdapter(MinuteDataAdapter());
 
   const AndroidInitializationSettings initializationSettingsAndroid =
   AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -627,8 +647,10 @@ class _SplashPageState extends State<SplashPage> {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', token ?? "");
       } else {
+        // final token = await messaging.getToken();
+        // print("Mobile Token: $token");
         final token = await messaging.getToken();
-        print("Mobile Token: $token");
+        print("FCM Token: ${token ?? 'null'}");
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', token ?? "");
       }
@@ -680,6 +702,10 @@ class _SplashPageState extends State<SplashPage> {
           // No device found, navigate to BluetoothPair
           Future.delayed(Duration(seconds: 1), () {
             Get.offAll(() => BluetoothPair());
+           //  Get.offUntil(
+           //    MaterialPageRoute(builder: (_) => BluetoothPair()),
+           //        (route) => false,
+           //  );
           });
         }
       } on PlatformException catch (e) {
@@ -692,6 +718,10 @@ class _SplashPageState extends State<SplashPage> {
       // Not logged in, show login
       Future.delayed(Duration(seconds: 1), () {
         Get.offAll(() => LoginScreen());
+        // Get.offUntil(
+        //   MaterialPageRoute(builder: (_) => LoginScreen()),
+        //       (route) => false,
+        // );
       });
     }
 
@@ -739,7 +769,14 @@ class _SplashPageState extends State<SplashPage> {
   }
 }
 
+
+
 Future<void> _showNotification(String? title, String? body) async {
+  if (title == null && body == null) {
+    print("Skipping notification: both title and body are null");
+    return;
+  }
+
   const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
     'your_channel_id',
     'your_channel_name',
@@ -754,10 +791,31 @@ Future<void> _showNotification(String? title, String? body) async {
 
   await flutterLocalNotificationsPlugin.show(
     0,
-    title,
-    body,
+    title ?? 'No Title',
+    body ?? 'No Body',
     platformDetails,
     payload: 'notification_payload',
   );
 }
 
+// Future<void> _showNotification(String? title, String? body) async {
+//   const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+//     'your_channel_id',
+//     'your_channel_name',
+//     importance: Importance.max,
+//     priority: Priority.high,
+//   );
+//
+//   const NotificationDetails platformDetails = NotificationDetails(
+//     android: androidDetails,
+//     iOS: DarwinNotificationDetails(),
+//   );
+//
+//   await flutterLocalNotificationsPlugin.show(
+//     0,
+//     title,
+//     body,
+//     platformDetails,
+//     payload: 'notification_payload',
+//   );
+// }

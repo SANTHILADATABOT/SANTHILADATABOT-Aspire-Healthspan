@@ -4,6 +4,7 @@ import 'package:azpire_new/View/edit_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timer_count_down/timer_controller.dart';
 import '../root/root.dart';
 import 'package:oktoast/oktoast.dart';
@@ -23,12 +24,13 @@ class EditEmailController {
     setState(() {
       isLoading_1 = true;
     });
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     final String url = '$root/update_mobile_email';
 
     final Map<String, String> userData = {
       'email': emailController.text,
-      'user_id': "102"
+      'user_id': user_id
     };
 
     try {
@@ -73,11 +75,13 @@ class EditEmailController {
     Future<void> otp_timeout_email({
      required TextEditingController emailController,
    }) async {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var user_id = prefs.getString('user_id') ?? "";
      final String url = '$root/update_otp_timeout';
 
      final Map<String, String> userData = {
        'email': emailController.text,
-       'user_id': "102"
+       'user_id': user_id
      };
 
      try {
@@ -105,12 +109,13 @@ class EditEmailController {
      required bool resend,
    }) async {
      print(emailController.text);
-
+     final SharedPreferences prefs = await SharedPreferences.getInstance();
+     var user_id = prefs.getString('user_id') ?? "";
      final String url = '$root/email_update_resend_otp';
 
      final Map<String, String> userData = {
        'email': emailController.text,
-       'user_id': "102"
+       'user_id': user_id
      };
 
      try {
@@ -149,12 +154,13 @@ class EditEmailController {
      setState(() {
        isLoading_1 = true;
      });
-
+     final SharedPreferences prefs = await SharedPreferences.getInstance();
+     var user_id = prefs.getString('user_id') ?? "";
      final String url = '$root/updt_mobmail_otp_verify';
 
      final Map<String, String> userData = {
        'email': emailController.text,
-       'user_id': "102",
+       'user_id': user_id,
        'mobile_email_otp': enteredOtp
      };
 
@@ -212,24 +218,27 @@ class EditEmailController {
 // }
 
 void showCustomToast(String msg) {
-  showToast(
-    msg,
-    duration: Duration(seconds: 2),
-    position: kIsWeb ? ToastPosition.top : ToastPosition.bottom,
-    backgroundColor: Colors.black,
-    radius: 8.0,
-    textPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-    textStyle: TextStyle(
-      fontSize: 16.0,
-      color: Colors.white,
+  showToastWidget(
+    Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 75),
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Text(
+        msg,
+        textAlign: TextAlign.center,
+        style: TextStyle(fontSize: 16.0, color: Colors.white),
+      ),
     ),
-    textAlign: TextAlign.center,
+    position: ToastPosition.bottom,
+    duration: Duration(seconds: 2),
     animationCurve: kIsWeb ? Curves.easeInOut : Curves.easeIn,
     animationDuration: const Duration(milliseconds: 400),
     animationBuilder: kIsWeb ? _slideFromRight : null,
   );
 }
-
 Widget _slideFromRight(
     BuildContext context,
     Widget child,

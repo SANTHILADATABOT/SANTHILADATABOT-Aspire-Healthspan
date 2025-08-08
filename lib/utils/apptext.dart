@@ -4,11 +4,17 @@ class AppText {
   static const splashAppname = "ASPIRE HEALTHSPAN";
 
  //Common
+  static const valid_username = "Please enter a valid username";
+  static const valid_phoneno = "Please enter a valid phone number";
+  static const valid_email = "Please enter a valid email address";
+  static const email_address = "Please enter an email address";
   static const std = "Standard Deviation";
   static const mostrecent = "Most Recent";
-  static const week_chart = "Week";
-  static const month_chart = "Month";
-  static const year_chart = "Year";
+  static const day = "Day";
+  static const week = "Week";
+  static const month= "Month";
+  static const year = "Year";
+  static const multiyear = "Multi-Year";
   static const zoom = "Zoom";
   static const country = "US";
   static const target = "Target";
@@ -25,6 +31,9 @@ class AppText {
   static const createAccount = "Create Your Account";
   static const alreadyHaveAccount = "Do you have already an account ?";
   static const generateotp = "Generate OTP";
+  static const user_name = "User Name";
+  static const Phone_number = "Phone Number";
+  static const email_id = "Email Id";
   static const LOGIN = "Login";
 
   //LogIn Screen
@@ -37,7 +46,7 @@ class AppText {
 
   //OTP Verification Mobile
   static const verificationcode = "Enter Verification Code";
-  static const mobilesentotp = "We have sent an OTP on your Mobile Number";
+  static const sentotp = "We have sent an OTP on your Mobile Number";
   static const resendmobileotp = "Resend OTP ?";
   static const SUBMIT = "Submit";
 
@@ -63,6 +72,17 @@ class AppText {
   static const spo2_N = "Normal";
   static const spo2_H = "Concern";
   static const spo2_L= "Low";
+  static const SYS= "Sys";
+  static const DIA= "/Dia";
+  static const avg_bp= "Avg Sys/Dia Blood Pressure";
+  static const bp_unit= "mmHg";
+  static const HR_unit= "BPM";
+  static const avg_hr = "Avg Heart Rate";
+  static const avg_steps = "Avg Daily Steps";
+  static const avg_sleep = "Avg Daily Total Sleep";
+  static const avg = "Avg";
+
+
 
 
   //Profile Screen
@@ -77,17 +97,29 @@ class AppText {
   static const weightkg = "Weight";
   static const mobno = "Mobile Number";
   static const email = "Email";
+  static const edit = "Edit";
 
   //EditProfile Screen
   static const choosewith = "Choose With";
   static const gallery = "Gallery";
   static const camera = "Camera";
-  static const bday = "Birthday";
-  static const Esex = "Sex";
-  static const Emale = "Male";
-  static const Efemale = "Female";
-  static const Eothers = "Others";
-  static const Ebtn = "Done";
+  static const E_bday = "Birthday";
+  static const E_sex = "Sex";
+  static const E_male = "Male";
+  static const E_female = "Female";
+  static const E_others = "Others";
+  static const E_btn = "Done";
+  static const edit_Fname = "First Name";
+  static const edit_Lname = "Last Name";
+  static const edit_month = "Month";
+  static const edit_day = "Day";
+  static const edit_year = "Year";
+  static const edit_height = "Height (ft/in)";
+  static const edit_weight = "weight (lbs)";
+  static const edit_mobileno = "Mobile Number";
+  static const edit_emailid = "E-mail ID";
+  static const verify = "Verify";
+
  //Blood Pressure
   static const SYSTOLIC = "Systolic";
   static const DIASTOLIC = "Diastolic";
@@ -107,6 +139,7 @@ class AppText {
   static const dmil = "Avg\nDistance\n(mi)";
   static const kcal = "Calories\nBurnt\n(kcal)";
   static const targetsteps = "Target Daily Steps is";
+  static const steps = "Steps";
 
   //Weight
   static const weight_lbs = "Weight (lbs)";
@@ -137,9 +170,10 @@ class AppText {
   static const weight_heading = "Weight";
   static const add_weight_headings = "Add Weight";
   static const admin_headings = "Admin";
-  static const SDK_headings = "Cling SDK Device Scanner";
+  static const SDK_headings = "Near by Wearable Devices";
   static const sync_headings = "Syncing Data";
   static const sleep_heading = "Sleep Statistics";
+  static const notification_heading = "Nudges";
 
   //detailscreen textinfo
   static const bp_blue_info1 = 'The shaded area around the blue line represents the systolic standard deviation of the blood pressure readings. This indicates the variability or spread of the data points around the average value.';
@@ -176,6 +210,7 @@ class AppText {
   static const spo2_np = "Normal";
   static const spo2_mp = "Concerning";
   static const spo2_lp = "Low Blood Oxygen Levels";
+  static const spo2 = "SpO₂";
 
 
   //sleep screen
@@ -185,9 +220,12 @@ class AppText {
   static const middle = "Middle";
   static const total_s = "Total Sleep";
   static const total_s1 = "Total\nSleep";
-  static const deepsleep = "Deep Sleep";
-  static const lightsleep = "Light Sleep";
-  static const middlesleep = "Middle Sleep";
+  static const deepsleep = "Deep Sleep - Restorative Stage";
+  static const lightsleep = "Light Sleep - Relaxing Stage";
+  static const middlesleep = "Middle Sleep - Transitional Stage";
+
+  //notifications
+  static const no_notifications = "No Notifications";
 
 
 

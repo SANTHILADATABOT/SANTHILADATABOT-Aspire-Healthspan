@@ -34,6 +34,56 @@ class Apptextstyle {
     fontSize: 10,
   );
 
+  static const s24wbc1 = TextStyle(
+    fontFamily: "Inter",
+    fontWeight: FontWeight.bold,
+    fontSize: 24,
+    color: AppColors.color1
+  );
+
+  static const s24wbc2 = TextStyle(
+      fontFamily: "Inter",
+      fontWeight: FontWeight.bold,
+      fontSize: 24,
+      color: AppColors.color2
+  );
+
+  static const s24wbc3 = TextStyle(
+      fontFamily: "Inter",
+      fontWeight: FontWeight.bold,
+      fontSize: 24,
+      color: AppColors.color3
+  );
+
+  static const s12wbc3 = TextStyle(
+      fontFamily: "Inter",
+      fontWeight: FontWeight.bold,
+      fontSize: 12,
+      color: AppColors.color3
+  );
+
+  static const s24wbc4 = TextStyle(
+      fontFamily: "Inter",
+      fontWeight: FontWeight.bold,
+      fontSize: 24,
+      color: AppColors.color4
+  );
+
+  static const s12wbc4 = TextStyle(
+      fontFamily: "Inter",
+      fontWeight: FontWeight.bold,
+      fontSize: 12,
+      color: AppColors.color4
+  );
+
+
+
+  static const s15wb= TextStyle(
+      fontFamily: "Inter",
+      fontWeight: FontWeight.bold,
+      fontSize: 15,
+  );
+
 
 
 
@@ -51,12 +101,31 @@ class Apptextstyle {
     color: AppColors.contentColorBlack,
     fontSize: 12,
   );
+  static const s12wnchr = TextStyle(
+  fontFamily: "Inter",
+  fontSize: 25,
+  fontWeight: FontWeight.bold,
+  color: Color(0xFFe13b4a)
 
-  static const s14wbcR = TextStyle(
+  );  static const s12wncsteps = TextStyle(
+  fontFamily: "Inter",
+  fontSize: 25,
+  fontWeight: FontWeight.bold,
+  color: Color(0xFF9C53C7)
+  );
+
+  static const s12wncweight = TextStyle(
+  fontFamily: "Inter",
+  fontSize: 25,
+  fontWeight: FontWeight.bold,
+  color: Color(0xffF5B849)
+  );
+
+  static const s14wbcO = TextStyle(
       fontFamily: "Inter",
       fontWeight: FontWeight.bold,
       fontSize: 14,
-      color: Colors.red
+      color: AppColors.othersT
   );
 
 
@@ -81,6 +150,7 @@ class Apptextstyle {
     fontWeight: FontWeight.normal,
     fontSize: 16,
     color: Colors.red,
+   // color: Color(0xFF275176)
   );
 
   static const s16wncG = TextStyle(
@@ -412,21 +482,21 @@ class Apptextstyle {
     fontFamily: "Inter",
     fontWeight: FontWeight.bold,
     fontSize: 10,
-    color: AppColors.othersD,
+    color: AppColors.others_D,
   );
 
   static const s10wbcLs= TextStyle(
     fontFamily: "Inter",
     fontWeight: FontWeight.bold,
     fontSize: 10,
-    color: AppColors.othersL,
+    color: AppColors.others_L,
   );
 
   static const s10wbcMs= TextStyle(
     fontFamily: "Inter",
     fontWeight: FontWeight.bold,
     fontSize: 10,
-    color: AppColors.othersM,
+    color: AppColors.others_M,
   );
 
   static const s10wbcTs= TextStyle(

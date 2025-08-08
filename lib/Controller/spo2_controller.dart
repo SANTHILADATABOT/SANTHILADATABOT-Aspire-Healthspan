@@ -44,6 +44,11 @@ class spo2Controller extends GetxController {
           final entries = (jsonResponse['hourly_spo2_data'] as List)
               .map((e) => BloodOxygenData.fromJson(e, dateString))
               .toList();
+          // final entries = (jsonResponse['hourly_spo2_data'] as List)
+          //     .where((e) => e['spo2'] != null)
+          //     .map((e) => BloodOxygenData.fromJson(e, dateString))
+          //     .toList();
+
 
           return {
             'mainDate': jsonResponse['date'],
@@ -176,35 +181,44 @@ class spo2Controller extends GetxController {
           final String? recentDate = jsonResponse['recent_datetime']?.toString();
           final int recentSpo2 = jsonResponse['recent_spo2']?.toInt() ?? 0;
 
-          monthlyData.forEach((weekLabel, weekData) {
-            double spo2Avg = weekData['average_spo2']?.toDouble() ?? 0.0;
-            DateTime startDate = DateFormat('yyyy-MM-dd').parse(weekData['start_date']);
-            String label = weekLabel; // "W1", "W2", etc.
+          // monthlyData.forEach((weekLabel, weekData) {
+          //   double spo2Avg = weekData['average_spo2']?.toDouble() ?? 0.0;
+          //   DateTime startDate = DateFormat('yyyy-MM-dd').parse(weekData['start_date']);
+          //   String label = weekLabel; // "W1", "W2", etc.
+          //
+          //   chartData.add(BloodOxygenData(
+          //     spo2: spo2Avg.round(),
+          //     day: '', // used as X-axis label
+          //     date: startDate, months: label,
+          //     Year: '',
+          //
+          //   ));
+          // });
+
+          final DateTime today = DateTime.now();
+          final DateTime monthStart = DateTime(today.year, today.month, 1);
+
+          for (int i = 1; i <= 5; i++) {
+            String weekKey = 'W$i';
+            final data = monthlyData[weekKey];
+
+            // Fallback start date if not present
+            final DateTime defaultStartDate = monthStart.add(Duration(days: (i - 1) * 7));
+            final String startDateStr = data?['start_date'] ?? defaultStartDate.toIso8601String();
+            final DateTime startDate = DateTime.tryParse(startDateStr) ?? defaultStartDate;
+
+            double spo2Avg = data?['average_spo2']?.toDouble() ?? 0.0;
 
             chartData.add(BloodOxygenData(
               spo2: spo2Avg.round(),
-              day: '', // used as X-axis label
-              date: startDate, months: label,
+              day: '',
+              date: startDate,
+              months: weekKey,
               Year: '',
-
             ));
-          });
+          }
 
-          // for (var weekLabel in ['W1', 'W2']) {
-          //   if (monthlyData.containsKey(weekLabel)) {
-          //     final weekData = monthlyData[weekLabel];
-          //     double spo2Avg = weekData['average_spo2']?.toDouble() ?? 0.0;
-          //     DateTime startDate = DateFormat('yyyy-MM-dd').parse(weekData['start_date']);
-          //
-          //     chartData.add(BloodOxygenData(
-          //       spo2: spo2Avg.toInt(),
-          //       day: '',
-          //       date: startDate,
-          //       months: weekLabel,
-          //       Year: ''
-          //     ));
-          //   }
-          // }
+
 
           return {
             'chartData': chartData,

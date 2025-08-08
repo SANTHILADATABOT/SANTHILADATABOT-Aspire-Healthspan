@@ -14,6 +14,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../utils/apptext.dart';
@@ -51,7 +52,7 @@ class _EditProfileState extends State<EditProfile> {
   TextEditingController mailController = TextEditingController();
   int? _groupValue = 0;
   File? shopImage;
-  var user_id = "102";
+
   final EditProfileController _profilecontroller = EditProfileController();
 
   @override
@@ -181,7 +182,7 @@ class _EditProfileState extends State<EditProfile> {
         appBar: AppBar(
           title: Text(
               AppText.editprofile,
-              style: Apptextstyle.s17wbcapp_b
+              style: Apptextstyle.s18wbap
           ),
           backgroundColor: Color(0xFFffffff),
           leading: IconButton(
@@ -427,7 +428,7 @@ class _EditProfileState extends State<EditProfile> {
                     controller: fnamecontroller,
                     keyboardType: TextInputType.text,
                     decoration: InputDecoration(
-                      hintText: "First Name",
+                      hintText: AppText.edit_Fname,
                       focusColor: Color(0xFF275176),
                       hintStyle: TextStyle(
                           color: Colors.grey.shade500, fontSize: 14),
@@ -438,14 +439,14 @@ class _EditProfileState extends State<EditProfile> {
                     controller: lnamecontroller,
                     keyboardType: TextInputType.text,
                     decoration: InputDecoration(
-                      hintText: "Last Name",
+                      hintText: AppText.edit_Lname,
                       focusColor: Color(0xFF275176),
                       hintStyle: TextStyle(
                           color: Colors.grey.shade500, fontSize: 14),
                     ),
                   ),
                   SizedBox(height: 15),
-                  Text(AppText.bday),
+                  Text(AppText.E_bday),
                   SizedBox(height: 15),
                   Row(
                     children: [
@@ -457,7 +458,7 @@ class _EditProfileState extends State<EditProfile> {
                           controller: monthController,
                           readOnly: true,
                           decoration: InputDecoration(
-                            hintText: "Month",
+                            hintText: AppText.edit_month,
                             focusColor: Color(0xFF275176),
                             hintStyle: TextStyle(
                                 color: Colors.grey.shade500, fontSize: 14),
@@ -473,7 +474,7 @@ class _EditProfileState extends State<EditProfile> {
                           controller: dayController,
                           readOnly: true,
                           decoration: InputDecoration(
-                            hintText: "Day",
+                            hintText: AppText.edit_day,
                             focusColor: Color(0xFF275176),
                             hintStyle: TextStyle(
                                 color: Colors.grey.shade500, fontSize: 14),
@@ -489,7 +490,7 @@ class _EditProfileState extends State<EditProfile> {
                           controller: yearController,
                           readOnly: true,
                           decoration: InputDecoration(
-                            hintText: "Year",
+                            hintText: AppText.edit_year,
                             focusColor: Color(0xFF275176),
                             hintStyle: TextStyle(
                                 color: Colors.grey.shade500, fontSize: 14),
@@ -499,7 +500,7 @@ class _EditProfileState extends State<EditProfile> {
                     ],
                   ),
                   SizedBox(height: 15),
-                  Text(AppText.Esex),
+                  Text(AppText.E_sex),
                   SizedBox(height: 15),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -516,7 +517,7 @@ class _EditProfileState extends State<EditProfile> {
                             },
                           ),
                           SizedBox(width: 10,),
-                          Text(AppText.Emale, style: TextStyle(fontSize: 16,
+                          Text(AppText.E_male, style: TextStyle(fontSize: 16,
                               color: _groupValue == 1
                                   ? Color(0xFF365c7f)
                                   : Colors.grey.shade400),)
@@ -534,7 +535,7 @@ class _EditProfileState extends State<EditProfile> {
                             },
                           ),
                           SizedBox(width: 10,),
-                          Text(AppText.Efemale, style: TextStyle(fontSize: 16,
+                          Text(AppText.E_female, style: TextStyle(fontSize: 16,
                               color: _groupValue == 2
                                   ? Color(0xFF365c7f)
                                   : Colors.grey.shade400))
@@ -552,7 +553,7 @@ class _EditProfileState extends State<EditProfile> {
                             },
                           ),
                           SizedBox(width: 10,),
-                          Text(AppText.Eothers, style: TextStyle(fontSize: 16,
+                          Text(AppText.E_others, style: TextStyle(fontSize: 16,
                               color: _groupValue == 3
                                   ? Color(0xFF365c7f)
                                   : Colors.grey.shade400))
@@ -569,7 +570,7 @@ class _EditProfileState extends State<EditProfile> {
                           keyboardType: TextInputType.number,
                           controller: heightController,
                           decoration: InputDecoration(
-                            hintText: "Height (ft/in)",
+                            hintText: AppText.edit_height,
                             focusColor: Color(0xFF275176),
                             hintStyle: TextStyle(
                                 color: Colors.grey.shade500, fontSize: 14),
@@ -583,7 +584,7 @@ class _EditProfileState extends State<EditProfile> {
                           controller: weightController,
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
-                            hintText: "weight (lbs)",
+                            hintText:AppText.edit_weight,
                             focusColor: Color(0xFF275176),
                             hintStyle: TextStyle(
                                 color: Colors.grey.shade500, fontSize: 14),
@@ -604,11 +605,13 @@ class _EditProfileState extends State<EditProfile> {
 
                           decoration: InputDecoration(
 
-                              hintText: "Mobile Number",
+                              hintText: AppText.edit_mobileno,
                               // focusColor: Color(0xFF275176),
                               hintStyle: TextStyle(
                                   color: Colors.grey.shade500, fontSize: 14),
-                              suffixIcon: IconButton(onPressed: () {
+                              suffixIcon: IconButton(onPressed: () async{
+                                final SharedPreferences prefs = await SharedPreferences.getInstance();
+                                var user_id = prefs.getString('user_id') ?? "";
                                 Get.to(() =>
                                     edit_phone_number(
                                         mobnum: mobnumController.text,
@@ -634,11 +637,13 @@ class _EditProfileState extends State<EditProfile> {
                           maxLines: 2,
                           minLines: 1,
                           decoration: InputDecoration(
-                              hintText: "E-mail ID",
+                              hintText:AppText.edit_emailid,
                               focusColor: Color(0xFF275176),
                               hintStyle: TextStyle(
                                   color: Colors.grey.shade500, fontSize: 14),
-                              suffixIcon: IconButton(onPressed: () {
+                              suffixIcon: IconButton(onPressed: () async{
+                                final SharedPreferences prefs = await SharedPreferences.getInstance();
+                                var user_id = prefs.getString('user_id') ?? "";
                                 Get.to(() =>
                                     edit_email(email_id: mailController.text,
                                         user_id: user_id));
@@ -664,7 +669,7 @@ class _EditProfileState extends State<EditProfile> {
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(30, 8, 30, 8),
                           child: Text(
-                            AppText.Ebtn,
+                            AppText.E_btn,
                             style: Apptextstyle.s20wbcW
                           ),
                         ),

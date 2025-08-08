@@ -6,6 +6,7 @@ import 'package:azpire_new/utils/apptextstyle.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -31,9 +32,11 @@ class _BloodOxygenChartPageState extends State<BloodOxygenChartPage>
 
   Future<void> Week_Chart() async {
     setState(() => _isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _spo2controller.Week_Chart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now()),
       );
 
@@ -125,11 +128,21 @@ class _BloodOxygenChartPageState extends State<BloodOxygenChartPage>
            //margin: const EdgeInsets.only(left: 10, right: 20),
            plotAreaBorderWidth: 0.0,
            backgroundColor: Color(0xFFffffff),
-           tooltipBehavior: TooltipBehavior(enable: true),
+           tooltipBehavior: TooltipBehavior(
+               enable: true,
+               textStyle: TextStyle(
+                   color: Colors.white,
+                   fontWeight: FontWeight.bold
+               )
+           ),
            primaryXAxis: CategoryAxis(
              title: AxisTitle(text: ''),
              majorGridLines: const MajorGridLines(width: 0),
              majorTickLines: MajorTickLines(width: 0),
+             labelPlacement: LabelPlacement.onTicks,
+             interval: 1,
+             maximumLabels: 7,
+             edgeLabelPlacement: EdgeLabelPlacement.shift,
              labelStyle: const TextStyle(
 
                  fontSize: 9,

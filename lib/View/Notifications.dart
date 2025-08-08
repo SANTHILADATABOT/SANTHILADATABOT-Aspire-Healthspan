@@ -3,6 +3,8 @@ import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_not
 import 'package:azpire_new/View/Dashboard_screen.dart';
 import 'package:azpire_new/View/profile.dart';
 import 'package:azpire_new/root/root.dart';
+import 'package:azpire_new/utils/apptext.dart';
+import 'package:azpire_new/utils/apptextstyle.dart';
 import 'package:azpire_new/widgets/CustomBottomNavBar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,6 +12,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show Platform;
 
 class Notifications_Screen extends StatefulWidget {
   Notifications_Screen({super.key});
@@ -34,11 +38,11 @@ bool is_loading = false;
       is_loading = true;
     });
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    var user_id = prefs.getString('user_id') ?? '102';
+    var user_id = prefs.getString('user_id');
     final String Url = "$root/get_notification";
 
     final Map<String, dynamic> userData = {
-      'user_id': "102",
+      'user_id': user_id,
     };
     try {
       final response = await http.post(
@@ -96,15 +100,12 @@ bool is_loading = false;
         appBar: AppBar(
           centerTitle: true,
           title: Text(
-            'Notifications',
-            style: TextStyle(
-              color: Color(0xFF365c7f),
-              fontSize: 17,
-            ),
+            AppText.notification_heading,
+            style:Apptextstyle.s18wbap,
           ),
           backgroundColor: Color(0xFFffffff),
           leading: IconButton(
-            icon: Icon(Icons.chevron_left),
+            icon: Icon(Icons.arrow_back_ios),
             onPressed: () {
               Get.to(() => DashboardScreen(deviceID: _registeredDevice ?? ''));
             },
@@ -116,7 +117,9 @@ bool is_loading = false;
             // :
         // is_loading == false ?
               ? _buildShimmerEffect() :
-        notificationsList.isEmpty ? Center(child: Text("No Notifications", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold,fontSize: 18),)):
+        notificationsList.isEmpty ? Center(child: Text(
+          AppText.no_notifications,
+          style: Apptextstyle.s18wbcB,)):
       ListView.builder(
           itemCount: notificationsList.length,
           itemBuilder: (context, index) {
@@ -163,7 +166,10 @@ bool is_loading = false;
             );
           },
         ),
-        bottomNavigationBar: CustomBottomNavBar(controller: _controller)
+        //bottomNavigationBar: CustomBottomNavBar(controller: _controller)
+        bottomNavigationBar: (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+            ? CustomBottomNavBar(controller: _controller)
+            : null,
       ),
     );
   }

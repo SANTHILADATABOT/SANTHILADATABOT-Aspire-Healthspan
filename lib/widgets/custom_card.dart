@@ -1,5 +1,6 @@
 
 // custom_card.dart
+import 'package:azpire_new/utils/app_color.dart';
 import 'package:flutter/material.dart';
 
 import '../utils/apptext.dart';
@@ -14,6 +15,7 @@ class CustomCard1 extends StatelessWidget {
   final VoidCallback press;
   final Color color1;
   final Color color2;
+
 
   CustomCard1({
     required this.title,
@@ -58,13 +60,7 @@ class CustomCard1 extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: TextStyle(
-                        fontFamily: "Inter",
-                        fontSize: 16, // Font size for the text
-                        // fontWeight: FontWeight.bold, // Bold text
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold
-                      ),
+                      style: Apptextstyle.s16wbcB,
                     ),
                     InkWell(
                       onTap: press,
@@ -82,7 +78,7 @@ class CustomCard1 extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Container(
-                      width: size.width * 0.65,
+                      width: size.width * 0.80,
                       height:portraitHeight *0.30,
                       child: chart,
                     ),
@@ -99,41 +95,22 @@ class CustomCard1 extends StatelessWidget {
                         children: [
                           Text(
                             "$t1",
-                            style: TextStyle(
-                                fontFamily: "Inter",
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: color1
-                            ),
+                            style: Apptextstyle.s24wbc1
                           ),
                           Text(
                             "/$t2",
-                            style: TextStyle(
-                                fontFamily: "Inter",
-                                fontSize: t2fontsize,
-                                fontWeight: FontWeight.bold,
-                                color: color2
-                            ),
+                            style: Apptextstyle.s24wbc2
                           ),
                           Text(
                             "$bpunit",
-                            style: TextStyle(
-                                fontFamily: "Inter",
-                                fontSize: 12,
-                                //fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                            ),
+                            style: Apptextstyle.s12wncB
                           ),
                         ],
                       ),
                       SizedBox(height: 5,),
                       RichText(
                         text: TextSpan(
-                          style: TextStyle(
-                            fontFamily: "Inter",
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
+                          style: Apptextstyle.s15wb,
                           children: [
                             TextSpan(
                               text: "Avg ",
@@ -169,6 +146,7 @@ class CustomCard1 extends StatelessWidget {
 
 class CustomCard extends StatelessWidget {
   final String title;
+  final String heading;
   final String t1;
   final String t2;
   final String datetime;
@@ -179,6 +157,7 @@ class CustomCard extends StatelessWidget {
 
   CustomCard({
     required this.title,
+    required this.heading,
     required this.datetime,
     required this.color,
     required this.t1,
@@ -216,13 +195,7 @@ class CustomCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: TextStyle(
-                        fontFamily: "Inter",
-                        fontSize: 16, // Font size for the text
-                        // fontWeight: FontWeight.bold, // Bold text
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold
-                      ),
+                      style: Apptextstyle.s16wbcB,
                     ),
                     InkWell(
                       onTap: press,
@@ -240,7 +213,7 @@ class CustomCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Container(
-                      width: size.width * 0.65,
+                      width: size.width * 0.80,
                       height: portraitHeight *0.28,
                       child: chart,
                     ),
@@ -256,13 +229,14 @@ class CustomCard extends StatelessWidget {
                         children: [
                           Text(
                             t1,
-                            style: TextStyle(
+                            style: heading == "heart" ? Apptextstyle.s12wnchr : heading == "steps" ? Apptextstyle.s12wncsteps :
+                            heading == "weight" ? Apptextstyle.s12wncweight :
+                            TextStyle(
                                 fontFamily: "Inter",
-                                fontSize: 25,
+                                fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: color
-                            ),
-                          ),
+                            ) ),
 
                           SizedBox(width: 5,),
                           Text(
@@ -343,13 +317,7 @@ class CustomCardspo2 extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: TextStyle(
-                          fontFamily: "Inter",
-                          fontSize: 16, // Font size for the text
-                          // fontWeight: FontWeight.bold, // Bold text
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold
-                      ),
+                      style: Apptextstyle.s16wbcB,
                     ),
                     InkWell(
                       onTap: press,
@@ -369,7 +337,7 @@ class CustomCardspo2 extends StatelessWidget {
                       children: [
                         // Chart aligned to right
                         Container(
-                          width: size.width * 0.60,
+                          width: size.width * 0.80,
                         height: isLandscape
                         ? size.width * 0.30 // scale with width in landscape
                             : size.height * 0.30,
@@ -384,24 +352,24 @@ class CustomCardspo2 extends StatelessWidget {
                               children: [
                                 _buildLegendspo2(
                                   context,
-                                  const Color(0xFFD1FCD1),
-                                  const Color(0xFF64EE64),
+                                  AppColors.spo2_n1,
+                                  AppColors.spo2_n2,
                                   AppText.spo2_n,
                                   AppText.spo2_np,
                                 ),
                                 const SizedBox(height: 5),
                                 _buildLegendspo2(
                                   context,
-                                  const Color(0xFFFAF0CC),
-                                  const Color(0xFFF5D666),
+                                  AppColors.spo2_h1,
+                                  AppColors.spo2_h2,
                                   AppText.spo2_h,
                                   AppText.spo2_mp,
                                 ),
                                 const SizedBox(height: 5),
                                 _buildLegendspo2(
                                   context,
-                                  const Color(0xFFF6CCCC),
-                                  const Color(0xFFF38F8F),
+                                  AppColors.spo2_l1,
+                                  AppColors.spo2_l2,
                                   AppText.spo2_l,
                                   AppText.spo2_lp,
                                 ),
@@ -425,23 +393,13 @@ class CustomCardspo2 extends StatelessWidget {
                         children: [
                           Text(
                             t1,
-                            style: TextStyle(
-                                fontFamily: "Inter",
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                                color: color
-                            ),
+                            style: Apptextstyle.s24wbc4
                           ),
 
                           SizedBox(width: 5,),
                           Text(
                             t2,
-                            style: TextStyle(
-                                fontFamily: "Inter",
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: color
-                            ),
+                              style: Apptextstyle.s12wbc4
                           ),
                         ],
                       ),
@@ -564,13 +522,7 @@ class CustomCardsleep extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: TextStyle(
-                          fontFamily: "Inter",
-                          fontSize: 16, // Font size for the text
-                          // fontWeight: FontWeight.bold, // Bold text
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold
-                      ),
+                      style: Apptextstyle.s16wbcB,
                     ),
                     InkWell(
                       onTap: press,
@@ -589,7 +541,7 @@ class CustomCardsleep extends StatelessWidget {
                     Column(
                       children: [
                         Container(
-                          width: size.width * 0.60,
+                          width: size.width * 0.80,
                           height: isLandscape
                               ? size.width * 0.30 // scale with width in landscape
                               : size.height * 0.30,
@@ -605,21 +557,21 @@ class CustomCardsleep extends StatelessWidget {
                               children: [
                                 _buildLegendPercentageBox(
                                   context,
-                                  const Color(0xFFb5e78c),
+                                  AppColors.others_D,
                                   deepPercentage ?? '',
                                   AppText.deep,
                                 ),
                                 const SizedBox(height: 5),
                                 _buildLegendPercentageBox(
                                   context,
-                                  const Color(0xFFef989e),
+                                  AppColors.others_M,
                                   middlePercentage ?? '',
                                   AppText.middle,
                                 ),
                                 const SizedBox(height: 5),
                                 _buildLegendPercentageBox(
                                   context,
-                                  const Color(0xFFa4bce7),
+                                  AppColors.others_L,
                                   lightPercentage ?? '',
                                   AppText.light,
                                 ),
@@ -643,23 +595,13 @@ class CustomCardsleep extends StatelessWidget {
                         children: [
                           Text(
                             t1,
-                            style: TextStyle(
-                                fontFamily: "Inter",
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                                color: color
-                            ),
+                            style: Apptextstyle.s24wbc3
                           ),
 
                           SizedBox(width: 5,),
                           Text(
                             t2,
-                            style: TextStyle(
-                                fontFamily: "Inter",
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: color
-                            ),
+                            style: Apptextstyle.s12wbc3
                           ),
                         ],
                       ),

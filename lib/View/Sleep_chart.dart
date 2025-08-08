@@ -1,12 +1,17 @@
 import 'dart:convert';
 import 'package:azpire_new/Controller/sleep_controller.dart';
 import 'package:azpire_new/Model/sleep_model.dart';
+import 'package:azpire_new/View/profile.dart';
+import 'package:azpire_new/menu/NavMneu.dart';
 import 'package:azpire_new/root/root.dart';
 import 'package:azpire_new/utils/app_color.dart';
 import 'package:azpire_new/utils/apptext.dart';
 import 'package:azpire_new/utils/apptextstyle.dart';
+import 'package:azpire_new/widgets/Appexithelper.dart';
+import 'package:azpire_new/widgets/text_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:flutter_holo_date_picker/date_picker.dart';
 import 'package:flutter_holo_date_picker/flutter_holo_date_picker.dart';
 import 'package:get/get.dart';
@@ -16,9 +21,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../utils/appimages.dart';
+import '../widgets/shimmer_effects.dart';
 
 
 class SleepChartPage extends StatefulWidget {
+  var name;
+
+  var email, profile, noti_count;
+
+  SleepChartPage({Key? key, required this.name, required this.email, required this.profile, required this.noti_count,}) : super(key: key);
   @override
   State<SleepChartPage> createState() => _SleepChartPageState();
 }
@@ -30,6 +41,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
   final List<String> daysOfWeek = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
   late Animation<double> _opacityAnimation;
   late AnimationController _controller;
+  final _advancedDrawerController = AdvancedDrawerController();
   String Reports = 'Day';
   String currentTitle = 'Daily Sleep Average';
   List<SleepDataChart1> _sleepsData = [];
@@ -72,6 +84,10 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
   late Map<String, Map<String, String>> daySummaries = {};
   late TooltipBehavior _tooltipBehavior;
   String? username;
+  var name;
+  var email;
+  var pofileimage;
+  var noti_count;
 
   Future<void> loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
@@ -194,10 +210,11 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
 
   Future<void> Day_Chart() async {
     setState(() => _isLoading = true);
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _sleepcontroller.Day_Chart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now()),
         type: 'daily',
       );
@@ -239,9 +256,11 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
 
   Future<void> Week_Chart() async {
     setState(() => _isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _sleepcontroller.Week_Chart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now()),
         type: 'weekly',
       );
@@ -272,55 +291,103 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
     }
   }
 
+  // Future<void> Month_Chart() async {
+  //   setState(() => _isLoading = true);
+  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   var user_id = prefs.getString('user_id') ?? "";
+  //   try {
+  //     final result = await _sleepcontroller.Month_Chart(
+  //       userId: user_id,
+  //       date: DateFormat('yyyy-MM').format(selectedDate ?? DateTime.now()),
+  //       type: 'monthly',
+  //     );
+  //
+  //     // final String? recentRaw = result['recent_datetime'];
+  //     // final String formattedDate = recentRaw != null
+  //     //     ? formatDateTime(recentRaw)
+  //     //     : result['mainDate'] ?? DateFormat('yyyy-MM-dd').format(DateTime.now());
+  //
+  //     deepPercentage = _formatPercentage(result['recent_deep_percent']);
+  //     lightPercentage = _formatPercentage(result['recent_light_percent']);
+  //     middlePercentage = _formatPercentage(result['recent_rem_percent']);
+  //     totalsleep = result['daily_avg_sleep'];
+  //
+  //    // totalsleep = result['recent_total'];
+  //     totalPercentage = result['recent_total_percent'];
+  //
+  //     setState(() {
+  //       _monthSleepBars = result['chartData'] ?? [];
+  //       _sleepsData = result['summaryData'];
+  //       mainDate = result['mainDate'];
+  //       yAxisMax = (result['y_axis_max'] as num).toDouble();
+  //       target_sleep = result['target_sleep'];
+  //       targetSleepValue = parseTargetSleep(target_sleep!);
+  //       target_visible = true;
+  //
+  //     });
+  //
+  //     print("✅ Monthly Sleep Chart Data Loaded");
+  //   } catch (e) {
+  //     print('❌ Error loading Monthly sleep chart: $e');
+  //   } finally {
+  //     setState(() => _isLoading = false);
+  //   }
+  // }
+
   Future<void> Month_Chart() async {
     setState(() => _isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
 
     try {
       final result = await _sleepcontroller.Month_Chart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM').format(selectedDate ?? DateTime.now()),
         type: 'monthly',
       );
 
-      // final String? recentRaw = result['recent_datetime'];
-      // final String formattedDate = recentRaw != null
-      //     ? formatDateTime(recentRaw)
-      //     : result['mainDate'] ?? DateFormat('yyyy-MM-dd').format(DateTime.now());
+      if (result == null) {
+        print('❌ API returned null');
+        return;
+      }
 
-      deepPercentage = _formatPercentage(result['recent_deep_percent']);
-      lightPercentage = _formatPercentage(result['recent_light_percent']);
-      middlePercentage = _formatPercentage(result['recent_rem_percent']);
-      totalsleep = result['daily_avg_sleep'];
+      print("📊 Month_Chart response: $result");
 
-     // totalsleep = result['recent_total'];
-      totalPercentage = result['recent_total_percent'];
+      // Safe parsing with null-aware operators
+      deepPercentage = _formatPercentage(result['recent_deep_percent'] ?? 0);
+      lightPercentage = _formatPercentage(result['recent_light_percent'] ?? 0);
+      middlePercentage = _formatPercentage(result['recent_rem_percent'] ?? 0);
+      totalsleep = result['daily_avg_sleep'] ?? 0;
+      totalPercentage = result['recent_total_percent'] ?? 0;
 
       setState(() {
         _monthSleepBars = result['chartData'] ?? [];
-        _sleepsData = result['summaryData'];
-        mainDate = result['mainDate'];
-        yAxisMax = (result['y_axis_max'] as num).toDouble();
+        _sleepsData = result['summaryData'] ?? [];
+        mainDate = result['mainDate'] ?? "";
+        yAxisMax = (result['y_axis_max'] as num?)?.toDouble() ?? 0;
         target_sleep = result['target_sleep'];
-        targetSleepValue = parseTargetSleep(target_sleep!);
+        targetSleepValue = parseTargetSleep(target_sleep ?? "0");
         target_visible = true;
-
       });
 
-      print("✅ Monthly Sleep Chart Data Loaded");
-    } catch (e) {
+      print("Monthly Sleep Chart Data Loaded");
+    } catch (e, stackTrace) {
       print('❌ Error loading Monthly sleep chart: $e');
+      print('🪵 StackTrace: $stackTrace');
     } finally {
       setState(() => _isLoading = false);
     }
   }
 
+
   Future<void> Year_Chart() async {
 
     setState(() => _isLoading = true);
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _sleepcontroller.Year_Chart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM').format(selectedDate ?? DateTime.now()),
         type: 'yearly',
       );
@@ -360,10 +427,11 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
   Future<void> MultiYear_Chart() async {
 
     setState(() => _isLoading = true);
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _sleepcontroller.MultiYear_Chart(
-        userId: '102',
+        userId: user_id,
         //fromYear: fromYear!,
         toYear: toYear!
       );
@@ -412,32 +480,66 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
   Widget build(BuildContext context) {
 
     Size size = MediaQuery.of(context).size;
-
-
-
-    return Scaffold(
+    return WillPopScope(
+        onWillPop: () async {
+          ExitAppDialog();
+          return true;
+        },
+        child:AdvancedDrawer(
+            controller: _advancedDrawerController,
+            backdropColor: Colors.grey.shade100,
+            drawer: NavMenu(name: widget.name, email : widget.email, profile:widget.profile, noti_count: widget.noti_count, ),
+    child:  Scaffold(
       backgroundColor: Color(0xFFffffff),
-      appBar: AppBar(
-        centerTitle: true,
-
-        title: Text(
-          username != null
-              ? "${makePossessive(username)} Sleep Statistics" : "",
-          style: Apptextstyle.s18wbap,
+        appBar: AppBar(
+          centerTitle: true,
+          title: widget.profile == null ? ShimmerLoadingItem() : Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: (){
+                  Get.to(()=>Profile());
+                },
+                child: CircleAvatar(
+                  backgroundImage: NetworkImage(widget.profile),
+                  radius: 20,
+                ),
+              ),
+              SizedBox(width: 20),
+              TextTitle1(
+                title: "Hi, ${username.toString().capitalizeFirst}",
+                color: Colors.black,
+              ),
+              Spacer(),
+              IconButton(
+                onPressed: () {
+                  _advancedDrawerController.showDrawer();
+                },
+                icon: Icon(
+                  Icons.menu,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+          leading: IconButton(
+            onPressed: () {
+              Get.back();
+            },
+            icon: Icon(Icons.arrow_back_ios),
+          ),
+          backgroundColor: Color(0xFFffffff),
         ),
-        backgroundColor: Color(0xFFffffff),
-        leading:  IconButton(
-          onPressed: (){
-            Get.back();
-          },
-          icon: Icon(Icons.arrow_back_ios),
-        ),
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Text(
+                    AppText.sleep_heading,
+                    textAlign: TextAlign.center,
+                    style: Apptextstyle.s18wbap,
+                  ),
                   SizedBox(
                     height: 10,
                   ),
@@ -459,7 +561,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                 children: [
                                   InkWell(
                                     child: Text(
-                                      'Day',
+                                      AppText.day,
                                       style:
                                       Reports == 'Day' ?  Apptextstyle.s16wncR
                                           : Apptextstyle.s16wncG,
@@ -478,7 +580,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                   ),
                                   InkWell(
                                     child: Text(
-                                      'Week',
+                                      AppText.week,
                                       style:  Reports == 'Week' ?  Apptextstyle.s16wncR
                                           : Apptextstyle.s16wncG,
                                     ),
@@ -495,7 +597,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                   ),
                                   InkWell(
                                     child: Text(
-                                      'Month',
+                                      AppText.month,
                                       style:Reports == 'Month' ?  Apptextstyle.s16wncR
                                           : Apptextstyle.s16wncG,
                                     ),
@@ -512,7 +614,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                   ),
                                   InkWell(
                                     child: Text(
-                                      'Year',
+                                     AppText.year,
                                       style: Reports == 'Year' ?  Apptextstyle.s16wncR
                                           : Apptextstyle.s16wncG,
                                     ),
@@ -529,7 +631,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                   ),
                                   InkWell(
                                     child: Text(
-                                      'Multi-Year',
+                                      AppText.multiyear,
                                       style: Reports == 'Multi-Year' ?  Apptextstyle.s16wncR
                                           : Apptextstyle.s16wncG,
                                     ),
@@ -650,7 +752,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                 },
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    color: Color(0xff275176),
+                                    color: AppColors.othersT,
                                     borderRadius: BorderRadius.all(Radius.circular(8)),
                                   ),
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -719,6 +821,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                       },
                       ismonth: true,
                       xAxisInterval: 1,
+                        isyears: false
 
                     )
                      else if (Reports == "Week")
@@ -763,6 +866,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                         },
                         ismonth: true,
                         xAxisInterval: 1,
+                          isyears: false
                       )
                     else if (Reports == "Month")
                         buildSleepChart(
@@ -807,6 +911,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                               },
                           ismonth: true,
                           xAxisInterval: 2,
+                            isyears: false
 
                         )
                       else if (Reports == "Year")
@@ -853,6 +958,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                             },
                             ismonth: false,
                             xAxisInterval: 1,
+                              isyears: false
 
                           )
                      else if (Reports == "Multi-Year")
@@ -863,7 +969,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                     chartData: _multiYearSleepBars,
                     fullSleepData: _sleepsData,
                     yAxisMax: yAxisMax,
-                    yAxisInterval: 1,
+                     yAxisInterval: 1,
                     targetSleepValue: targetSleepValue,
                     onTooltipRenderCustom: (TooltipArgs args) {
                       args.header = 'Sleep';
@@ -899,6 +1005,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                     },
                     ismonth: false,
                     xAxisInterval: 1,
+                      isyears: true
                   ),
                       SizedBox(height: 20,),
                       deepPercentage == null ?
@@ -935,8 +1042,8 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                               children: [
                                                 Container(
                                                   decoration: BoxDecoration(
-                                                    color: Color(0xFFb5e78c),
-                                                    border: Border.all(color: Color(0xFFb5e78c), width: 1.0),
+                                                    color: AppColors.others_D,
+                                                    border: Border.all(color: AppColors.others_D, width: 1.0),
                                                     borderRadius: BorderRadius.circular(5),
                                                   ),
                                                   child: Padding(
@@ -949,7 +1056,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                                   ),),
                                                 SizedBox(width: 5,),
                                                 Text(
-                                                  'Deep Sleep - Restorative Stage',
+                                                  AppText.deepsleep,
                                                   style: Apptextstyle.s10wbcB,
                                                 ),
                                               ],
@@ -960,8 +1067,8 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                               children: [
                                                 Container(
                                                   decoration: BoxDecoration(
-                                                    color: Color(0xFFef989e),
-                                                    border: Border.all(color: Color(0xFFef989e), width: 1.0),
+                                                    color:AppColors.others_M,
+                                                    border: Border.all(color: AppColors.others_M, width: 1.0),
                                                     borderRadius: BorderRadius.circular(5),
                                                   ),
         
@@ -975,7 +1082,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                                   ),),
                                                 SizedBox(width: 5,),
                                                 Text(
-                                                  'Middle Sleep - Transitional Stage',
+                                                  AppText.middlesleep,
                                                   style: Apptextstyle.s10wbcB,
                                                 ),
                                                 //Text("Middle"),
@@ -987,8 +1094,8 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                               children: [
                                                 Container(
                                                   decoration: BoxDecoration(
-                                                    color: Color(0xFFa4bce7),
-                                                    border: Border.all(color: Color(0xFFa4bce7), width: 1.0),
+                                                    color: AppColors.others_L,
+                                                    border: Border.all(color: AppColors.others_L, width: 1.0),
                                                     borderRadius: BorderRadius.circular(5),
                                                   ),
                                                   child: Padding(
@@ -1001,7 +1108,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                                   ),),
                                                 SizedBox(width: 5,),
                                                 Text(
-                                                  'Light Sleep - Relaxing Stage',
+                                                  AppText.lightsleep,
                                                   style: Apptextstyle.s10wbcB,
                                                 ),
                                               ],
@@ -1135,7 +1242,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                     Text(
                                       currentTitle,
                                       style: TextStyle(
-                                          color: Colors.red, fontWeight: FontWeight.bold),
+                                          color: AppColors.othersT, fontWeight: FontWeight.bold),
                                     ),
                                   ],
                                 ),
@@ -1152,7 +1259,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                           "Date",
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            color: Color(0xFF275176),
+                                            color: AppColors.othersT,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                           textAlign: TextAlign.left, // Centers the text within its space
@@ -1163,7 +1270,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                           AppText.deep,
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            color: Color(0xFF275176),
+                                            color: AppColors.othersT,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                           textAlign: TextAlign.center,
@@ -1175,7 +1282,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                           AppText.middle,
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            color: Color(0xFF275176),
+                                            color: AppColors.othersT,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                           textAlign: TextAlign.center,
@@ -1186,7 +1293,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                           AppText.light,
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            color: Color(0xFF275176),
+                                            color: AppColors.othersT,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                           textAlign: TextAlign.center,
@@ -1197,7 +1304,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                           AppText.total_s1,
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            color: Color(0xFF275176),
+                                            color: AppColors.othersT,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                           textAlign: TextAlign.center,
@@ -1301,6 +1408,8 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                   ),
             ),
       )
+    )
+        )
       );
   }
 
@@ -1314,10 +1423,16 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
     double yAxisInterval = 1,
     required double? targetSleepValue,
     required bool ismonth,
+    required bool isyears,
     required double xAxisInterval,
     //required bool ischarts,
     required void Function(TooltipArgs) onTooltipRenderCustom,
   }) {
+
+    print("🟩 Chart Data Length: ${_multiYearSleepBars.length}");
+    _multiYearSleepBars.forEach((e) {
+      print('▶ ${e.label}: start ${e.startHour}, end ${e.endHour}, value ${e.value}');
+    });
     // Use MediaQuery to get screen dimensions
     final screenSize = MediaQuery.of(context).size;
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
@@ -1336,6 +1451,10 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
         tooltipBehavior: TooltipBehavior(
           enable: true,
           canShowMarker: false,
+            textStyle: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold
+            )
         ),
         onTooltipRender: onTooltipRenderCustom,
         title: ChartTitle(text: title),
@@ -1355,6 +1474,17 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
             text: xAxisTitle
           ),
           interval: xAxisInterval,
+        ):
+        isyears == true ?CategoryAxis(
+          title: AxisTitle(text: xAxisTitle),
+          labelStyle: TextStyle(fontSize: 9,
+              fontWeight: FontWeight.bold,
+              color: Colors.black
+          ),
+          majorTickLines: MajorTickLines(width: 0),
+          majorGridLines: MajorGridLines(width: 0),
+          // labelPlacement: LabelPlacement.onTicks,
+          // edgeLabelPlacement: EdgeLabelPlacement.shift,
         ):
         CategoryAxis(
           majorGridLines: MajorGridLines(width: 0),
@@ -1390,7 +1520,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                 isVisible: true,
                 start: targetSleepValue,
                 end: targetSleepValue,
-                borderColor: Colors.green,
+                borderColor:AppColors.target_color,
                 borderWidth: 2,
                 text: '',
                 horizontalTextAlignment: TextAnchor.end,

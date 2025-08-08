@@ -18,6 +18,8 @@ import 'package:azpire_new/View/Dashboard_screen.dart';
 import 'package:http/http.dart' as http;
 import '../utils/apptext.dart';
 import '../widgets/custompincodetextfield.dart';
+import 'package:oktoast/oktoast.dart';
+import 'package:flutter/foundation.dart'; // for kIsWeb
 
 class VerificationOtpScreen extends StatefulWidget {
   var email;
@@ -277,14 +279,56 @@ class _VerificationOtpScreenState extends State<VerificationOtpScreen> {
   }
 }
 
-showToast(String msg) {
-  Fluttertoast.showToast(
-    msg: msg,
-    toastLength: Toast.LENGTH_SHORT,
-    gravity: ToastGravity.BOTTOM,
-    timeInSecForIosWeb: 1,
-    backgroundColor: Colors.black,
-    textColor: Colors.white,
-    fontSize: 16.0,
+void showToast(String msg) {
+  showToastWidget(
+    Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 75),
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Text(
+        msg,
+        textAlign: TextAlign.center,
+        style: TextStyle(fontSize: 16.0, color: Colors.white),
+      ),
+    ),
+    position: ToastPosition.bottom,
+    duration: Duration(seconds: 2),
+    animationCurve: kIsWeb ? Curves.easeInOut : Curves.easeIn,
+    animationDuration: const Duration(milliseconds: 400),
+    animationBuilder: kIsWeb ? _slideFromRight : null,
   );
 }
+
+
+Widget _slideFromRight(
+    BuildContext context,
+    Widget child,
+    AnimationController controller,
+    double percent,
+    ) {
+  return SlideTransition(
+    position: Tween<Offset>(
+      begin: Offset(1.2, 0.0), // far right
+      end: Offset(-1.2, 0.0),  // f // Slide to original position
+    ).animate(CurvedAnimation(
+      parent: controller,
+      curve: Curves.easeInOut,
+    )),
+    child: child,
+  );
+}
+
+// showToast(String msg) {
+//   Fluttertoast.showToast(
+//     msg: msg,
+//     toastLength: Toast.LENGTH_SHORT,
+//     gravity: ToastGravity.BOTTOM,
+//     timeInSecForIosWeb: 1,
+//     backgroundColor: Colors.black,
+//     textColor: Colors.white,
+//     fontSize: 16.0,
+//   );
+// }

@@ -34,88 +34,39 @@ class _SignupScreenState extends State<SignupScreen> {
   String? completePhoneNumber = '';
   bool _isPhoneValid = true;
 
-  // Future<void> registerUser() async {
-  //   setState(() {
-  //     isLoading = true;
-  //   });
-  //   final String url = 'https://app.aspirehealthspan.ai/aspire_api/signin';
-  //   final Map<String, String> userData = {
-  //     'username': _usernameController.text.trim(),
-  //     'mobile_no': completePhoneNumber?.trim() ?? '',
-  //     'email': _emailController.text.trim(),
-  //   };
-  //
-  //   try {
-  //     print('User Data: $userData');
-  //     final response = await http.post(
-  //       Uri.parse(url),
-  //       body: userData,
-  //     );
-  //
-  //     print('Response body: ${response.body}');
-  //     if (response.statusCode == 200) {
-  //       final Map<String, dynamic> jsonResponse = json.decode(response.body);
-  //
-  //       if (jsonResponse['status'] == "SUCCESS") {
-  //         String mobileOtp = jsonResponse['data']['mobile_otp'].toString();
-  //         print('Mobile OTP: $mobileOtp');
-  //         Get.to(() => MobileOtpScreen(
-  //           MobileOTP: mobileOtp,
-  //           user: _usernameController.text.toString(),
-  //           mobileno: completePhoneNumber.toString(),
-  //         ));
-  //         showToast("OTP Sent Successfully");
-  //       } else if (jsonResponse['status'] == "Failed") {
-  //         showToast(jsonResponse['message']); // Show specific failure message
-  //         print('Error: ${jsonResponse['message']}');
-  //         // Navigate to login if applicable
-  //         // Get.to(() => LoginScreen());
-  //       }
-  //     } else {
-  //       print('Request failed with status: ${response.statusCode}');
-  //       showToast('Server error: ${response.statusCode}');
-  //     }
-  //   } catch (e) {
-  //     print('Error: $e');
-  //     showToast('An error occurred: $e');
-  //   } finally {
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-  //   }
-  // }
-
   Future<void> registerUser() async {
+    print("usernameController: ${_usernameController.text}");
+    print("emailController: ${_emailController.text}");
+    print("completePhoneNumber: $completePhoneNumber");
 
-    // await _apiService.registerUser(
-    //   context: context,
-    //   setState: setState,
-    //   formKey: _formkey,
-    //   usernameController: _usernameController,
-    //   emailController: _emailController,
-    //   completePhoneNumber: completePhoneNumber,
-    //   setLoading: (value) => setState(() => isLoading = value),
-    //   setPhoneValid: (value) => setState(() => _isPhoneValid = value),
-    // );
+    try{
 
-   await registerController.registerUser(
-      context: context,
-      setState: setState,
-      formKey: _formkey,
-      usernameController: _usernameController,
-      emailController: _emailController,
-      completePhoneNumber: completePhoneNumber,
-      setLoading: (bool loading) {
+      if (!_isPhoneValid || completePhoneNumber == null
+          || completePhoneNumber!.isEmpty) {
         setState(() {
-          isLoading = loading;
+          _isPhoneValid = false; // ✅ Force error display
         });
-      },
-      setPhoneValid: (bool valid) {
-        setState(() {
-          _isPhoneValid = valid;
-        });
-      },
-    );
+        return;
+      }
+
+      setState(() {
+        isLoading = true;
+      });
+
+      await registerController.registerUser(
+        username: _usernameController.text,
+        email: _emailController.text,
+        completePhoneNumber: completePhoneNumber.toString(),
+      );
+    }
+    catch(e){
+      print("signup error:$e");
+    }
+    finally{
+      setState(() {
+        isLoading = false;
+      });
+    }
 
   }
 
@@ -138,7 +89,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         SizedBox(height: 120,),
                         Image.asset(
                           Appimages.applogo,
-                          height: 115,
+                          height:size.height * 0.15,
                           fit: BoxFit.contain,
                         ),
                         SizedBox(height: 22,),
@@ -154,12 +105,12 @@ class _SignupScreenState extends State<SignupScreen> {
                             children: [
                               CustomTextfield(
                                 inputType: TextInputType.name,
-                                hinttext: 'User Name',
+                                hinttext: AppText.user_name,
                                 icon: Icons.person,
                                 controller: _usernameController,
                                 validator: (value){
                                   if (value == null || value.isEmpty) {
-                                    return 'Please enter a valid username';
+                                    return AppText.valid_username;
                                   }
                                 },),
                               SizedBox(height: 10,),
@@ -172,10 +123,10 @@ class _SignupScreenState extends State<SignupScreen> {
                                   color: Colors.black,
                                 ),
                                 decoration: InputDecoration(
-                                  hintText: 'Phone Number',
+                                  hintText: AppText.Phone_number,
                                   border: UnderlineInputBorder(),
                                   counterText: '',
-                                  errorText: _isPhoneValid ? null : 'Please enter a valid phone number', // Show error message
+                                  errorText: _isPhoneValid ? null : AppText.valid_phoneno, // Show error message
                                 ),
                                 initialCountryCode: AppText.country,
                                 autovalidateMode: AutovalidateMode.disabled,
@@ -192,14 +143,14 @@ class _SignupScreenState extends State<SignupScreen> {
                               SizedBox(height: 10,),
                               CustomTextfield(
                                 inputType: TextInputType.emailAddress,
-                                hinttext: 'Email Id',
+                                hinttext: AppText.email_id,
                                 icon: Icons.email,
                                 controller: _emailController,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Please enter an email address';
+                                    return AppText.email_address;
                                   } else if (!RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$').hasMatch(value)) {
-                                    return 'Please enter a valid email address';
+                                    return AppText.valid_email;
                                   }
                                   return null;
                                 },)
@@ -227,7 +178,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           ):
                           Center(child: Image.asset(
                             Appimages.applogo,
-                            height: 50,
+                            height: size.height*0.07,
                             fit: BoxFit.contain,
                           ),),
                         ),
@@ -251,15 +202,3 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 }
 
-showToast(String msg) {
-  Fluttertoast.showToast(
-      msg: msg,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
-      backgroundColor: Colors.black,
-      textColor: Colors.white,
-      fontSize: 16.0
-  );
-
-}

@@ -1,5 +1,6 @@
 
 import 'dart:convert';
+import 'package:azpire_new/root/root.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,76 +12,137 @@ import 'package:flutter/foundation.dart';
 
 class RegisterController{
 
-  Future<void> registerUser({
-    required BuildContext context,
-    required StateSetter setState,
-    required GlobalKey<FormState> formKey,
-    required TextEditingController usernameController,
-    required TextEditingController emailController,
-    required String? completePhoneNumber,
-    required Function(bool) setLoading,
-    required Function(bool) setPhoneValid,
-  }) async {
-    if (completePhoneNumber == null || completePhoneNumber.length < 10) {
-      setState(() {
-        setPhoneValid(false);
-      });
-      return;
-    }
+  // Future<void> registerUser({
+  //   required BuildContext context,
+  //   required StateSetter setState,
+  //   required GlobalKey<FormState> formKey,
+  //   required TextEditingController usernameController,
+  //   required TextEditingController emailController,
+  //   required String? completePhoneNumber,
+  //   required Function(bool) setLoading,
+  //   required Function(bool) setPhoneValid,
+  // }) async {
+  //   if (completePhoneNumber == null || completePhoneNumber.length < 10) {
+  //     setState(() {
+  //       setPhoneValid(false);
+  //     });
+  //     return;
+  //   }
+  //
+  //   if (formKey.currentState!.validate()) {
+  //     print("completePhoneNumber$completePhoneNumber");
+  //     print("usernameController$usernameController");
+  //     print("emailController$emailController");
+  //     final RegisterModel user = RegisterModel(
+  //       username: usernameController.text.trim(),
+  //       email: emailController.text.trim(),
+  //       mobileNumber: completePhoneNumber!.trim(),
+  //     );
+  //
+  //     final String url = 'https://app.aspirehealthspan.ai/aspire_api/signin';
+  //
+  //     try {
+  //       setState(() {
+  //         setLoading(true);
+  //       });
+  //
+  //       final response = await http.post(
+  //         Uri.parse(url),
+  //         body: user.toJson(),
+  //       );
+  //       print("register Status Code: ${response.statusCode}");
+  //       print("register Headers: ${response.headers}");
+  //       print("register Body: ${response.body}");
+  //
+  //
+  //       if (response.statusCode == 200) {
+  //         print("register1:$response");
+  //         final RegisterResponse registerResponse =
+  //         RegisterResponse.fromJson(json.decode(response.body));
+  //
+  //         if (registerResponse.status == "SUCCESS") {
+  //           print("register2:$registerResponse");
+  //           String mobileOtp = registerResponse.data['mobile_otp'].toString();
+  //           String user = usernameController.text.toString();
+  //           String mobile = completePhoneNumber.toString();
+  //
+  //           showToast("OTP Sent Successfully");
+  //
+  //           Get.to(() => MobileOtpScreen(
+  //             MobileOTP: mobileOtp,
+  //             user: user,
+  //             mobileno: mobile,
+  //           ));
+  //         } else if (registerResponse.status == "Failed") {
+  //           showToast(registerResponse.message ?? "Unknown error");
+  //           print('Error: ${registerResponse.message}');
+  //         }
+  //       } else {
+  //         print('Request failed with status: ${response.statusCode}');
+  //         showToast('Server error: ${response.statusCode}');
+  //       }
+  //     } catch (e) {
+  //       print('Error: $e');
+  //       showToast('An error occurred: $e');
+  //     } finally {
+  //       setState(() {
+  //         setLoading(false);
+  //       });
+  //     }
+  //   }
 
-    if (formKey.currentState!.validate()) {
-      final RegisterModel user = RegisterModel(
-        username: usernameController.text.trim(),
-        email: emailController.text.trim(),
-        mobileNumber: completePhoneNumber!.trim(),
+  Future<void> registerUser({
+    required String completePhoneNumber,
+    required String username,
+    required String email,
+  }) async {
+    final String url = '$root/signin';
+
+    final Map<String, String> userData = {
+      'username': username,
+      'mobile_no': completePhoneNumber,
+      'email': email,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        body: userData,
       );
 
-      final String url = 'https://app.aspirehealthspan.ai/aspire_api/signin';
+      print("Register Status Code: ${response.statusCode}");
+      print("Register Response: ${response.body}");
 
-      try {
-        setState(() {
-          setLoading(true);
-        });
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
 
-        final response = await http.post(
-          Uri.parse(url),
-          body: user.toJson(),
-        );
+        if (jsonResponse["status"] == "SUCCESS") {
+          String mobileOtp = jsonResponse['data']['mobile_otp'].toString();
 
-        if (response.statusCode == 200) {
-          final RegisterResponse registerResponse =
-          RegisterResponse.fromJson(json.decode(response.body));
+          showToast("OTP Sent Successfully");
 
-          if (registerResponse.status == "SUCCESS") {
-            String mobileOtp = registerResponse.data['mobile_otp'].toString();
-            String user = usernameController.text.toString();
-            String mobile = completePhoneNumber.toString();
-
-            showToast("OTP Sent Successfully");
-
-            Get.to(() => MobileOtpScreen(
-              MobileOTP: mobileOtp,
-              user: user,
-              mobileno: mobile,
-            ));
-          } else if (registerResponse.status == "Failed") {
-            showToast(registerResponse.message ?? "Unknown error");
-            print('Error: ${registerResponse.message}');
-          }
+          Get.to(() => MobileOtpScreen(
+            MobileOTP: mobileOtp,
+            user: username,
+            mobileno: completePhoneNumber,
+          ));
         } else {
-          print('Request failed with status: ${response.statusCode}');
-          showToast('Server error: ${response.statusCode}');
+          showToast(jsonResponse["message"] ?? "Registration failed");
         }
-      } catch (e) {
-        print('Error: $e');
-        showToast('An error occurred: $e');
-      } finally {
-        setState(() {
-          setLoading(false);
-        });
+      } else {
+        showToast("Server error: ${response.statusCode}");
       }
+    } catch (e) {
+      print("Register Exception: $e");
+      showToast("Something went wrong. Please try again.");
     }
   }
+
+
+
+
+
+}
 
   void showCustomToast(String msg) {
     showToast(
@@ -134,4 +196,3 @@ class RegisterController{
 
 
 
-}

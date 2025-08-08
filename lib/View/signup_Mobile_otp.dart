@@ -57,33 +57,63 @@ class _MobileOtpScreenState extends State<MobileOtpScreen> {
     //     isLoading: (value) => setState(() => isLoading = value),
     //     controller: _controller);
 
+    setState(() {
+      isLoading = true;
+    });
+
     await otpController.otpVerify(
-      context: context,
-      setState: setState,
+     //context: context,
+      //setState: setState,
       enteredOtp: enteredOtp,
       newOtp: newotp,
       user: widget.user,
       mobileno: widget.mobileno,
       mobileOTP: widget.MobileOTP,
-      setLoading: (value) => setState(() => isLoading = value),
+     // setLoading: (value) => setState(() => isLoading = value),
       controller: _controller,
     );
+
+
+    setState(() {
+      isLoading = false;
+    });
+
   }
 
   Future<void> otp_timeout() async{
     await otpController.otpTimeout(mobileno: widget.mobileno);
   }
 
+  // Future<void> otp_resend() async {
+  //   setState(() {
+  //     isLoading = false;
+  //   });
+  //
+  //   await otpController.otpResend(
+  //     mobileno: widget.mobileno,
+  //     controller: _controller,
+  //   );
+  //
+  //   setState(() {
+  //     isLoading = false;
+  //     resend = false;
+  //   });
+  // }
+
+
   Future<void> otp_resend() async{
+    setState(() {
+      isLoading = false;
+    });
     await otpController.otpResend(
       mobileno: widget.mobileno,
-      setState: setState,
+      //setState: setState,
       newotp: newotp.toString(),
-      resend: (bool loading) {
-        setState(() {
-          isLoading = loading;
-        });
-      },
+      // resend: (bool loading) {
+      //   setState(() {
+      //     isLoading = loading;
+      //   });
+      // },
       controller: _controller,
     );
   }
@@ -91,6 +121,7 @@ class _MobileOtpScreenState extends State<MobileOtpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: AppColors.White,
       body: Padding(
@@ -111,13 +142,13 @@ class _MobileOtpScreenState extends State<MobileOtpScreen> {
                 ),
                 SizedBox(height: 30),
                 Text(
-                  AppText.verificationcode,
-                  style:Apptextstyle.s18wbcB
+                    AppText.verificationcode,
+                    style:Apptextstyle.s18wbcB
                 ),
                 SizedBox(height: 10),
                 Text(
-                  AppText.mobilesentotp,
-                  style: Apptextstyle.s14wncLb
+                    AppText.sentotp,
+                    style: Apptextstyle.s14wncLb
                 ),
                 SizedBox(height: 20),
                 CustomPinCodeField(
@@ -141,11 +172,14 @@ class _MobileOtpScreenState extends State<MobileOtpScreen> {
                       onTap: () {
                         if (resend) {
                           otp_resend();
+                          setState(() {
+                            resend = false;
+                          });
                         }
                       },
                       child: Text(
-                       AppText.resendmobileotp,
-                        style: Apptextstyle.  s14wncblue
+                          AppText.resendmobileotp,
+                          style: Apptextstyle.  s14wncblue
                       ),
                     ) :
                     SizedBox(),
@@ -175,7 +209,7 @@ class _MobileOtpScreenState extends State<MobileOtpScreen> {
                   text: AppText.SUBMIT,
                 ) : Center(child: Image.asset(
                   Appimages.applogo,
-                  height: 50,
+                  height: size.height*0.07,
                   fit: BoxFit.contain,
                 ),),
               ],

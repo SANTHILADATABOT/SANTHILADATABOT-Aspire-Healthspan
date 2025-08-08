@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MinuteDataController {
   static const platform = MethodChannel('cling_sdk');
@@ -76,7 +77,8 @@ class MinuteDataController {
   // Method to send bulk minute data to API
   Future<void> sendBulkMinuteDataToApi(List<Map<String, dynamic>> dataList) async {
     final url = Uri.parse('https://app.aspirehealthspan.ai/aspire_api/minute_health_variable/add');
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     print("📤 Sending raw bulk minute data to API");
 
     try {
@@ -86,7 +88,7 @@ class MinuteDataController {
           "Content-Type": "application/json",
         },
         body: jsonEncode({
-          "user_id": "102",
+          "user_id": user_id,
           "data": dataList,
         }),
       );

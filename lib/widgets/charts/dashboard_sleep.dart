@@ -8,6 +8,7 @@ import 'package:azpire_new/utils/apptextstyle.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:http/http.dart' as http;
@@ -77,10 +78,11 @@ class _SleepChartState extends State<SleepChart> {
 
 
     setState(() => _isLoading = true);
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _sleepcontroller.Week_Chart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now()),
         type: 'weekly',
       );
@@ -161,6 +163,10 @@ class _SleepChartState extends State<SleepChart> {
               child: SfCartesianChart(
                 tooltipBehavior: TooltipBehavior(
                   enable: true,
+                  textStyle: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold
+                  ),
                   canShowMarker: false, // Hides the marker dot
                 ),
                 onTooltipRender: (TooltipArgs args) {

@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:azpire_new/Controller/editEmail_controller.dart';
+import 'package:azpire_new/utils/app_color.dart';
 import 'package:azpire_new/utils/appimages.dart';
 import 'package:azpire_new/utils/apptextstyle.dart';
 import 'package:azpire_new/widgets/custom_button/My_Button.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timer_count_down/timer_controller.dart';
 import 'package:timer_count_down/timer_count_down.dart';
 import 'package:http/http.dart' as http;
@@ -123,11 +125,13 @@ class _edit_emailState extends State<edit_email> {
     setState(() {
       isLoading_1 = true;
     });
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     final String url = '$root/update_mobile_email';
 
     final Map<String, String> userData = {
       'email': emailController.text,
-      'user_id': "102"
+      'user_id': user_id
     };
 
     try {
@@ -176,10 +180,11 @@ class _edit_emailState extends State<edit_email> {
       isLoading_1 = true;
     });
     final String url = '$root/updt_mobmail_otp_verify';
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     final Map<String, String> userData = {
       'email': emailController.text,
-      'user_id': "102",
+      'user_id': user_id,
       'mobile_email_otp': enteredOtp
     };
 
@@ -223,10 +228,11 @@ class _edit_emailState extends State<edit_email> {
 
   Future<void> otp_timeout() async {
     final String url = '$root/update_otp_timeout';
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     final Map<String, String> userData = {
       'email': emailController.text,
-      'user_id':"102"
+      'user_id':user_id
     };
     try {
       final response = await http.post(
@@ -247,10 +253,12 @@ class _edit_emailState extends State<edit_email> {
 
   Future<void> otp_resend() async {
     print(emailController.text);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     final String url = '$root/email_update_resend_otp';
     final Map<String, String> userData = {
       'email': emailController.text,
-       'user_id': "102"
+       'user_id': user_id
     };
     try {
       final response = await http.post(
@@ -345,21 +353,16 @@ class _edit_emailState extends State<edit_email> {
 
                         },
                         child: isLoading_1 == true ? Center(
-                          child: CircularProgressIndicator(),) : Container(
+                          child: CircularProgressIndicator(),) :Container(
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
-                              color: Colors.blue
+                              gradient: AppColors.button
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.fromLTRB(15, 4, 15, 4),
+                            padding: const EdgeInsets.fromLTRB(30, 8, 30, 8),
                             child: Text(
-                              "Verify",
-                              style: TextStyle(
-                                  fontFamily: "Inter",
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold
-                              ),
+                             AppText.verify,
+                              style: Apptextstyle.s16wbcW
                             ),
                           ),
                         ),

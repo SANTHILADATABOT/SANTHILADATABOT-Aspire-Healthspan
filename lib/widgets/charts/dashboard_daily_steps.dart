@@ -7,6 +7,7 @@ import 'package:azpire_new/utils/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:http/http.dart' as http;
 import 'package:shimmer/shimmer.dart';
@@ -35,9 +36,11 @@ class _StepsChartState extends State<StepsChart> {
 
   Future<void> Week_Chart() async {
     setState(() => _isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _stepscontroller.Week_Chart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now()),
       );
 
@@ -126,7 +129,13 @@ class _StepsChartState extends State<StepsChart> {
   }) {
     return SfCartesianChart(
       //tooltipBehavior: TooltipBehavior(enable: true),
-      tooltipBehavior: TooltipBehavior(enable: true),
+      tooltipBehavior: TooltipBehavior(
+          enable: true,
+          textStyle: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold
+          )
+      ),
       //margin: const EdgeInsets.only(left: 10),
       plotAreaBorderWidth: 0,
       backgroundColor: AppColors.White,

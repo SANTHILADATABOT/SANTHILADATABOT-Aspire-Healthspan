@@ -2,7 +2,12 @@
 import 'dart:convert';
 import 'package:azpire_new/Controller/Heartrate_controller.dart';
 import 'package:azpire_new/Model/Heartrate_model.dart';
+import 'package:azpire_new/View/profile.dart';
+import 'package:azpire_new/menu/NavMneu.dart';
+import 'package:azpire_new/widgets/Appexithelper.dart';
+import 'package:azpire_new/widgets/text_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:flutter_holo_date_picker/date_picker.dart';
 import 'package:flutter_holo_date_picker/i18n/date_picker_i18n.dart';
 import 'package:get/get.dart';
@@ -14,8 +19,14 @@ import '../utils/app_color.dart';
 import '../utils/appimages.dart';
 import '../utils/apptext.dart';
 import '../utils/apptextstyle.dart';
+import '../widgets/shimmer_effects.dart';
 
 class HeartRateChart extends StatefulWidget {
+  var name;
+
+  var email, profile, noti_count;
+
+  HeartRateChart({Key? key, required this.name, required this.email, required this.profile, required this.noti_count,}) : super(key: key);
   @override
   State<HeartRateChart> createState() => _HeartRateChartState();
 }
@@ -23,6 +34,7 @@ class HeartRateChart extends StatefulWidget {
 class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProviderStateMixin {
 
   List<HeartRateData> chartData = [];
+  //List<HeartRateData1> chartData1 = [];
   String Reports = 'Day';
   String currentTitle = 'Daily Heart Rate Average';
   String selectedPeriod = 'Day';
@@ -36,6 +48,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
   double? sd_low;
   double? sd_high;
   final HeartRatecontroller _Heartratecontroller = Get.put(HeartRatecontroller());
+  final _advancedDrawerController = AdvancedDrawerController();
   //animation controller
   late Animation<double> _opacityAnimation;
   late AnimationController _controller;
@@ -48,6 +61,10 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
   String yearPickerLabel = "Pick Years";
   String? Upto;
   String? username;
+  var name;
+  var email;
+  var pofileimage;
+  var noti_count;
 
   Future<void> loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
@@ -114,10 +131,11 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
   }
   Future<void> Day_Chart() async {
     setState(() => isLoading = true);
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _Heartratecontroller.Day_Chart(
-        userId: '102',
+        userId: user_id,
         date: DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now()),
       );
 
@@ -148,9 +166,11 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
 
   Future<void> Week_Chart() async {
     setState(() => isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _Heartratecontroller.Week_Chart(
-          '102',
+          user_id,
           DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now())
       );
 
@@ -175,9 +195,11 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
 
   Future<void> Month_Chart() async {
     setState(() => isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _Heartratecontroller.Month_Chart(
-          '102',
+          user_id,
           DateFormat('yyyy-MM').format(selectedDate ?? DateTime.now())
       );
 
@@ -195,7 +217,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
         heartrate_sd_low = result['heartrate_sd_low'];
       });
     } catch (e) {
-      print('Error loading weekly data: $e');
+      print('Error loading monthly data: $e');
     } finally {
       setState(() => isLoading = false);
     }
@@ -203,9 +225,11 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
 
   Future<void> Year_Chart() async {
     setState(() => isLoading = true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     try {
       final result = await _Heartratecontroller.Year_Chart(
-          '102',
+          user_id,
           DateFormat('yyyy-MM').format(selectedDate ?? DateTime.now())
       );
 
@@ -230,7 +254,16 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
   }
 
   Future<void> MultiYear_Chart() async {
-    setState(() => isLoading = true);
+    print('✅ chartData length: ${chartData.length}');
+    for (var data in chartData) {
+      print('📅 Year: ${data.Years}, HR: ${data.heartrate}');
+    }
+     setState(() {
+       isLoading = true;
+       //chartData = [];
+     });
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var user_id = prefs.getString('user_id') ?? "";
     if (toYear == null) {
       print('toYear is null. Cannot call API.');
       return;
@@ -238,7 +271,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
 
     try {
       final result = await _Heartratecontroller.MultiYear_Chart(
-        '102',
+        user_id,
         toYear!,  // Only pass toYear
       );
 
@@ -279,24 +312,46 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
     Size size = MediaQuery
         .of(context)
         .size;
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        ExitAppDialog();
+        return true;
+      },
+      child:AdvancedDrawer(
+          controller: _advancedDrawerController,
+          backdropColor: Colors.grey.shade100,
+          drawer: NavMenu(name: widget.name, email : widget.email, profile:widget.profile, noti_count: widget.noti_count, ),
+    child: Scaffold(
       backgroundColor: Color(0xFFffffff),
       appBar: AppBar(
         centerTitle: true,
-        title: Row(
+        title: widget.profile == null ? ShimmerLoadingItem() : Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // Center the text using the Center widget
-            Expanded(
-              child: Center(
-                child: Text(
-                  username != null
-                      ? "${makePossessive(username)} Heart Rate" : "",
-                  textAlign: TextAlign.center,
-                  style: Apptextstyle.s18wbap,
-                ),
+            GestureDetector(
+              onTap: (){
+                Get.to(()=>Profile());
+              },
+              child: CircleAvatar(
+                backgroundImage: NetworkImage(widget.profile),
+                radius: 20,
               ),
             ),
-            // Spacer to push the zoom button to the right
+            SizedBox(width: 20),
+            TextTitle1(
+              title: "Hi, ${username.toString().capitalizeFirst}",
+              color: Colors.black,
+            ),
+            Spacer(),
+            IconButton(
+              onPressed: () {
+                _advancedDrawerController.showDrawer();
+              },
+              icon: Icon(
+                Icons.menu,
+                color: Colors.black,
+              ),
+            ),
           ],
         ),
         leading: IconButton(
@@ -312,6 +367,11 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
           physics: ScrollPhysics(),
           child: Column(
             children: [
+              Text(
+                AppText.hr_heading,
+                textAlign: TextAlign.center,
+                style: Apptextstyle.s18wbap,
+              ),
               SizedBox(height: 10,),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -335,7 +395,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                                   });
                                   simulateLoading(Day_Chart);
                                 },
-                                child: Text('Day',style: Reports == 'Day' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG),
+                                child: Text(AppText.day,style: Reports == 'Day' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG),
                               ),
                               SizedBox(width: 20),
                               InkWell(
@@ -348,7 +408,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                                   });
                                   simulateLoading(Week_Chart);
                                 },
-                                child: Text('Week',style: Reports == 'Week' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG),
+                                child: Text(AppText.week,style: Reports == 'Week' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG),
                               ),
                               SizedBox(width: 20,),
                               InkWell(
@@ -360,7 +420,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                                   });
                                   simulateLoading(Month_Chart);
                                 },
-                                child: Text('Month',style: Reports == 'Month' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG),
+                                child: Text(AppText.month,style: Reports == 'Month' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG),
                               ),
                               SizedBox(width: 20,),
                               InkWell(
@@ -373,7 +433,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                                   });
                                   simulateLoading(Year_Chart);
                                 },
-                                child: Text('Year',style: Reports == 'Year' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG),
+                                child: Text(AppText.year,style: Reports == 'Year' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG),
                               ),
                               SizedBox(width: 20,),
                               InkWell(
@@ -393,7 +453,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                                   });
                                   simulateLoading(MultiYear_Chart);
                                 },
-                                child: Text('Multi-Year',style: Reports == 'Multi-Year' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG),
+                                child: Text(AppText.multiyear,style: Reports == 'Multi-Year' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG),
                               ),
                             ],
                           ),
@@ -497,7 +557,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                             },
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Color(0xff275176),
+                                color: AppColors.othersT,
                                 borderRadius: BorderRadius.all(Radius.circular(8)),
                               ),
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -552,8 +612,11 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                     sd_high: sd_high,
                     title: 'Heart Rate for this Day',
                     Xaxistitle: 'Time of Day',
-                    isweek: true,
-        
+                    isMonth: false,
+                    minY: 40,
+                    maxY: 170,
+                    interval: 20,
+                    isDay: true
                   )
                 else
                   if (Reports == "Week")
@@ -566,7 +629,11 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                      targetHR: target_HR ?? 75,
                       title: 'Avg Daily Heart Rate',
                       Xaxistitle: 'Days',
-                      isweek: false
+                      isMonth: false,
+                      minY: 40,
+                      maxY: 170,
+                      interval: 20,
+                        isDay: false
                     )
         
                   else if (Reports == "Month")
@@ -579,7 +646,11 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                          targetHR: target_HR ?? 75,
                          title: 'Avg Weekly Heart Rate',
                       Xaxistitle: 'Weeks',
-                        isweek: false
+                      isMonth: false,
+                      minY: 40,
+                      maxY: 170,
+                      interval: 20,
+                        isDay: false
                       )
                     else
                       if (Reports == "Year")
@@ -592,65 +663,42 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                           targetHR: target_HR ?? 75,
                           title: 'Avg Monthly Heart Rate',
                             Xaxistitle: 'Months',
-                            isweek: false
+                          isMonth: true,
+                          minY: 40,
+                          maxY: 170,
+                          interval: 20,
+                            isDay: false
                         )
                       else
                         if (Reports == "Multi-Year")
                           buildHeartRateChart(
-                            context: context,
-                            chartData: chartData,
-                            xValueMapper: (HeartRateData data, _) => data.Years,
+                              context: context,
+                              chartData: chartData,
+                              targetHR: target_HR?.toInt() ?? 120,
                             sd_low: sd_low,
                             sd_high: sd_high,
-                            targetHR: target_HR ?? 75,
-                            title: 'Avg Yearly Heart Rate',
+                              // targetDiastolic: target_dys?.toInt() ?? 80,
+                              xValueMapper: (data, _) => data.Years, // Or custom format like "08:00"
+                              minY: 40,
+                              maxY: 170,
+                              interval: 20,
                               Xaxistitle: 'Years',
-                              isweek: false
+                              title: 'Avg Yearly Heart Rate',
+                            isMonth: false,
+                              isDay: false
                           ),
+                          // buildHeartRateChart(
+                          //   context: context,
+                          //   chartData: chartData,
+                          //   xValueMapper: (HeartRateData data, _) => data.Years,
+                          //   sd_low: sd_low,
+                          //   sd_high: sd_high,
+                          //   targetHR: target_HR ?? 75,
+                          //   title: 'Avg Yearly Heart Rate',
+                          //     Xaxistitle: 'Years',
+                          //     isweek: false,
+                          // ),
               SizedBox(height: 30),
-              // Container(
-              //   //width: size.width * 0.3,
-              //   child: Row(
-              //     mainAxisAlignment: MainAxisAlignment.center,
-              //    // crossAxisAlignment: CrossAxisAlignment.center,
-              //     children: [
-              //       Container(
-              //           width: size.width *
-              //               0.1, // Width of the small box
-              //           height: 10, // Height of the small box
-              //           decoration: BoxDecoration(
-              //             color: Colors.red.withOpacity(0.2),
-              //             border: Border.all(color: Colors.red, width: 1),
-              //           ),
-              //       ),
-              //       Expanded(
-              //         child: Text(
-              //             AppText.std,
-              //             style: Apptextstyle.s11wbcB
-              //         ),
-              //       ),
-              //       //SizedBox(width: 10),
-              //       Container(
-              //           width: size.width *
-              //               0.1, // Width of the small box
-              //           height: 10, // Height of the small box
-              //           color: Colors.green //orange, // Color of the box
-              //       ),
-              //       Expanded(
-              //         child: Text(
-              //             AppText.target,
-              //             style: Apptextstyle.s11wbcB
-              //         ),
-              //       ),
-              //     ],
-              //   ),
-              //   // decoration: BoxDecoration(
-              //   //   border: Border.all(color: Colors.grey.shade700, width: 1),
-              //   //   color: Colors.transparent,
-              //   // ),
-              //   padding: EdgeInsets.all(
-              //       8), // Optional: Add padding for better spacing
-              // ),
               Padding(
                 padding: EdgeInsets.only(left: 20, right: 10),
                 child: Container(
@@ -685,7 +733,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                       Container(
                         width: size.width * 0.1, // Responsive box width
                         height: 10,
-                        color: Colors.green,
+                        color: AppColors.target_color,
                       ),
                       SizedBox(width: 6),
                       Text(
@@ -775,7 +823,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                                             horizontal: 8),
                                         decoration: BoxDecoration(
                                           border: Border.all(
-                                            color: Color(0xffFF0000),
+                                            color: AppColors.Heartrate_color,
                                             // Border color for Systolic
                                             width: 1.0,
                                           ),
@@ -800,8 +848,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                                             // Toggle text on icon click
                                             child: Icon(
                                               Icons.info_outline_rounded,
-                                              color: is_heart_rate ? Color(
-                                                  0xffFF0000) : Color(0xFF997f7f),
+                                              color: is_heart_rate ? AppColors.Heartrate_color : AppColors.info_changing,
                                             ),
                                           ),
                                         ],
@@ -852,7 +899,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                                   width: 45,
                                   height: 45,
                                   decoration: BoxDecoration(
-                                    color: Color(0xffFF0000),
+                                    color: AppColors.Heartrate_color,
                                     // Background color remains constant
                                     shape: BoxShape
                                         .rectangle, // Optional: make it circular
@@ -915,7 +962,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                             Text(
                               currentTitle,
                               style: TextStyle(
-                                  color: Colors.red, fontWeight: FontWeight.bold),
+                                  color: AppColors.othersT, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
@@ -930,7 +977,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                                   Reports,
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFF275176)),
+                                      color: AppColors.othersT),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -1020,9 +1067,144 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
           ),
         ),
       ),
+    )
+      )
     );
   }
 
+  Widget buildBloodPressureChart({
+    required BuildContext context,
+    required String title,
+    required String Xaxistitle,
+    required List<HeartRateData1> chartData,
+    required int targetSystolic,
+    // required int targetDiastolic,
+    required String Function(HeartRateData1, int) xValueMapper,
+    double maxY = 200,
+    double minY = 60,
+    double interval = 20,
+    required bool isMonth
+  })
+  {
+    // ✅ Use MediaQuery to get screen dimensions
+    final screenSize = MediaQuery.of(context).size;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    // ✅ Always use portrait height (the larger of height or width)
+    final portraitHeight = screenSize.height > screenSize.width
+        ? screenSize.height
+        : screenSize.width;
+
+    final chartHeight = portraitHeight * 0.4;
+    final xStart = chartData.isNotEmpty ? xValueMapper(chartData.first, 0) : '';
+    final xEnd = chartData.isNotEmpty ? xValueMapper(chartData.last, chartData.length - 1) : '';
+
+    final targetSystolicPoints = [
+      TargetLinePoint(xStart, targetSystolic.toDouble()),
+      TargetLinePoint(xEnd, targetSystolic.toDouble()),
+    ];
+
+    // final targetDiastolicPoints = [
+    //   TargetLinePoint(xStart, targetDiastolic.toDouble()),
+    //   TargetLinePoint(xEnd, targetDiastolic.toDouble()),
+    // ];
+
+
+    return Container(
+      width: double.infinity,
+      height:chartHeight,
+      child: SfCartesianChart(
+        title: ChartTitle(text: title),
+        tooltipBehavior: TooltipBehavior(
+            enable: true,
+            textStyle: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold
+            )
+        ),
+        plotAreaBorderWidth: 0.0,
+        plotAreaBorderColor: Colors.grey.shade100,
+        backgroundColor: Colors.white,
+        primaryXAxis: isMonth == true ?
+        CategoryAxis(
+          title: AxisTitle(text: Xaxistitle),
+          labelStyle: TextStyle(fontSize: 9,
+              fontWeight: FontWeight.bold,
+              color: Colors.black
+          ),
+          maximumLabels: 12,
+          labelIntersectAction: AxisLabelIntersectAction.none,
+          labelPlacement: LabelPlacement.onTicks,
+          majorTickLines: MajorTickLines(width: 0),
+          majorGridLines: MajorGridLines(width: 0),
+        )
+            : CategoryAxis(
+          title: AxisTitle(text: Xaxistitle),
+          labelStyle: TextStyle(fontSize: 9,
+              fontWeight: FontWeight.bold,
+              color: Colors.black
+          ),
+          majorTickLines: MajorTickLines(width: 0),
+          majorGridLines: MajorGridLines(width: 0),
+          labelPlacement: LabelPlacement.onTicks,
+          edgeLabelPlacement: EdgeLabelPlacement.shift,
+        ),
+        primaryYAxis: NumericAxis(
+          minimum: minY,
+          maximum: maxY,
+          interval: interval,
+          title: AxisTitle(text: AppText.bp_unit),
+          labelStyle: TextStyle(fontSize: 9,
+              fontWeight: FontWeight.bold,
+              color: Colors.black
+          ),
+          // numberFormat: NumberFormat('##0'),
+          majorGridLines: MajorGridLines(width: 0),
+          minorGridLines: MinorGridLines(width: 0),
+          majorTickLines: MajorTickLines(width: 0),
+        ),
+        series: <CartesianSeries>[
+          SplineRangeAreaSeries<HeartRateData1, String>(
+            // dataSource: chartData.where((d) => d.date.isBefore(DateTime.now().add(Duration(days: 0)))).toList(),
+            dataSource: chartData,
+            xValueMapper:xValueMapper,
+            highValueMapper: (data, _) => sd_high,
+            lowValueMapper: (data, _) => sd_low,
+            color: Color(0xFFd9d9ff).withOpacity(0.6),
+            name: '',
+            enableTooltip: false,
+          ),
+
+          // 2️⃣ Target Lines (Middle)
+          // 2️⃣ Target Lines (Middle, Dynamic Full Width)
+          LineSeries<TargetLinePoint, String>(
+            name: '',
+            dataSource: targetSystolicPoints,
+            xValueMapper: (point, _) => point.xLabel,
+            yValueMapper: (point, _) => point.yValue,
+            color:  AppColors.target_color,
+            width: 2,
+            enableTooltip: false,
+            markerSettings: MarkerSettings(
+                isVisible: false
+            ),
+          ),
+
+
+          SplineSeries<HeartRateData1, String>(
+            name: AppText.SYSTOLIC,
+            dataSource: chartData,
+            xValueMapper: xValueMapper,
+            yValueMapper: (data, _) => data.systolic == 0 ? null : data.systolic,
+            color: AppColors.systolic_color,
+            markerSettings: MarkerSettings(isVisible: true, height: 12, width: 12),
+          ),
+
+        ],
+
+      ),
+    );
+  }
   Widget buildHeartRateChart({
     required BuildContext context,
     required String title,
@@ -1033,10 +1215,12 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
     double minY = 40,
     double maxY = 170,
     double interval = 20,
-    required bool isweek,
+    required bool isMonth,
+    required bool isDay,
     required double? sd_low,
     required double? sd_high,
-  }) {
+  })
+  {
     // Use MediaQuery to get screen dimensions
     final screenSize = MediaQuery.of(context).size;
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
@@ -1052,15 +1236,38 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
       height: chartHeight,
       child: SfCartesianChart(
         title: ChartTitle(text: title),
-        tooltipBehavior: TooltipBehavior(enable: true),
+        tooltipBehavior: TooltipBehavior(
+            enable: true,
+            textStyle: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold
+            )
+        ),
         plotAreaBorderWidth: 0.0,
         plotAreaBorderColor: AppColors.greyshaded100,
         backgroundColor: AppColors.White,
-        primaryXAxis: isweek ==true ?CategoryAxis(
+        primaryXAxis: isMonth == true ?
+        CategoryAxis(
           title: AxisTitle(text: Xaxistitle),
-          axisLine: const AxisLine(width: 1, color: AppColors.Grey),
+          labelStyle: TextStyle(fontSize: 9,
+              fontWeight: FontWeight.bold,
+              color: Colors.black
+          ),
+          maximumLabels: 12,
+          labelIntersectAction: AxisLabelIntersectAction.none,
+          labelPlacement: LabelPlacement.onTicks,
           majorTickLines: MajorTickLines(width: 0),
-          majorGridLines: const MajorGridLines(width: 0),
+          majorGridLines: MajorGridLines(width: 0),
+        ):
+        isDay == true ?CategoryAxis(
+          title: AxisTitle(text: Xaxistitle),
+          labelStyle: TextStyle(fontSize: 9,
+              fontWeight: FontWeight.bold,
+              color: Colors.black
+          ),
+          majorTickLines: MajorTickLines(width: 0),
+          majorGridLines: MajorGridLines(width: 0),
+          labelPlacement: LabelPlacement.onTicks,
           edgeLabelPlacement: EdgeLabelPlacement.shift,
           minimum: 0,
           maximum: 23,
@@ -1076,20 +1283,33 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
               ),
             );
           },
+
         ):
         CategoryAxis(
           title: AxisTitle(text: Xaxistitle),
-          axisLine: const AxisLine(width: 1, color: AppColors.Grey),
-          majorTickLines: MajorTickLines(width: 0),
-          majorGridLines: const MajorGridLines(width: 0),
-          edgeLabelPlacement: EdgeLabelPlacement.shift,
-          labelStyle: TextStyle(
-            fontSize: 9,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
+          labelStyle: TextStyle(fontSize: 9,
+              fontWeight: FontWeight.bold,
+              color: Colors.black
           ),
-          labelIntersectAction: AxisLabelIntersectAction.none, // ✅ Prevents skipping
-          maximumLabels: 12,
+          majorTickLines: MajorTickLines(width: 0),
+          majorGridLines: MajorGridLines(width: 0),
+          labelPlacement: LabelPlacement.onTicks,
+          edgeLabelPlacement: EdgeLabelPlacement.shift,
+          // minimum: 0,
+          // maximum: 23,
+          // interval: 2,
+          // axisLabelFormatter: (AxisLabelRenderDetails args) {
+          //   final value = args.value.toInt();
+          //   return ChartAxisLabel(
+          //     value.toString(),
+          //     TextStyle(
+          //       fontSize: 9,
+          //       fontWeight: FontWeight.bold,
+          //       color: Colors.black,
+          //     ),
+          //   );
+          // },
+
         ),
         primaryYAxis: NumericAxis(
           minimum: minY,
@@ -1105,22 +1325,9 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
-          plotBands: [
-            PlotBand(
-              isVisible: true,
-              start: targetHR.toDouble(),
-              end: targetHR.toDouble(),
-              borderWidth: 2,
-              borderColor: Colors.green,
-              text: '',
-              textStyle: TextStyle(color: Colors.green),
-              horizontalTextAlignment: TextAnchor.end,
-            ),
-
-          ],
         ),
         series: <CartesianSeries>[
-          if (sd_low != null && sd_high != null)
+          if (sd_low != null && sd_high != null && chartData.length > 1)
             SplineRangeAreaSeries<HeartRateData, String>(
               //dataSource: chartData,
               dataSource: chartData.where((data) => data.heartrate > 0).toList(),
@@ -1130,12 +1337,24 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
               color: Colors.red.withOpacity(0.2),
               enableTooltip: false,
             ),
+          LineSeries<HeartRateData, String>(
+            name: '',
+            dataSource: chartData,
+            xValueMapper: xValueMapper,
+            yValueMapper: (_, __) => targetHR.toDouble(),
+            color: AppColors.target_color,
+            width: 2,
+            enableTooltip: false,
+            markerSettings: MarkerSettings(
+                isVisible: false
+            ),
+          ),
           SplineSeries<HeartRateData, String>(
-            name: 'Heart Rate',
+            name: AppText.HEART,
             dataSource: chartData,
             xValueMapper: xValueMapper,
             yValueMapper: (data, _) => data.heartrate == 0 ? null :data.heartrate,
-            color: const Color(0xffFF0000),
+            color: AppColors.Heartrate_color,
             markerSettings: MarkerSettings(
               isVisible: true,
               height: 12,
@@ -1151,4 +1370,9 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
 
 
 
+}
+class TargetLinePoint {
+  final String xLabel;
+  final double yValue;
+  TargetLinePoint(this.xLabel, this.yValue);
 }

@@ -7,12 +7,16 @@ import 'package:azpire_new/Controller/email_controller.dart';
 import 'package:azpire_new/utils/apptext.dart';
 import 'package:azpire_new/utils/apptextstyle.dart';
 import 'package:azpire_new/widgets/custom_button/My_Button.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:azpire_new/widgets/custom_textfield.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:oktoast/oktoast.dart';
+import '../root/root.dart';
+
 
  class EmailScreen extends StatefulWidget {
     EmailScreen({super.key});
@@ -139,16 +143,62 @@ class _EmailScreenState extends State<EmailScreen> {
    }
 }
 
-
-showToast(String msg) {
-  Fluttertoast.showToast(
-      msg: msg,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
-      backgroundColor: Colors.black,
-      textColor: Colors.white,
-      fontSize: 16.0
+void showToast(String msg) {
+  showToastWidget(
+    _buildToastWidget(msg),
+    position: kIsWeb ? ToastPosition.top : ToastPosition.bottom,
+    duration: Duration(seconds: 2),
+    animationCurve: kIsWeb ? Curves.easeInOut : Curves.easeIn,
+    animationDuration: const Duration(milliseconds: 400),
+    animationBuilder: kIsWeb ? _slideFromRight : null,
   );
-
 }
+
+Widget _buildToastWidget(String msg) {
+  return Container(
+    margin: EdgeInsets.symmetric(horizontal: 20),
+    padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+    decoration: BoxDecoration(
+      color: Colors.black,
+      borderRadius: BorderRadius.circular(8.0),
+    ),
+    child: Text(
+      msg,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontSize: 16.0,
+        color: Colors.white,
+      ),
+    ),
+  );
+}
+
+Widget _slideFromRight(BuildContext context,
+    Widget child,
+    AnimationController controller,
+    double percent,) {
+  return SlideTransition(
+    position: Tween<Offset>(
+      begin: Offset(1.2, 0.0), // far right
+      end: Offset(-1.2, 0.0), // f // Slide to original position
+    ).animate(CurvedAnimation(
+      parent: controller,
+      curve: Curves.easeInOut,
+    )),
+    child: child,
+  );
+}
+
+//
+// showToast(String msg) {
+//   Fluttertoast.showToast(
+//       msg: msg,
+//       toastLength: Toast.LENGTH_SHORT,
+//       gravity: ToastGravity.BOTTOM,
+//       timeInSecForIosWeb: 1,
+//       backgroundColor: Colors.black,
+//       textColor: Colors.white,
+//       fontSize: 16.0
+//   );
+//
+// }

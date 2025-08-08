@@ -15,110 +15,138 @@ import '../root/root.dart';
 class LoginController {
   // update as needed
 
+  // Future<void> login({
+  //   required BuildContext context,
+  //   required StateSetter setState,
+  //   required GlobalKey<FormState> formKey,
+  //   required String? completePhoneNumber,
+  //   required String? token,
+  //   required Function(bool) setLoading,
+  //   required Function(bool) setPhoneValid,
+  //   required void Function(String) onOtpReceived,
+  //   required void Function(String) onUserReceived,
+  //   required void Function(String) onMobileNoReceived,
+  // }) async {
+  //   print(completePhoneNumber.toString());
+  //   print('FCM Token: ${token == null ? " No FCM TOKEN" : token}');
+  //
+  //   if (completePhoneNumber == null || completePhoneNumber.length < 10) {
+  //     setState(() {
+  //       setPhoneValid(false);
+  //     });
+  //     return;
+  //   }
+  //
+  //   if (formKey.currentState!.validate()) {
+  //     final String url = '$root/login_resend_otp';
+  //     final Map<String, String> userData = {
+  //       'mobile_no': completePhoneNumber.toString(),
+  //       "access_token": "${token ?? "No FCM TOKEN"}"
+  //     };
+  //
+  //     try {
+  //       setState(() {
+  //         setLoading(true);
+  //       });
+  //
+  //       final response = await http.post(
+  //         Uri.parse(url),
+  //         headers: {
+  //           'Content-Type': 'application/x-www-form-urlencoded',
+  //         },
+  //         body: userData,
+  //       );
+  //
+  //       if (response.statusCode == 200) {
+  //         final Map<String, dynamic> jsonResponse = json.decode(response.body);
+  //         if (jsonResponse["status"] == "SUCCESS") {
+  //           print(response.body);
+  //
+  //           onOtpReceived(jsonResponse['data']['mobile_otp'].toString());
+  //           onUserReceived(jsonResponse['data']['user'].toString());
+  //           onMobileNoReceived(jsonResponse['data']['mobile_no'].toString());
+  //
+  //           showToast("OTP Sent Successfully");
+  //
+  //           Get.to(() =>
+  //               MobileOtpScreen(
+  //                 MobileOTP: jsonResponse['data']['mobile_otp'].toString(),
+  //                 user: jsonResponse['data']['user'].toString(),
+  //                 mobileno: jsonResponse['data']['mobile_no'].toString(),
+  //               ));
+  //         } else {
+  //           showToast("User not Registered");
+  //         }
+  //       } else {
+  //         print(response.body);
+  //         showToast("Invalid Username");
+  //         print("Request failed with status: ${response.statusCode}.");
+  //       }
+  //     } catch (e) {
+  //       print("Error: $e");
+  //     } finally {
+  //       setState(() {
+  //         setLoading(false);
+  //       });
+  //     }
+  //   }
+  // }
+
   Future<void> login({
-    required BuildContext context,
-    required StateSetter setState,
-    required GlobalKey<FormState> formKey,
-    required String? completePhoneNumber,
-    required String? token,
-    required Function(bool) setLoading,
-    required Function(bool) setPhoneValid,
-    required void Function(String) onOtpReceived,
-    required void Function(String) onUserReceived,
-    required void Function(String) onMobileNoReceived,
+    required String completePhoneNumber,
+    required String token,
+    required String onOtpReceived,
+    required String onUserReceived,
+    required String onMobileNoReceived,
   }) async {
-    print(completePhoneNumber.toString());
+    final String url = '$root/login_resend_otp';
+
     print('FCM Token: ${token == null ? " No FCM TOKEN" : token}');
 
-    if (completePhoneNumber == null || completePhoneNumber.length < 10) {
-      setState(() {
-        setPhoneValid(false);
-      });
-      return;
-    }
+    final Map<String, String> userData = {
+      'mobile_no': completePhoneNumber,
+      'access_token': token,
+    };
 
-    if (formKey.currentState!.validate()) {
-      final String url = '$root/login_resend_otp';
-      final Map<String, String> userData = {
-        'mobile_no': completePhoneNumber.toString(),
-        "access_token": "${token ?? "No FCM TOKEN"}"
-      };
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: userData,
+      );
 
-      try {
-        setState(() {
-          setLoading(true);
-        });
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
 
-        final response = await http.post(
-          Uri.parse(url),
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: userData,
-        );
+        if (jsonResponse["status"] == "SUCCESS") {
+          print("Response: ${response.body}");
 
-        if (response.statusCode == 200) {
-          final Map<String, dynamic> jsonResponse = json.decode(response.body);
-          if (jsonResponse["status"] == "SUCCESS") {
-            print(response.body);
+          onOtpReceived = jsonResponse['data']['mobile_otp'].toString();
+          onUserReceived = jsonResponse['data']['user'].toString();
+          onMobileNoReceived = jsonResponse['data']['mobile_no'].toString();
 
-            onOtpReceived(jsonResponse['data']['mobile_otp'].toString());
-            onUserReceived(jsonResponse['data']['user'].toString());
-            onMobileNoReceived(jsonResponse['data']['mobile_no'].toString());
+          showToast("OTP Sent Successfully");
 
-            showToast("OTP Sent Successfully");
-
-            Get.to(() =>
-                MobileOtpScreen(
-                  MobileOTP: jsonResponse['data']['mobile_otp'].toString(),
-                  user: jsonResponse['data']['user'].toString(),
-                  mobileno: jsonResponse['data']['mobile_no'].toString(),
-                ));
-          } else {
-            showToast("User not Registered");
-          }
+          Get.to(() => MobileOtpScreen(
+            MobileOTP: onOtpReceived,
+            user: onUserReceived,
+            mobileno: onMobileNoReceived,
+          ));
         } else {
-          print(response.body);
-          showToast("Invalid Username");
-          print("Request failed with status: ${response.statusCode}.");
+          showToast("User not Registered");
         }
-      } catch (e) {
-        print("Error: $e");
-      } finally {
-        setState(() {
-          setLoading(false);
-        });
+      } else {
+        print(response.body);
+        showToast("Invalid Username");
+        print("Request failed with status: ${response.statusCode}.");
       }
+    } catch (e) {
+      print("Error: $e");
     }
   }
 
-
-
-  // void showToast(BuildContext context, String msg) {
-  //   // Hide any existing SnackBar
-  //   ScaffoldMessenger.of(context).hideCurrentSnackBar();
-  //
-  //   // Show a new toast-like SnackBar
-  //   final snackBar = SnackBar(
-  //     content: Text(
-  //       msg,
-  //       style: const TextStyle(
-  //         color: Colors.white, // textColor
-  //         fontSize: 16.0,       // fontSize
-  //       ),
-  //       textAlign: TextAlign.center,
-  //     ),
-  //     duration: const Duration(seconds: 1), // toastLength: SHORT, timeInSecForIosWeb: 1
-  //     backgroundColor:Colors.black,        // backgroundColor
-  //     behavior: SnackBarBehavior.floating,  // Allows positioning
-  //     shape: RoundedRectangleBorder(
-  //       borderRadius: BorderRadius.circular(8.0),
-  //     ),
-  //     //elevation: 3.0,
-  //   );
-  //
-  //   ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  // }
 
   void showCustomToast(String msg) {
     showToast(
