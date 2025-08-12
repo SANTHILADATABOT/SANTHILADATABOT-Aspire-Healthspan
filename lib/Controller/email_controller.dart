@@ -12,265 +12,52 @@ import 'package:flutter/foundation.dart'; // for kIsWeb
 import '../View/Dashboard_screen.dart';
 import '../root/root.dart';
 
-class EmailController {
+class EmailLoginController {
 
-  Future<void> emaillogin({
-  required BuildContext context,
-  required StateSetter setState,
-  required GlobalKey<FormState> formKey,
-  required TextEditingController emailcontroller,
-  required Function(bool) isLoading,
-  required String emailOtp,email,
-  required String user,
-}) async {
-    setState(() {
-      isLoading(true);
-    });
+
+
+  Future<Map<String, dynamic>> emailLogin(String email) async {
     final String url = '$root/email_login_resend_otp';
 
-    final Map<String, String> userData = {
-      'email': emailcontroller.text,
-    };
-
     try {
       final response = await http.post(
         Uri.parse(url),
-        body: userData,
+        body: {'email': email},
       );
+
+      print("emailresponse:${response.body}");
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        print("email otp response$jsonResponse");
-        if(jsonResponse['status'] == "SUCCESS"){
-           emailOtp = jsonResponse['data']['email_otp'].toString()  ;
-           email = jsonResponse['data']["email"];
-           showCustomToast("OTP sent to Email");
-          Get.to(() => VerificationOtpScreen(
-            email: email!,
-            emailOtp: emailOtp,
-          ));
-        } else {
-          showCustomToast("Email not Registered");
-          setState(() {
-            isLoading(false);
-          });
-        }
+        return {
+          'success': jsonResponse['status'] == "SUCCESS",
+          'data': jsonResponse['data'],
+          'message': jsonResponse['status'] == "SUCCESS"
+              ? "OTP sent to Email"
+              : "Email not Registered"
+        };
       } else {
-        print('Request failed with status: ${response.statusCode}.');
-        setState(() {
-          isLoading(false);
-        });
+        return {
+          'success': false,
+          'message': 'Request failed with status: ${response.statusCode}'
+        };
       }
     } catch (e) {
-      print('Error: $e');
-      setState(() {
-        isLoading(false);
-      });
-    }
-  }
-
-  //Email OTP Verify
-  Future<void> otpverify({
-    required BuildContext context,
-    required StateSetter setState,
-    required String email,
-    required String enteredOtp,
-    required Function(bool) setLoading,
-    required CountdownController controller,
-  }) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? _registeredDevice;
-    var token = prefs.getString('token');
-    print('FCM Token: ${token == null ? " " : token}');
-    print("New OTP: $enteredOtp");
-    print("Email: $email");
-
-    final String url = '$root/email_otp_verified';
-
-    final Map<String, String> userData = {
-      'email': email,
-      'email_otp': enteredOtp,
-      'access_token': token ?? " ",
-    };
-
-    try {
-      setState(() {
-        setLoading(true);
-      });
-
-      final response = await http.post(
-        Uri.parse(url),
-        body: userData,
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        print('Full response body: ${response.body}');
-
-        if (jsonResponse["status"] == "SUCCESS") {
-          var user_id = jsonResponse["user_id"].toString();
-          var name = jsonResponse["name"];
-          var mobile_no = jsonResponse["mobile_no"].toString();
-          var email = jsonResponse["email"];
-          var pofile = jsonResponse["pofile"] ?? " ";
-
-          final SharedPreferences prefs = await SharedPreferences.getInstance();
-          prefs.setBool('isLoggedIn', true);
-          await prefs.setString('user_id', user_id);
-          await prefs.setString('name', name);
-          await prefs.setString('mobile_no', mobile_no);
-          await prefs.setString('email', email);
-          await prefs.setString('pofile', pofile);
-
-          showCustomToast("Sign In Successful");
-          controller.pause();
-
-          setState(() {
-            setLoading(false);
-          });
-
-          Get.to(() => DashboardScreen(deviceID:_registeredDevice!,));
-
-        } else {
-          setState(() {
-            setLoading(false);
-          });
-          showCustomToast("OTP Mismatch. Please try again.");
-        }
-      } else {
-        print('Request failed with status: ${response.statusCode}.');
-        setState(() {
-          setLoading(false);
-        });
-      }
-    } catch (e) {
-      print('Error:1 $e');
-      showCustomToast("An error occurred. Please try again.");
-    }
-  }
-
-  //Email OTP Timeout
-  Future<void> otpTimeout({required String email}) async {
-    final String url = '$root/otp_timeout';
-
-    final Map<String, String> userData = {
-      'email': email,
-    };
-
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        body: userData,
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        print('OTP Timeout Response: $jsonResponse');
-      } else {
-        print('Request failed with status: ${response.statusCode}.');
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
-  //Email Resend OTP
-  Future<void> otp_resend(
-  {
-    required String email,
-    required StateSetter setState,
-    required String newotp,
-    required Function(bool)resend,
-    required CountdownController controller,
-}) async {
-
-    final String url = '$root/email_login_resend_otp';
-    final Map<String, String> userData = {
-      'email': email,
-    };
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        body: userData,
-      );
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        print('OTP Resend Response: $jsonResponse');
-        if(jsonResponse["status"] == "SUCCESS"){
-          setState(() {
-            newotp = jsonResponse['data']['email_otp'].toString();
-            resend(false);
-          });
-
-          // Restart the countdown timer when OTP is resent
-          controller.restart();
-        }
-
-      } else {
-        print('Request failed with status: ${response.statusCode}.');
-      }
-    } catch (e) {
-      print('Error:2 $e');
+      return {
+        'success': false,
+        'message': 'Error: $e'
+      };
     }
   }
 
 
 }
 
-// showToast(String msg) {
-//   Fluttertoast.showToast(
-//       msg: msg,
-//       toastLength: Toast.LENGTH_SHORT,
-//       gravity: ToastGravity.BOTTOM,
-//       timeInSecForIosWeb: 1,
-//       backgroundColor: Colors.black,
-//       textColor: Colors.white,
-//       fontSize: 16.0
-//   );
-//
-// }
-
-void showCustomToast(String msg) {
-  showToastWidget(
-    Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 75),
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Text(
-        msg,
-        textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 16.0, color: Colors.white),
-      ),
-    ),
-    position: ToastPosition.bottom,
-    duration: Duration(seconds: 2),
-    animationCurve: kIsWeb ? Curves.easeInOut : Curves.easeIn,
-    animationDuration: const Duration(milliseconds: 400),
-    animationBuilder: kIsWeb ? _slideFromRight : null,
-  );
-}
 
 
-Widget _slideFromRight(
-    BuildContext context,
-    Widget child,
-    AnimationController controller,
-    double percent,
-    ) {
-  return SlideTransition(
-    position: Tween<Offset>(
-      begin: Offset(1.2, 0.0), // far right
-      end: Offset(-1.2, 0.0),  // f // Slide to original position
-    ).animate(CurvedAnimation(
-      parent: controller,
-      curve: Curves.easeInOut,
-    )),
-    child: child,
-  );
-}
+
+
+
 
 
 

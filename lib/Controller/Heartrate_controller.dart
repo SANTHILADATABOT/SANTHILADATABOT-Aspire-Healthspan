@@ -876,81 +876,81 @@ class HeartRatecontroller extends GetxController {
       rethrow;
     }
   }
-  // Future<Map<String, dynamic>> MultiYear_Chart(String userId, int toYear) async {
-  //   final String url = '$root/get_multiyear_hr_data';
-  //   final Map<String, dynamic> payload = {
-  //     'user_id': userId,
-  //     'to_year': '${toYear.toString()}',
-  //   };
-  //
-  //   try {
-  //     final response = await http.post(
-  //       Uri.parse(url),
-  //       headers: {'Content-Type': 'application/json'},
-  //       body: jsonEncode(payload),
-  //     );
-  //
-  //     print('MultiYear HR Response: $response');
-  //
-  //
-  //     if (response.statusCode == 200) {
-  //       final Map<String, dynamic> jsonResponse = json.decode(response.body);
-  //
-  //       print('MultiYear HR Response status: ${response.statusCode}');
-  //       print('MultiYear HR Response body: ${response.body}');
-  //
-  //       if (jsonResponse['status'] == "SUCCESS") {
-  //         final Map<String, dynamic> multiYearData = jsonResponse['multiyear_heart_data'] ?? {};
-  //
-  //         int targetHR = jsonResponse['target_heart_rate'] ?? 75;
-  //         final String? recentDate = jsonResponse['recent_datetime']?.toString();
-  //         int recentHR = jsonResponse['recent_heart_rate']?.toInt() ?? 0;
-  //
-  //         List<HeartRateData> chartData = [];
-  //
-  //         double heartrateSdLow = 0.0;
-  //         double heartrateSdHigh = 0.0;
-  //
-  //         multiYearData.forEach((yearLabel, yearData) {
-  //           double heartRateAvg = (yearData['average_heart_rate'] as num?)?.toDouble() ?? 0.0;
-  //           heartrateSdLow = (yearData['heart_rate_sd_low'] as num?)?.toDouble() ?? 0.0;
-  //           heartrateSdHigh = (yearData['heart_rate_sd_high'] as num?)?.toDouble() ?? 0.0;
-  //
-  //           final int year = int.tryParse(yearLabel) ?? DateTime.now().year;
-  //           final DateTime yearDate = DateTime(year);
-  //
-  //           chartData.add(HeartRateData(
-  //             months: '',
-  //             heartrate: heartRateAvg.round(),
-  //             date: yearDate,
-  //             day: '',
-  //             Years: yearLabel,
-  //             targetheartrate: targetHR,
-  //             sd_high: heartrateSdHigh,
-  //             sd_low: heartrateSdLow,
-  //           ));
-  //         });
-  //
-  //         return {
-  //           'chartData': chartData,
-  //           'weekhr': recentHR,
-  //           'target_heart_rate': targetHR,
-  //           'mainDate': '${jsonResponse['to_year']}',
-  //           'recent_datetime': recentDate,
-  //           'heartrate_sd_high': heartrateSdHigh,
-  //           'heartrate_sd_low': heartrateSdLow,
-  //         };
-  //       } else {
-  //         throw Exception('API Error: ${jsonResponse['message']}');
-  //       }
-  //     } else {
-  //       throw Exception('Failed to load data. Status code: ${response.statusCode}');
-  //     }
-  //   } catch (e) {
-  //     print('Error fetching multiyear HR data: $e');
-  //     rethrow;
-  //   }
-  // }
+// Future<Map<String, dynamic>> MultiYear_Chart(String userId, int toYear) async {
+//   final String url = '$root/get_multiyear_hr_data';
+//   final Map<String, dynamic> payload = {
+//     'user_id': userId,
+//     'to_year': '${toYear.toString()}',
+//   };
+//
+//   try {
+//     final response = await http.post(
+//       Uri.parse(url),
+//       headers: {'Content-Type': 'application/json'},
+//       body: jsonEncode(payload),
+//     );
+//
+//     print('MultiYear HR Response: $response');
+//
+//
+//     if (response.statusCode == 200) {
+//       final Map<String, dynamic> jsonResponse = json.decode(response.body);
+//
+//       print('MultiYear HR Response status: ${response.statusCode}');
+//       print('MultiYear HR Response body: ${response.body}');
+//
+//       if (jsonResponse['status'] == "SUCCESS") {
+//         final Map<String, dynamic> multiYearData = jsonResponse['multiyear_heart_data'] ?? {};
+//
+//         int targetHR = jsonResponse['target_heart_rate'] ?? 75;
+//         final String? recentDate = jsonResponse['recent_datetime']?.toString();
+//         int recentHR = jsonResponse['recent_heart_rate']?.toInt() ?? 0;
+//
+//         List<HeartRateData> chartData = [];
+//
+//         double heartrateSdLow = 0.0;
+//         double heartrateSdHigh = 0.0;
+//
+//         multiYearData.forEach((yearLabel, yearData) {
+//           double heartRateAvg = (yearData['average_heart_rate'] as num?)?.toDouble() ?? 0.0;
+//           heartrateSdLow = (yearData['heart_rate_sd_low'] as num?)?.toDouble() ?? 0.0;
+//           heartrateSdHigh = (yearData['heart_rate_sd_high'] as num?)?.toDouble() ?? 0.0;
+//
+//           final int year = int.tryParse(yearLabel) ?? DateTime.now().year;
+//           final DateTime yearDate = DateTime(year);
+//
+//           chartData.add(HeartRateData(
+//             months: '',
+//             heartrate: heartRateAvg.round(),
+//             date: yearDate,
+//             day: '',
+//             Years: yearLabel,
+//             targetheartrate: targetHR,
+//             sd_high: heartrateSdHigh,
+//             sd_low: heartrateSdLow,
+//           ));
+//         });
+//
+//         return {
+//           'chartData': chartData,
+//           'weekhr': recentHR,
+//           'target_heart_rate': targetHR,
+//           'mainDate': '${jsonResponse['to_year']}',
+//           'recent_datetime': recentDate,
+//           'heartrate_sd_high': heartrateSdHigh,
+//           'heartrate_sd_low': heartrateSdLow,
+//         };
+//       } else {
+//         throw Exception('API Error: ${jsonResponse['message']}');
+//       }
+//     } else {
+//       throw Exception('Failed to load data. Status code: ${response.statusCode}');
+//     }
+//   } catch (e) {
+//     print('Error fetching multiyear HR data: $e');
+//     rethrow;
+//   }
+// }
 
 
 

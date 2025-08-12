@@ -179,7 +179,25 @@ class SleepController extends GetxController{
 
       // Final yAxisMax calculation (rounded to next even number after adding 2 hours)
       final roundedTotal = maxTotalSleep.ceil();
-      yAxisMax = ((roundedTotal + 2) / 2).ceil() * 2;
+      yAxisMax = ((roundedTotal + 4) / 2).ceil() * 2;
+
+      // return {
+      //   'chartData': dailyBars,
+      //   'summaryData': daySummaryList,
+      //   'recent_datetime': recentDatetime?.toString(),
+      //   'recent_sleep_list': recentSleepList,
+      //   'recent_light': recentLight?.toString(),
+      //   'recent_deep': recentDeep?.toString(),
+      //   'recent_rem': recentMiddle?.toString(),
+      //   'recent_light_percent': recentLightPercent?.toString(),
+      //   'recent_deep_percent': recentDeepPercent?.toString(),
+      //   'recent_rem_percent': recentMiddlePercent?.toString(),
+      //   'y_axis_max': yAxisMax.toDouble(),
+      //   'recent_total': recentTotal?.toString(),
+      //   'recent_total_percent': recenttotalPercent?.toString(),
+      //   'target_sleep': targetsleep?.toString(),
+      // };
+
 
       return {
         'chartData': dailyBars,
@@ -390,7 +408,7 @@ class SleepController extends GetxController{
         'recent_rem_percent': recentMiddlePercent,
         'recent_total': recentTotal,
         'recent_total_percent':recenttotalPercent,
-        'target_sleep':targetsleep,
+        'target_sleep': targetsleep?.toString(),
          'daily_avg_sleep':avgsleep
 
       };
@@ -424,6 +442,8 @@ class SleepController extends GetxController{
         'type': type,
       }),
     );
+
+    print("response:${response.body}");
 
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
@@ -587,10 +607,14 @@ class SleepController extends GetxController{
         'summaryData': monthlySummaryList,
         'y_axis_max': yAxisMax,
         'mainDate': date,
-        'recent_light_percent': recentLightPercent,
-        'recent_deep_percent': recentDeepPercent,
-        'recent_rem_percent': recentMiddlePercent,
-        'recent_total_percent': recenttotalPercent,
+        // 'recent_light_percent': recentLightPercent,
+        // 'recent_deep_percent': recentDeepPercent,
+        // 'recent_rem_percent': recentMiddlePercent,
+        // 'recent_total_percent': recenttotalPercent,
+        'recent_light_percent': recentLightPercent?.toString(),
+        'recent_deep_percent': recentDeepPercent?.toString(),
+        'recent_rem_percent': recentMiddlePercent?.toString(),
+        'recent_total_percent': recenttotalPercent?.toString(),
         'target_sleep':targetsleep,
         'daily_avg_sleep':avgsleep
       };

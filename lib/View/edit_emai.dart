@@ -6,9 +6,11 @@ import 'package:azpire_new/utils/app_color.dart';
 import 'package:azpire_new/utils/appimages.dart';
 import 'package:azpire_new/utils/apptextstyle.dart';
 import 'package:azpire_new/widgets/custom_button/My_Button.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timer_count_down/timer_controller.dart';
@@ -103,17 +105,17 @@ class _edit_emailState extends State<edit_email> {
   //
   // }
 
-  showToast(String msg) {
-    Fluttertoast.showToast(
-      msg: msg,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
-      backgroundColor: Colors.black,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
-  }
+  // showToast(String msg) {
+  //   Fluttertoast.showToast(
+  //     msg: msg,
+  //     toastLength: Toast.LENGTH_SHORT,
+  //     gravity: ToastGravity.BOTTOM,
+  //     timeInSecForIosWeb: 1,
+  //     backgroundColor: Colors.black,
+  //     textColor: Colors.white,
+  //     fontSize: 16.0,
+  //   );
+  // }
 
   void _onTextChanged(String value) {
     setState(() {
@@ -121,169 +123,237 @@ class _edit_emailState extends State<edit_email> {
     });
   }
 
+  // Future<void> verify_mob() async {
+  //   setState(() {
+  //     isLoading_1 = true;
+  //   });
+  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   var user_id = prefs.getString('user_id') ?? "";
+  //   final String url = '$root/update_mobile_email';
+  //
+  //   final Map<String, String> userData = {
+  //     'email': emailController.text,
+  //     'user_id': user_id
+  //   };
+  //
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse(url),
+  //       headers: {
+  //         'Content-Type': 'application/x-www-form-urlencoded',
+  //       },
+  //       body: userData,
+  //     );
+  //     if (response.statusCode == 200) {
+  //       final Map<String, dynamic> jsonResponse = json.decode(response.body);
+  //       if (jsonResponse["status"] == "SUCCESS") {
+  //         print(response.body);
+  //         setState(() {
+  //          // showbutton = true;
+  //           verify = true;
+  //           isLoading_1 = false;
+  //           _controller.restart();
+  //         });
+  //         showToast("OTP Sent Successfully");
+  //         //_controller.pause();
+  //       } else {
+  //         showToast("Email already exists");
+  //         print(response.body);
+  //         setState(() {
+  //           isLoading_1 = false;
+  //           verify = false;
+  //         });
+  //         //showToast("User not Registered");
+  //       }
+  //     } else {
+  //       showToast("Request failed with status: ${response.statusCode}.");
+  //     }
+  //   } catch (e) {
+  //     showToast("Error: $e");
+  //   } finally {
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //   }
+  // }
+
+  // Future<void> verify_submit() async {
+  //   setState(() {
+  //     isLoading_1 = true;
+  //   });
+  //   final String url = '$root/updt_mobmail_otp_verify';
+  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   var user_id = prefs.getString('user_id') ?? "";
+  //   final Map<String, String> userData = {
+  //     'email': emailController.text,
+  //     'user_id': user_id,
+  //     'mobile_email_otp': enteredOtp
+  //   };
+  //
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse(url),
+  //       headers: {
+  //         'Content-Type': 'application/x-www-form-urlencoded',
+  //       },
+  //       body: userData,
+  //     );
+  //     if (response.statusCode == 200) {
+  //       final Map<String, dynamic> jsonResponse = json.decode(response.body);
+  //       if (jsonResponse["status"] == "SUCCESS") {
+  //         print(response.body);
+  //
+  //         showToast("Email Updated Successfully");
+  //         Get.to(EditProfile());
+  //         // setState(() {
+  //         //   isLoading_1 = false;
+  //         //   verify = true;
+  //         // });
+  //       } else {
+  //         setState(() {
+  //           isLoading = false;
+  //         });
+  //         showToast("OTP Mismatch. Please try again.");
+  //       }
+  //     } else {
+  //       showToast("Request failed with status: ${response.statusCode}.");
+  //     }
+  //   } catch (e) {
+  //     showToast("Error: $e");
+  //   } finally {
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //   }
+  // }
+  //
+  // Future<void> otp_timeout() async {
+  //   final String url = '$root/update_otp_timeout';
+  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   var user_id = prefs.getString('user_id') ?? "";
+  //   final Map<String, String> userData = {
+  //     'email': emailController.text,
+  //     'user_id':user_id
+  //   };
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse(url),
+  //       body: userData,
+  //     );
+  //     if (response.statusCode == 200) {
+  //       final Map<String, dynamic> jsonResponse = json.decode(response.body);
+  //       print('OTP Timeout Response: $jsonResponse');
+  //     } else {
+  //       print('Request failed with status: ${response.statusCode}.');
+  //     }
+  //   } catch (e) {
+  //     print('Error:3 $e');
+  //   }
+  // }
+  //
+  // Future<void> otp_resend() async {
+  //   print(emailController.text);
+  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   var user_id = prefs.getString('user_id') ?? "";
+  //   final String url = '$root/email_update_resend_otp';
+  //   final Map<String, String> userData = {
+  //     'email': emailController.text,
+  //     'user_id': user_id
+  //   };
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse(url),
+  //       body: userData,
+  //     );
+  //     if (response.statusCode == 200) {
+  //       final Map<String, dynamic> jsonResponse = json.decode(response.body);
+  //       print('OTP Resend Response: $jsonResponse');
+  //       if (jsonResponse["status"] == "SUCCESS") {
+  //         setState(() {
+  //           newotp = jsonResponse['data']['mobile_otp'].toString();
+  //           resend = false;
+  //         });
+  //
+  //         // Restart the countdown timer when OTP is resent
+  //         _controller.restart();
+  //       }
+  //     } else {
+  //       print('Request failed with status: ${response.statusCode}.');
+  //     }
+  //   } catch (e) {
+  //     print('Error:2 $e');
+  //   }
+  // }
+
   Future<void> verify_mob() async {
-    setState(() {
-      isLoading_1 = true;
-    });
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    var user_id = prefs.getString('user_id') ?? "";
-    final String url = '$root/update_mobile_email';
+    setState(() => isLoading_1 = true);
 
-    final Map<String, String> userData = {
-      'email': emailController.text,
-      'user_id': user_id
-    };
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('user_id') ?? "";
 
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: userData,
-      );
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        if (jsonResponse["status"] == "SUCCESS") {
-          print(response.body);
-          setState(() {
-           // showbutton = true;
-            verify = true;
-            isLoading_1 = false;
-            _controller.restart();
-          });
-          showToast("OTP Sent Successfully");
-          //_controller.pause();
-        } else {
-          showToast("Email already exists");
-          print(response.body);
-          setState(() {
-            isLoading_1 = false;
-            verify = false;
-          });
-          //showToast("User not Registered");
-        }
-      } else {
-        showToast("Request failed with status: ${response.statusCode}.");
-      }
-    } catch (e) {
-      showToast("Error: $e");
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
+    final result = await _editemailcontroller.verify_mob(
+      email: emailController.text,
+      userId: userId,
+    );
+
+    if (result['success']) {
+      verify = true;
+      _controller.restart();
     }
+
+    showToast(result['message']);
+
+    setState(() => isLoading_1 = false);
   }
 
   Future<void> verify_submit() async {
-    setState(() {
-      isLoading_1 = true;
-    });
-    final String url = '$root/updt_mobmail_otp_verify';
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    var user_id = prefs.getString('user_id') ?? "";
-    final Map<String, String> userData = {
-      'email': emailController.text,
-      'user_id': user_id,
-      'mobile_email_otp': enteredOtp
-    };
+    setState(() => isLoading_1 = true);
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('user_id') ?? "";
 
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: userData,
-      );
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        if (jsonResponse["status"] == "SUCCESS") {
-          print(response.body);
+    final result = await _editemailcontroller.verifyOtp(
+      email: emailController.text,
+      userId: userId,
+      otp: enteredOtp,
+    );
 
-          showToast("Email Updated Successfully");
-          Get.to(EditProfile());
-          // setState(() {
-          //   isLoading_1 = false;
-          //   verify = true;
-          // });
-        } else {
-          setState(() {
-            isLoading = false;
-          });
-          showToast("OTP Mismatch. Please try again.");
-        }
-      } else {
-        showToast("Request failed with status: ${response.statusCode}.");
-      }
-    } catch (e) {
-      showToast("Error: $e");
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
+    showToast(result['message']);
+    if (result['success']) {
+      Get.to(EditProfile());
     }
+    setState(() => isLoading_1 = false);
   }
-
 
   Future<void> otp_timeout() async {
-    final String url = '$root/update_otp_timeout';
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    var user_id = prefs.getString('user_id') ?? "";
-    final Map<String, String> userData = {
-      'email': emailController.text,
-      'user_id':user_id
-    };
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        body: userData,
-      );
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        print('OTP Timeout Response: $jsonResponse');
-      } else {
-        print('Request failed with status: ${response.statusCode}.');
-      }
-    } catch (e) {
-      print('Error:3 $e');
-    }
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('user_id') ?? "";
+    await _editemailcontroller.otpTimeout(
+      email: emailController.text,
+      userId: userId,
+    );
   }
-
 
   Future<void> otp_resend() async {
-    print(emailController.text);
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    var user_id = prefs.getString('user_id') ?? "";
-    final String url = '$root/email_update_resend_otp';
-    final Map<String, String> userData = {
-      'email': emailController.text,
-       'user_id': user_id
-    };
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        body: userData,
-      );
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        print('OTP Resend Response: $jsonResponse');
-        if (jsonResponse["status"] == "SUCCESS") {
-          setState(() {
-            newotp = jsonResponse['data']['mobile_otp'].toString();
-            resend = false;
-          });
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('user_id') ?? "";
 
-          // Restart the countdown timer when OTP is resent
-          _controller.restart();
-        }
-      } else {
-        print('Request failed with status: ${response.statusCode}.');
-      }
-    } catch (e) {
-      print('Error:2 $e');
+    final result = await _editemailcontroller.resendOtp(
+      email: emailController.text,
+      userId: userId,
+    );
+
+    if (result['success']) {
+      setState(() {
+        newotp = result['data']['mobile_otp'].toString();
+        resend = false;
+      });
+      _controller.restart();
     }
   }
+
+
+
+
 
 
 
@@ -523,6 +593,46 @@ class _edit_emailState extends State<edit_email> {
           ),
         ),
       ),
+    );
+  }
+
+  void showToast(String msg) {
+    showToastWidget(
+      Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+        margin: EdgeInsets.symmetric(horizontal: 20, vertical: 75),
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Text(
+          msg,
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 16.0, color: Colors.white),
+        ),
+      ),
+      position: ToastPosition.bottom,
+      //duration: Duration(seconds: 2),
+      animationCurve: kIsWeb ? Curves.easeInOut : Curves.easeIn,
+      animationDuration: const Duration(milliseconds: 400),
+      animationBuilder: kIsWeb ? _slideFromRight : null,
+    );
+  }
+  Widget _slideFromRight(
+      BuildContext context,
+      Widget child,
+      AnimationController controller,
+      double percent,
+      ) {
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: Offset(1.2, 0.0), // far right
+        end: Offset(-1.2, 0.0),  // f // Slide to original position
+      ).animate(CurvedAnimation(
+        parent: controller,
+        curve: Curves.easeInOut,
+      )),
+      child: child,
     );
   }
 }

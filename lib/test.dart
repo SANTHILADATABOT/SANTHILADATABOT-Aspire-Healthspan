@@ -1,266 +1,661 @@
-
-import 'dart:convert';
-import 'package:azpire_new/View/edit_profile.dart';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:get/get.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:timer_count_down/timer_controller.dart';
-import '../root/root.dart';
-import 'package:oktoast/oktoast.dart';
-import 'package:flutter/foundation.dart'; // for kIsWeb
-
-class EditPhoneController {
-
-  Future<void> verify_mob({
-    //required BuildContext context,
-    //required StateSetter setState,
-    required String completePhoneNumber,
-    required String mobnum,
-    //required bool isLoading_1,
-    //required bool isLoading,
-    //required bool verify,
-    required CountdownController controller,
-  }) async {
-    print('PHONE' + mobnum);
-    print("Phone number : ${completePhoneNumber.toString()}");
-
-    // setState(() {
-    //   isLoading_1 = true;
-    // });
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    var user_id = prefs.getString('user_id') ?? "";
-    final String url = '$root/update_mobile_email';
-
-    final Map<String, String> userData = {
-      'mobile_no': completePhoneNumber.toString(),
-      'user_id': user_id
-    };
-
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: userData,
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        print(response.body);
-
-        if (jsonResponse["status"] == "SUCCESS") {
-          // setState(() {
-          //   verify = true;
-          //   controller.restart();
-          //   isLoading_1 = false;
-          // });
-          showToast("OTP Sent Successfully");
-        } else {
-          showToast("Mobile number already exists");
-          print(response.body);
-          // setState(() {
-          //   isLoading_1 = false;
-          //   verify = false;
-          // });
-        }
-      } else {
-        showToast("Request failed with status: ${response.statusCode}.");
-      }
-    } catch (e) {
-      showToast("Error: $e");
-    } finally {
-      // setState(() {
-      //   isLoading = false;
-      // });
-    }
-  }
-
-  Future<void> otp_timeout({
-    required String completePhoneNumber,
-  }) async {
-    final String url = '$root/update_otp_timeout';
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    var user_id = prefs.getString('user_id') ?? "";
-    final Map<String, String> userData = {
-      'mobile_no': completePhoneNumber.toString(),
-      'user_id': user_id
-    };
-
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        body: userData,
-      );
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        print('OTP Timeout Response: $jsonResponse');
-      } else {
-        print('Request failed with status: ${response.statusCode}.');
-      }
-    } catch (e) {
-      print('Error:3 $e');
-    }
-  }
-
-  Future<void> otp_resend({
-    required BuildContext context,
-    required StateSetter setState,
-    required String completePhoneNumber,
-    required String mobnum,
-    required CountdownController controller,
-    required String newotp,
-    required bool resend,
-  }) async {
-    print('Resendno' + completePhoneNumber);
-    print('Resendno2' + mobnum);
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    var user_id = prefs.getString('user_id') ?? "";
-    final String url = '$root/update_resend_otp';
-
-    final Map<String, String> userData = {
-      'mobile_no': completePhoneNumber.toString(),
-      'user_id': user_id
-    };
-
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        body: userData,
-      );
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        print('OTP Resend Response: $jsonResponse');
-
-        if (jsonResponse["status"] == "SUCCESS") {
-          setState(() {
-            newotp=jsonResponse['data']['mobile_otp'].toString();
-            resend=false;
-          });
-
-          controller.restart(); // Restart countdown
-        }
-      } else {
-        print('Request failed with status: ${response.statusCode}.');
-      }
-    } catch (e) {
-      print('Error:2 $e');
-    }
-  }
-
-  Future<void> verify_submit({
-    required BuildContext context,
-    required StateSetter setState,
-    required String completePhoneNumber,
-    required String enteredOtp,
-    required bool isLoading,
-    required bool isLoading_1,
-    required bool verify,
-  }) async {
-    print(completePhoneNumber.toString());
-    print(enteredOtp.toString());
-
-    setState(() {
-      isLoading_1 = true;
-    });
-
-    final String url = '$root/updt_mobmail_otp_verify';
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    var user_id = prefs.getString('user_id') ?? "";
-    final Map<String, String> userData = {
-      'mobile_no': completePhoneNumber,
-      'user_id': user_id,
-      'mobile_email_otp': enteredOtp
-    };
-
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: userData,
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
-
-        if (jsonResponse["status"] == "SUCCESS") {
-          print(response.body);
-          showToast("Mobile Number Updated Successfully");
-          Get.to(EditProfile());
-          setState(() {
-            isLoading_1 = false;
-            verify = true;
-          });
-        } else {
-          print("Error:1" + response.body);
-          setState(() {
-            isLoading = false;
-          });
-          showToast("OTP Mismatch. Please try again.");
-        }
-      } else {
-        showToast("Request failed with status: ${response.statusCode}.");
-      }
-    } catch (e) {
-      showToast("Error:2 $e");
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-}
-
-void showCustomToast(String msg) {
-  showToast(
-    msg,
-    duration: Duration(seconds: 2),
-    position: kIsWeb ? ToastPosition.top : ToastPosition.bottom,
-    backgroundColor: Colors.black,
-    radius: 8.0,
-    textPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-    textStyle: TextStyle(
-      fontSize: 16.0,
-      color: Colors.white,
-    ),
-    textAlign: TextAlign.center,
-    animationCurve: kIsWeb ? Curves.easeInOut : Curves.easeIn,
-    animationDuration: const Duration(milliseconds: 400),
-    animationBuilder: kIsWeb ? _slideFromRight : null,
-  );
-}
-
-Widget _slideFromRight(
-    BuildContext context,
-    Widget child,
-    AnimationController controller,
-    double percent,
-    ) {
-  return SlideTransition(
-    position: Tween<Offset>(
-      begin: Offset(1.2, 0.0), // far right
-      end: Offset(-1.2, 0.0),  // f // Slide to original position
-    ).animate(CurvedAnimation(
-      parent: controller,
-      curve: Curves.easeInOut,
-    )),
-    child: child,
-  );
-}
-
-// showToast(String msg) {
-//   Fluttertoast.showToast(
-//     msg: msg,
-//     toastLength: Toast.LENGTH_SHORT,
-//     gravity: ToastGravity.BOTTOM,
-//     timeInSecForIosWeb: 1,
-//     backgroundColor: Colors.black,
-//     textColor: Colors.white,
-//     fontSize: 16.0,
+// // import 'dart:io';
+// //
+// // import 'package:app_tracking_transparency/app_tracking_transparency.dart';
+// // import 'package:azpire_new/View/Dashboard_screen.dart';
+// // import 'package:azpire_new/View/login_Screen.dart';
+// // import 'package:azpire_new/View/bluetoothscreen.dart';
+// // import 'package:azpire_new/utils/app_color.dart';
+// // import 'package:azpire_new/utils/appimages.dart';
+// // import 'package:azpire_new/utils/apptext.dart';
+// // import 'package:azpire_new/utils/apptextstyle.dart';
+// // import 'package:easy_splash_screen/easy_splash_screen.dart';
+// // import 'package:firebase_core/firebase_core.dart';
+// // import 'package:firebase_messaging/firebase_messaging.dart';
+// // import 'package:flutter/material.dart';
+// // import 'package:flutter/services.dart';
+// // import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+// // import 'package:get/get.dart';
+// // import 'package:get/get_navigation/src/root/get_material_app.dart';
+// // import 'package:hive/hive.dart';
+// // import 'package:hive_flutter/adapters.dart';
+// // import 'package:lottie/lottie.dart';
+// // import 'package:path_provider/path_provider.dart';
+// // import 'package:shared_preferences/shared_preferences.dart';
+// // import 'package:flutter/foundation.dart';
+// // import 'Cling Connections/health_data.dart';
+// // import 'Cling Connections/hive_model.dart';
+// //
+// //
+// //
+// //
+// //
+// // final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+// // FlutterLocalNotificationsPlugin();
+// //
+// // Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+// //   await Firebase.initializeApp();
+// //   _showNotification(message.notification?.title, message.notification?.body);
+// // }
+// //
+// // Future<void> main() async {
+// //   WidgetsFlutterBinding.ensureInitialized();
+// //   if (kIsWeb) {
+// //     await Firebase.initializeApp(
+// //       options: const FirebaseOptions(
+// //         apiKey: "AIzaSyDuRkpyB2efP-U9Ild4zTXzmJUvSIY1CiQ",
+// //         authDomain: "aspirenew-5085f.firebaseapp.com",
+// //         projectId: "aspirenew-5085f",
+// //         storageBucket: "aspirenew-5085f.appspot.com",
+// //         messagingSenderId: "989276102678",
+// //         appId: "1:989276102678:web:057645535a645b2364d537",
+// //         measurementId: "G-D3VW2P8SEC",
+// //       ),
+// //     );
+// //   } else {
+// //     await Firebase.initializeApp();
+// //   }
+// //
+// //
+// //   //await Firebase.initializeApp();
+// //   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+// //   // await Hive.initFlutter();
+// //   // await Hive.openBox('minuteDataBox');
+// //   // await Hive.initFlutter(); // initialize Hive for Flutter
+// //   // Hive.registerAdapter(MinuteDataAdapter());
+// //   // ✅ Register adapter here
+// //
+// //
+// //
+// //   // Show ATT prompt if on iOS
+// //   if (Platform.isIOS) {
+// //     final status = await AppTrackingTransparency.trackingAuthorizationStatus;
+// //
+// //     if (status == TrackingStatus.notDetermined) {
+// //       await AppTrackingTransparency.requestTrackingAuthorization();
+// //       print("ATT prompt shown to the user.");
+// //     } else {
+// //       print("ATT already determined: $status");
+// //     }
+// //   } else {
+// //     print("Platform is not iOS — skipping ATT request.");
+// //   }
+// //
+// //
+// //
+// //
+// //   const AndroidInitializationSettings initializationSettingsAndroid =
+// //   AndroidInitializationSettings('@mipmap/ic_launcher');
+// //   const DarwinInitializationSettings initializationSettingsIOS =
+// //   DarwinInitializationSettings();
+// //
+// //   const InitializationSettings initializationSettings = InitializationSettings(
+// //     android: initializationSettingsAndroid,
+// //     iOS: initializationSettingsIOS,
+// //   );
+// //
+// //   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+// //   runApp(MyApp());
+// // }
+// //
+// //
+// // class MyApp extends StatelessWidget {
+// //   @override
+// //   Widget build(BuildContext context) {
+// //     final FirebaseMessaging messaging = FirebaseMessaging.instance;
+// //
+// //     messaging.requestPermission(
+// //       alert: true,
+// //       badge: true,
+// //       sound: true,
+// //     );
+// //
+// //     if (kIsWeb) {
+// //       // Web FCM token with VAPID key
+// //       messaging
+// //           .getToken(
+// //         vapidKey:
+// //         "BBDchPDDIaVe_9T10UA-yxAzZfhWN68KuYExqsvwdOwZxcKItXJhj93VYGgyoaAaoafelKRzcfJWggC2ftMRXuA", // put your VAPID key here
+// //       )
+// //           .then((String? webToken) async {
+// //         print("Web FCM Token: $webToken");
+// //         final SharedPreferences prefs = await SharedPreferences.getInstance();
+// //         await prefs.setString('token', webToken ?? "");
+// //       }).catchError((e) {
+// //         print("Error fetching Web FCM token: $e");
+// //       });
+// //     } else {
+// //       // Android / iOS FCM token
+// //       messaging.getToken().then((String? apnsToken) async {
+// //         print("APNs/FCM Token: $apnsToken");
+// //         final SharedPreferences prefs = await SharedPreferences.getInstance();
+// //         await prefs.setString('token', apnsToken ?? "");
+// //       }).catchError((e) {
+// //         print("Error fetching APNs token: $e");
+// //       });
+// //     }
+// //
+// //     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+// //       _showNotification(
+// //           message.notification?.title, message.notification?.body);
+// //     });
+// //
+// //     return GetMaterialApp(
+// //       title: 'Flutter Demo',
+// //       debugShowCheckedModeBanner: false,
+// //       home: SplashPage(),
+// //     );
+// //   }
+// // }
+// //
+// //
+// //
+// // class SplashPage extends StatefulWidget {
+// //   SplashPage({Key? key}) : super(key: key);
+// //
+// //   @override
+// //   _SplashPageState createState() => _SplashPageState();
+// // }
+// //
+// // class _SplashPageState extends State<SplashPage> {
+// //   bool isLoggedIn = false;
+// //   bool isLoading = true;
+// //   static const platform = MethodChannel('cling_sdk');
+// //   String? _registeredDevice;
+// //
+// //
+// //   @override
+// //   void initState() {
+// //     super.initState();
+// //     checkSession();
+// //
+// //   }
+// //
+// //
+// //
+// //
+// //
+// //
+// //
+// //   Future<void> checkSession() async {
+// //     final SharedPreferences prefs = await SharedPreferences.getInstance();
+// //     bool loggedIn = prefs.getBool('isLoggedIn') ?? false;
+// //
+// //     setState(() {
+// //       isLoggedIn = loggedIn;
+// //     });
+// //
+// // // If logged in, check for paired device
+// //     if (loggedIn) {
+// //       try {
+// //         final String? lastDeviceID = await platform.invokeMethod('getLastActiveDevice');
+// //         if (lastDeviceID != null && lastDeviceID.isNotEmpty) {
+// //           setState(() {
+// //             _registeredDevice = lastDeviceID;
+// //           });
+// // // Navigate to Sync Screen immediately if a paired device is found
+// //           Future.delayed(Duration(seconds: 1), () {
+// //             _navigateToSyncScreen();
+// //           });
+// //         }
+// //       } on PlatformException catch (e) {
+// //         print("Failed to get last active device: ${e.message}");
+// //       }
+// //     }
+// //
+// //     setState(() {
+// //       isLoading = false;
+// //     });
+// //   }
+// //
+// //   void _navigateToSyncScreen() {
+// //     if (_registeredDevice != null) {
+// //       Navigator.of(context).pushReplacement(
+// //         MaterialPageRoute(
+// //           builder: (context) => DashboardScreen(deviceID: _registeredDevice!),
+// //         ),
+// //       );
+// //     }
+// //   }
+// //
+// //   @override
+// //   Widget build(BuildContext context) {
+// //     // Wait until checkSession() completes before showing the splash screen
+// //     if (isLoading) {
+// //       return Scaffold(
+// //         body: Center(child: CircularProgressIndicator()),
+// //       );
+// //     }
+// //
+// //     return EasySplashScreen(
+// //       logo: Image.asset(
+// //         Appimages.applogo,
+// //       ),
+// //       title: Text(
+// //         AppText.splashAppname,
+// //         style : Apptextstyle.s16wbcothers,
+// //       ),
+// //       logoWidth: 75,
+// //       backgroundColor: Colors.white,
+// //       showLoader: true,
+// //       navigator: isLoggedIn ? BluetoothPair() : LoginScreen(),
+// //       durationInSeconds: 5,
+// //     );
+// //   }
+// // }
+// //
+// //
+// //
+// //
+// // Future<void> _showNotification(String? title, String? body) async {
+// //   const AndroidNotificationDetails androidPlatformChannelSpecifics =
+// //   AndroidNotificationDetails(
+// //     'your_channel_id',
+// //     'your_channel_name',
+// //     importance: Importance.max,
+// //     priority: Priority.high,
+// //   );
+// //
+// //   const NotificationDetails platformChannelSpecifics = NotificationDetails(
+// //     android: androidPlatformChannelSpecifics,
+// //     iOS: DarwinNotificationDetails(),
+// //   );
+// //
+// //   await flutterLocalNotificationsPlugin.show(
+// //     0,
+// //     title,
+// //     body,
+// //     platformChannelSpecifics,
+// //     payload: 'notification_payload',
+// //   );
+// // }
+// //
+// //
+// // // void main() async {
+// // //   WidgetsFlutterBinding.ensureInitialized();
+// // //   await Hive.initFlutter();
+// // //   await Hive.openBox('minuteDataBox');
+// // //   runApp(MyApp());
+// // // }
+// // //
+// // //
+// // // class MyApp extends StatelessWidget {
+// // //
+// // //
+// // //   @override
+// // //   Widget build(BuildContext context) {
+// // //     return GetMaterialApp(
+// // //       debugShowCheckedModeBanner: false,
+// // //       home: Scaffold(
+// // //         body: DashboardScreen(deviceID: '',),
+// // //       ),
+// // //     );
+// // //   }
+// // // }
+// //
+// //
+//
+// import 'package:azpire_new/Cling%20Connections/hive_model.dart';
+// import 'package:azpire_new/root/root.dart';
+// import 'package:azpire_new/web_app/platform_utils_stub.dart';
+// import 'package:flutter/foundation.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter/services.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+// import 'package:hive_flutter/hive_flutter.dart';
+// import 'package:oktoast/oktoast.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:get/get.dart';
+// import 'package:easy_splash_screen/easy_splash_screen.dart';
+// import 'package:app_tracking_transparency/app_tracking_transparency.dart';
+// import 'View/login_Screen.dart';
+// import 'View/bluetoothscreen.dart';
+// import 'View/Dashboard_screen.dart';
+// import 'utils/app_color.dart';
+// import 'utils/appimages.dart';
+// import 'utils/apptext.dart';
+// import 'utils/apptextstyle.dart';
+//
+//
+//
+//
+//
+// final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+// FlutterLocalNotificationsPlugin();
+//
+// Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+//   await Firebase.initializeApp();
+//   _showNotification(message.notification?.title, message.notification?.body);
+// }
+//
+// Future<void> main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//
+//   FlutterError.onError = (FlutterErrorDetails details) {
+//     FlutterError.presentError(details);
+//     print('Flutter Error: ${details.exceptionAsString()}');
+//   };
+//
+//   PlatformDispatcher.instance.onError = (error, stack) {
+//     print('Uncaught platform error: $error');
+//     return true;
+//   };
+//
+//
+//   if (kIsWeb) {
+//     await Firebase.initializeApp(
+//       options: const FirebaseOptions(
+//         apiKey: "AIzaSyDuRkpyB2efP-U9Ild4zTXzmJUvSIY1CiQ",
+//         authDomain: "aspirenew-5085f.firebaseapp.com",
+//         projectId: "aspirenew-5085f",
+//         storageBucket: "aspirenew-5085f.appspot.com",
+//         messagingSenderId: "989276102678",
+//         appId: "1:989276102678:web:057645535a645b2364d537",
+//         measurementId: "G-D3VW2P8SEC",
+//       ),
+//     );
+//   } else {
+//     await Firebase.initializeApp();
+//
+//   }
+//
+//   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+//
+//   if (isIOS) {
+//     final status = await AppTrackingTransparency.trackingAuthorizationStatus;
+//     if (status == TrackingStatus.notDetermined) {
+//       await AppTrackingTransparency.requestTrackingAuthorization();
+//       print("ATT prompt shown to the user.");
+//     } else {
+//       print("ATT already determined: $status");
+//     }
+//   }
+//
+//   await Hive.initFlutter();
+//   await Hive.openBox('minuteDataBox');
+//   await Hive.initFlutter(); // initialize Hive for Flutter
+//   Hive.registerAdapter(MinuteDataAdapter());
+//
+//   const AndroidInitializationSettings initializationSettingsAndroid =
+//   AndroidInitializationSettings('@mipmap/ic_launcher');
+//   const DarwinInitializationSettings initializationSettingsIOS =
+//   DarwinInitializationSettings();
+//
+//   const InitializationSettings initializationSettings = InitializationSettings(
+//     android: initializationSettingsAndroid,
+//     iOS: initializationSettingsIOS,
+//   );
+//
+//   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+//   runApp(
+//       OKToast(
+//           position: kIsWeb ? ToastPosition.top : ToastPosition.bottom,
+//           child: MyApp()));
+// }
+//
+// class MyApp extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return GetMaterialApp(
+//       title: 'Aspire Healthspan',
+//       debugShowCheckedModeBanner: false,
+//       home: SplashPage(),
+//     );
+//   }
+// }
+//
+// class SplashPage extends StatefulWidget {
+//   SplashPage({Key? key}) : super(key: key);
+//
+//   @override
+//   _SplashPageState createState() => _SplashPageState();
+// }
+//
+// class _SplashPageState extends State<SplashPage> {
+//   bool isLoggedIn = false;
+//   bool isLoading = true;
+//   static const platform = MethodChannel('cling_sdk');
+//   String? _registeredDevice;
+//   final FirebaseMessaging messaging = FirebaseMessaging.instance;
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     initializeNotifications();
+//     checkSession();
+//   }
+//
+//   // Future<void> initializeNotifications() async {
+//   //   NotificationSettings settings = await messaging.requestPermission();
+//   //   print('Permission status: ${settings.authorizationStatus}');
+//   //
+//   //   if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+//   //     print("✅ Notification permission granted");
+//   //
+//   //     if (kIsWeb) {
+//   //       final token = await messaging.getToken(
+//   //         vapidKey:
+//   //         "BBDchPDDIaVe_9T10UA-yxAzZfhWN68KuYExqsvwdOwZxcKItXJhj93VYGgyoaAaoafelKRzcfJWggC2ftMRXuA",
+//   //       );
+//   //       print("Web FCM Token: $token");
+//   //       final prefs = await SharedPreferences.getInstance();
+//   //       await prefs.setString('token', token ?? "");
+//   //     } else {
+//   //       // final token = await messaging.getToken();
+//   //       // print("Mobile Token: $token");
+//   //       final token = await messaging.getToken();
+//   //       print("FCM Token: ${token ?? 'null'}");
+//   //       final prefs = await SharedPreferences.getInstance();
+//   //       await prefs.setString('token', token ?? "");
+//   //     }
+//   //
+//   //     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+//   //       print("Foreground Notification Received");
+//   //       _showNotification(
+//   //         message.notification?.title,
+//   //         message.notification?.body,
+//   //       );
+//   //     });
+//   //   } else {
+//   //     print("❌ Notification permission denied");
+//   //   }
+//   // }
+//
+//   Future<void> initializeNotifications() async {
+//     // Request notification permission (works for both Web & Mobile)
+//     NotificationSettings settings = await messaging.requestPermission();
+//     print('Permission status: ${settings.authorizationStatus}');
+//
+//     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+//       print("✅ Notification permission granted");
+//
+//       final prefs = await SharedPreferences.getInstance();
+//
+//       if (kIsWeb) {
+//         // Web FCM token
+//         final token = await messaging.getToken(
+//           vapidKey:
+//           "BBDchPDDIaVe_9T10UA-yxAzZfhWN68KuYExqsvwdOwZxcKItXJhj93VYGgyoaAaoafelKRzcfJWggC2ftMRXuA",
+//         );
+//         print("Web FCM Token: $token");
+//         await prefs.setString('token', token ?? "");
+//       } else {
+//         // Mobile FCM token
+//         final token = await messaging.getToken();
+//         print("FCM Token: ${token ?? 'null'}");
+//         await prefs.setString('token', token ?? "");
+//
+//         // Only listen for foreground notifications on mobile
+//         FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+//           print("Foreground Notification Received");
+//
+//           // Show local notification (not supported on Web)
+//           _showNotification(
+//             message.notification?.title,
+//             message.notification?.body,
+//           );
+//         });
+//       }
+//     } else {
+//       print("Notification permission denied");
+//     }
+//   }
+//
+//
+//
+//
+//   Future<void> checkSession() async {
+//     final prefs = await SharedPreferences.getInstance();
+//     bool loggedIn = prefs.getBool('isLoggedIn') ?? false;
+//
+//     if(mounted)
+//       setState(() {
+//         isLoggedIn = loggedIn;
+//         isLoading = false;
+//       });
+//
+//     // if (loggedIn) {
+//     //   try {
+//     //     final String? lastDeviceID =
+//     //     await platform.invokeMethod('getLastActiveDevice');
+//     //     if (lastDeviceID != null && lastDeviceID.isNotEmpty) {
+//     //       setState(() {
+//     //         _registeredDevice = lastDeviceID;
+//     //       });
+//     //       Future.delayed(Duration(seconds: 1), _navigateToSyncScreen);
+//     //     }
+//     //   } on PlatformException catch (e) {
+//     //     print("Failed to get last active device: ${e.message}");
+//     //   }
+//     // }
+//     // if (loggedIn) {
+//     //   try {
+//     //     final String? lastDeviceID = await platform.invokeMethod('getLastActiveDevice');
+//     //     if (lastDeviceID != null && lastDeviceID.isNotEmpty) {
+//     //       if(mounted)
+//     //       setState(() {
+//     //         _registeredDevice = lastDeviceID;
+//     //       });
+//     //       Future.delayed(Duration(seconds: 1), _navigateToSyncScreen);
+//     //     } else {
+//     //       // No device found, navigate to BluetoothPair
+//     //       Future.delayed(Duration(seconds: 1), () {
+//     //         Get.offAll(() => BluetoothPair());
+//     //        //  Get.offUntil(
+//     //        //    MaterialPageRoute(builder: (_) => BluetoothPair()),
+//     //        //        (route) => false,
+//     //        //  );
+//     //       });
+//     //     }
+//     //   } on PlatformException catch (e) {
+//     //     print("Failed to get last active device: ${e.message}");
+//     //     // Future.delayed(Duration(seconds: 1), () {
+//     //     //   Get.offAll(() => BluetoothPair());
+//     //     // });
+//     //   }
+//     // } else {
+//     //   // Not logged in, show login
+//     //   Future.delayed(Duration(seconds: 1), () {
+//     //     Get.offAll(() => LoginScreen());
+//     //     // Get.offUntil(
+//     //     //   MaterialPageRoute(builder: (_) => LoginScreen()),
+//     //     //       (route) => false,
+//     //     // );
+//     //   });
+//     // }
+//
+//     if (!kIsWeb && loggedIn) {
+//       try {
+//         final String? lastDeviceID = await platform.invokeMethod('getLastActiveDevice');
+//         if (lastDeviceID != null && lastDeviceID.isNotEmpty) {
+//           if (mounted) setState(() => _registeredDevice = lastDeviceID);
+//           Future.delayed(Duration(seconds: 1), _navigateToSyncScreen);
+//         } else {
+//           Future.delayed(Duration(seconds: 1), () {
+//             Get.offAll(() => BluetoothPair());
+//           });
+//         }
+//       } on PlatformException catch (e) {
+//         print("Failed to get last active device: ${e.message}");
+//       }
+//     } else if (!loggedIn) {
+//       Future.delayed(Duration(seconds: 1), () {
+//         Get.offAll(() => LoginScreen());
+//       });
+//     }
+//
+//
+//
+//     // setState(() {
+//     //   isLoading = false;
+//     // });
+//   }
+//
+//   // Future<void> checkSession() async {
+//   //   final prefs = await SharedPreferences.getInstance();
+//   //   bool loggedIn = prefs.getBool('isLoggedIn') ?? false;
+//   //
+//   //   setState(() {
+//   //     isLoggedIn = loggedIn;
+//   //     isLoading = false;
+//   //   });
+//   // }
+//
+//
+//   void _navigateToSyncScreen() {
+//     if (_registeredDevice != null) {
+//       Get.to(() => DashboardScreen(deviceID: _registeredDevice!));
+//     }
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     if (isLoading) {
+//       return Scaffold(
+//         body: Center(child: CircularProgressIndicator()),
+//       );
+//     }
+//
+//     return EasySplashScreen(
+//       logo: Image.asset(Appimages.applogo),
+//       title: Text(
+//           AppText.splashAppname,
+//           style: Apptextstyle.s16wbcothers),
+//       logoWidth: 75,
+//       backgroundColor: Colors.white,
+//       showLoader: true,
+//       navigator: isLoggedIn ? BluetoothPair() : LoginScreen(),
+//     );
+//   }
+// }
+//
+//
+//
+// Future<void> _showNotification(String? title, String? body) async {
+//   if (title == null && body == null) {
+//     print("Skipping notification: both title and body are null");
+//     return;
+//   }
+//
+//   const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+//     'your_channel_id',
+//     'your_channel_name',
+//     importance: Importance.max,
+//     priority: Priority.high,
+//   );
+//
+//   const NotificationDetails platformDetails = NotificationDetails(
+//     android: androidDetails,
+//     iOS: DarwinNotificationDetails(),
+//   );
+//
+//   await flutterLocalNotificationsPlugin.show(
+//     0,
+//     title ?? 'No Title',
+//     body ?? 'No Body',
+//     platformDetails,
+//     payload: 'notification_payload',
 //   );
 // }
+//

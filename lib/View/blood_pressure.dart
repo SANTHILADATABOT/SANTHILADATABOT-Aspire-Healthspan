@@ -1555,6 +1555,7 @@ Widget buildBloodPressureChart({
             yValueMapper: (data, _) => data.systolic == 0 ? null : data.systolic,
             color: AppColors.systolic_color,
             markerSettings: MarkerSettings(isVisible: true, height: 12, width: 12),
+            //emptyPointSettings: EmptyPointSettings(mode: EmptyPointMode.zero),
           ),
           SplineSeries<BloodPressureData, String>(
             name: AppText.DIASTOLIC,
@@ -1563,6 +1564,7 @@ Widget buildBloodPressureChart({
             yValueMapper: (data, _) => data.diastolic == 0 ? null : data.diastolic,
             color: AppColors.diastolic_color,
             markerSettings: MarkerSettings(isVisible: true, height: 12, width: 12),
+            //emptyPointSettings: EmptyPointSettings(mode: EmptyPointMode.zero),
           ),
         ],
 

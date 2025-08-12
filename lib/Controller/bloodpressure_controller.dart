@@ -251,7 +251,7 @@ import 'package:intl/intl.dart';
 
           for (int i = 1; i <= 5; i++) {
             String weekKey = 'W$i';
-            final data = monthlyData[weekKey]; // ✅ Don't use .toLowerCase()
+            final data = monthlyData[weekKey];
 
             // Default start/end dates
             final DateTime defaultStartDate = monthStart.add(Duration(days: (i - 1) * 7));

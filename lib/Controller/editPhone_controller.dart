@@ -206,7 +206,7 @@ class EditPhoneController {
 void showCustomToast(String msg) {
   showToast(
     msg,
-    duration: Duration(seconds: 2),
+   // duration: Duration(seconds: 2),
     position: kIsWeb ? ToastPosition.top : ToastPosition.bottom,
     backgroundColor: Colors.black,
     radius: 8.0,

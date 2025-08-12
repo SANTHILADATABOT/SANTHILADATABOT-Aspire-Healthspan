@@ -1327,6 +1327,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                 isVisible: true,
                 height: 12,width: 12
             ),
+            //emptyPointSettings: EmptyPointSettings(mode: EmptyPointMode.zero),
           ),
         ],
       ),

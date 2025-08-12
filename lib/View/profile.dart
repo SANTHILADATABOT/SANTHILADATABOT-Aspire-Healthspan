@@ -49,6 +49,7 @@ class _ProfileState extends State<Profile> {
         fname = jsonResponse['first_name'];
         lname = jsonResponse['last_name'];
         dob = jsonResponse['dob'];
+        dob = jsonResponse['dob'];
         age = jsonResponse['age'] == "0" ? " " :  jsonResponse['age'];
         sex = jsonResponse['sex'] == "null" ? " " : jsonResponse['sex'];
         height = jsonResponse['height'];

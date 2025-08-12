@@ -1484,6 +1484,7 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
                 //color: color,
                 height: 12,width: 12
             ),
+            //emptyPointSettings: EmptyPointSettings(mode: EmptyPointMode.zero),
           ),
         ],
       ),

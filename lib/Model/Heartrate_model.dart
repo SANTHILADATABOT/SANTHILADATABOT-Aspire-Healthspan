@@ -22,6 +22,7 @@ class HeartRateData {
     required this.sd_high
   });
 }
+
 class HeartRateData1 {
   final String day;
   final String Year;

@@ -1366,6 +1366,7 @@ class _StepsChartPageState extends State<StepsChartPage>
             yValueMapper: (StepsData d, _) => d.dailySteps,
             //dataLabelMapper: (StepsData d, _) => '${d.labelHour} : ${d.dailySteps}',
             dataLabelSettings: const DataLabelSettings(isVisible: false),
+            //emptyPointSettings: EmptyPointSettings(mode: EmptyPointMode.zero),
             color: AppColors.steps_graph,
             onPointTap: onPointTap,
             width: 0.8,      // Bar width (0 to 1). 0.6 is typically good.
@@ -1378,6 +1379,7 @@ class _StepsChartPageState extends State<StepsChartPage>
             yValueMapper: (StepsData d, _) => d.dailySteps,
             //dataLabelMapper: (StepsData d, _) => '${d.labelHour} : ${d.dailySteps}',
             dataLabelSettings: const DataLabelSettings(isVisible: false),
+            //emptyPointSettings: EmptyPointSettings(mode: EmptyPointMode.zero),
             color: AppColors.steps_graph,
             onPointTap: onPointTap,
             width: 0.8,      // Bar width (0 to 1). 0.6 is typically good.

@@ -7,6 +7,7 @@ import 'package:azpire_new/root/root.dart';
 import 'package:azpire_new/utils/app_color.dart';
 import 'package:azpire_new/utils/appimages.dart';
 import 'package:azpire_new/utils/apptextstyle.dart';
+import 'package:azpire_new/web_app/platform_utils_io.dart';
 import 'package:azpire_new/widgets/custom_button/My_Button.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
@@ -58,6 +59,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
 
 
+
+
+
   Future<void> initializePreferences() async {
     prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token');
@@ -87,23 +91,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   }
 
-  // Future<void> login() async {
-  //
-  //   await _controller.login(
-  //     context: context,
-  //     setState: setState,
-  //     formKey: _formKey,
-  //     completePhoneNumber: completePhoneNumber,
-  //     token: token,
-  //     setLoading: (value) => setState(() => isLoading = value),
-  //     setPhoneValid: (value) => setState(() => _isPhoneValid = value),
-  //     onOtpReceived: (otp) => MobileOTP = otp,
-  //     onUserReceived: (user) => user = user,
-  //     onMobileNoReceived: (mobileNo) => mobileNo = mobileNo,
-  //   );
-  //
-  //
-  // }
 
   Future<void> login() async {
 
@@ -114,6 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    if(mounted)
     setState(() {
       isLoading = true;
     });
@@ -127,11 +115,6 @@ class _LoginScreenState extends State<LoginScreen> {
         onMobileNoReceived: mobileno.toString(),
       );
 
-      // setState(() {
-      //   MobileOTP = MobileOTP.toString();
-      //   user = user.toString();
-      //   mobileno = mobileno.toString();
-      // });
     } catch (e) {
       print('Login error: $e');
     } finally {

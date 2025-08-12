@@ -32,50 +32,75 @@ class _EmailScreenState extends State<EmailScreen> {
   bool isLoading = false;
 
   final TextEditingController emailcontroller = TextEditingController();
-  final EmailController _emailcontroller = EmailController();
+  final EmailLoginController _controller = EmailLoginController();
    final _formKey = GlobalKey<FormState>();
+
+  // Future<void> emaillogin() async {
+  //   setState(() {
+  //     isLoading = true;
+  //   });
+  //   final String url = '$root/email_login_resend_otp';
+  //
+  //   final Map<String, String> userData = {
+  //     'email': emailcontroller.text,
+  //   };
+  //
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse(url),
+  //       body: userData,
+  //     );
+  //
+  //     if (response.statusCode == 200) {
+  //       final Map<String, dynamic> jsonResponse = json.decode(response.body);
+  //       print("email otp response$jsonResponse");
+  //       if(jsonResponse['status'] == "SUCCESS"){
+  //         String emailOtp = jsonResponse['data']['email_otp'].toString()  ;
+  //         var email = jsonResponse['data']["email"];
+  //         showToast("OTP sent to Email");
+  //         Get.to(() => VerificationOtpScreen(
+  //           email: email!,
+  //           emailOtp: emailOtp,
+  //         ));
+  //       } else {
+  //         showToast("Email not Registered");
+  //         setState(() {
+  //           isLoading = false;
+  //         });
+  //       }
+  //     } else {
+  //       print('Request failed with status: ${response.statusCode}.');
+  //       setState(() {
+  //         isLoading = false;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     print('Error: $e');
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //   }
+  // }
+
+
 
   Future<void> emaillogin() async {
     setState(() {
       isLoading = true;
     });
-    final String url = '$root/email_login_resend_otp';
 
-    final Map<String, String> userData = {
-      'email': emailcontroller.text,
-    };
+    final result = await _controller.emailLogin(emailcontroller.text);
 
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        body: userData,
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        print("email otp response$jsonResponse");
-        if(jsonResponse['status'] == "SUCCESS"){
-          String emailOtp = jsonResponse['data']['email_otp'].toString()  ;
-          var email = jsonResponse['data']["email"];
-          showToast("OTP sent to Email");
-          Get.to(() => VerificationOtpScreen(
-            email: email!,
-            emailOtp: emailOtp,
-          ));
-        } else {
-          showToast("Email not Registered");
-          setState(() {
-            isLoading = false;
-          });
-        }
-      } else {
-        print('Request failed with status: ${response.statusCode}.');
-        setState(() {
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      print('Error: $e');
+    if (result['success']) {
+      final emailOtp = result['data']['email_otp'].toString();
+      final email = result['data']["email"];
+      showToast(result['message']);
+      Get.to(() => VerificationOtpScreen(
+        email: email!,
+        emailOtp: emailOtp,
+      ));
+    } else {
+      showToast(result['message']);
       setState(() {
         isLoading = false;
       });
@@ -83,7 +108,9 @@ class _EmailScreenState extends State<EmailScreen> {
   }
 
 
-   @override
+
+
+  @override
    Widget build(BuildContext context) {
      return Scaffold(
        backgroundColor: Colors.white,
@@ -147,7 +174,6 @@ void showToast(String msg) {
   showToastWidget(
     _buildToastWidget(msg),
     position: kIsWeb ? ToastPosition.top : ToastPosition.bottom,
-    duration: Duration(seconds: 2),
     animationCurve: kIsWeb ? Curves.easeInOut : Curves.easeIn,
     animationDuration: const Duration(milliseconds: 400),
     animationBuilder: kIsWeb ? _slideFromRight : null,
@@ -188,6 +214,14 @@ Widget _slideFromRight(BuildContext context,
     child: child,
   );
 }
+
+
+
+
+
+
+
+
 
 //
 // showToast(String msg) {

@@ -224,6 +224,23 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
       //     ? formatDateTime(recentRaw)
       //     : result['mainDate'];
 
+      // setState(() {
+      //   _daySleepBars = result['chartData'] ?? [];
+      //   _sleepsData = result['summaryData'] ?? [];
+      //   mainDate = result['mainDate']?.toString() ?? "";
+      //   deepsleep = result['recent_deep']?.toString();
+      //   lightsleep = result['recent_light']?.toString();
+      //   remsleep = result['recent_rem']?.toString();
+      //   deepPercentage = _formatPercentage(result['recent_deep_percent']?.toString() ?? "0");
+      //   lightPercentage = _formatPercentage(result['recent_light_percent']?.toString() ?? "0");
+      //   middlePercentage = _formatPercentage(result['recent_rem_percent']?.toString() ?? "0");
+      //   yAxisMax = double.tryParse(result['y_axis_max']?.toString() ?? "0") ?? 0;
+      //   totalsleep = result['recent_total']?.toString();
+      //   totalPercentage = result['recent_total_percent']?.toString();
+      //   day_target_sleep = result['target_sleep']?.toString();
+      //   targetSleepValue = parseTargetSleep(day_target_sleep ?? "0");
+      //   target_visible = true;
+      // });
 
 
       setState(() {
@@ -280,6 +297,8 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
         mainDate = result['mainDate'];
         target_sleep = result['target_sleep'];
         targetSleepValue = parseTargetSleep(target_sleep!);
+        // target_sleep = result['target_sleep']?.toString();
+        // targetSleepValue = parseTargetSleep(target_sleep ?? "0");
         target_visible = true;
       });
 
@@ -334,6 +353,58 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
   //   }
   // }
 
+  // Future<void> Month_Chart() async {
+  //   setState(() => _isLoading = true);
+  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   var user_id = prefs.getString('user_id') ?? "";
+  //
+  //   try {
+  //     final result = await _sleepcontroller.Month_Chart(
+  //       userId: user_id,
+  //       date: DateFormat('yyyy-MM').format(selectedDate ?? DateTime.now()),
+  //       type: 'monthly',
+  //     );
+  //
+  //     if (result == null) {
+  //       print('❌ API returned null');
+  //       return;
+  //     }
+  //
+  //     print("📊 Month_Chart response: $result");
+  //
+  //     // // Safe parsing with null-aware operators
+  //     // deepPercentage = _formatPercentage(result['recent_deep_percent'] ?? 0);
+  //     // lightPercentage = _formatPercentage(result['recent_light_percent'] ?? 0);
+  //     // middlePercentage = _formatPercentage(result['recent_rem_percent'] ?? 0);
+  //     // totalsleep = result['daily_avg_sleep'] ?? 0;
+  //     // totalPercentage = result['recent_total_percent'] ?? 0;
+  //
+  //     deepPercentage = _formatPercentage(result['recent_deep_percent']?.toString() ?? "0");
+  //     lightPercentage = _formatPercentage(result['recent_light_percent']?.toString() ?? "0");
+  //     middlePercentage = _formatPercentage(result['recent_rem_percent']?.toString() ?? "0");
+  //     totalsleep = result['daily_avg_sleep']?.toString() ?? "0";
+  //     totalPercentage = result['recent_total_percent']?.toString() ?? "0";
+  //
+  //
+  //     setState(() {
+  //       _monthSleepBars = result['chartData'] ?? [];
+  //       _sleepsData = result['summaryData'] ?? [];
+  //       mainDate = result['mainDate'] ?? "";
+  //       yAxisMax = (result['y_axis_max'] as num?)?.toDouble() ?? 0;
+  //       target_sleep = result['target_sleep'];
+  //       targetSleepValue = parseTargetSleep(target_sleep ?? "0");
+  //       target_visible = true;
+  //     });
+  //
+  //     print("Monthly Sleep Chart Data Loaded");
+  //   } catch (e, stackTrace) {
+  //     print('❌ Error loading Monthly sleep chart: $e');
+  //     print('🪵 StackTrace: $stackTrace');
+  //   } finally {
+  //     setState(() => _isLoading = false);
+  //   }
+  // }
+
   Future<void> Month_Chart() async {
     setState(() => _isLoading = true);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -346,26 +417,31 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
         type: 'monthly',
       );
 
-      if (result == null) {
-        print('❌ API returned null');
-        return;
-      }
+      // if (result == null) {
+      //   print('❌ API returned null');
+      //   return;
+      // }
+      //
+      // print("📊 Month_Chart response: $result");
 
-      print("📊 Month_Chart response: $result");
+      // 🛠 Debug type check
+      print("🔍 mainDate type: ${result['mainDate']?.runtimeType}");
+      print("🔍 target_sleep type: ${result['target_sleep']?.runtimeType}");
+      print("🔍 y_axis_max type: ${result['y_axis_max']?.runtimeType}");
 
-      // Safe parsing with null-aware operators
-      deepPercentage = _formatPercentage(result['recent_deep_percent'] ?? 0);
-      lightPercentage = _formatPercentage(result['recent_light_percent'] ?? 0);
-      middlePercentage = _formatPercentage(result['recent_rem_percent'] ?? 0);
-      totalsleep = result['daily_avg_sleep'] ?? 0;
-      totalPercentage = result['recent_total_percent'] ?? 0;
+      // ✅ Ensure percentages are always strings
+      deepPercentage = _formatPercentage(result['recent_deep_percent']?.toString() ?? "0");
+      lightPercentage = _formatPercentage(result['recent_light_percent']?.toString() ?? "0");
+      middlePercentage = _formatPercentage(result['recent_rem_percent']?.toString() ?? "0");
+      totalsleep = result['daily_avg_sleep']?.toString() ?? "0";
+      totalPercentage = result['recent_total_percent']?.toString() ?? "0";
 
       setState(() {
         _monthSleepBars = result['chartData'] ?? [];
         _sleepsData = result['summaryData'] ?? [];
-        mainDate = result['mainDate'] ?? "";
-        yAxisMax = (result['y_axis_max'] as num?)?.toDouble() ?? 0;
-        target_sleep = result['target_sleep'];
+        mainDate = result['mainDate']?.toString() ?? "";
+        yAxisMax = double.tryParse(result['y_axis_max']?.toString() ?? "0") ?? 0;
+        target_sleep = result['target_sleep']?.toString();
         targetSleepValue = parseTargetSleep(target_sleep ?? "0");
         target_visible = true;
       });
@@ -378,6 +454,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
       setState(() => _isLoading = false);
     }
   }
+
 
 
   Future<void> Year_Chart() async {
@@ -410,7 +487,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
         _sleepsData = result['summaryData'];
         mainDate = result['mainDate'];
         yAxisMax = (result['y_axis_max'] as num).toDouble();
-        target_sleep = result['target_sleep'];
+        target_sleep = result['target_sleep']?.toString();
         targetSleepValue = parseTargetSleep(target_sleep!);
         target_visible = true;
 
@@ -1535,6 +1612,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
             lowValueMapper: (d, _) => d.startHour,
             highValueMapper: (d, _) => d.endHour,
             pointColorMapper: (d, _) => _getColor(d.value),
+           //emptyPointSettings: EmptyPointSettings(mode: EmptyPointMode.zero),
             //name: 'Sleep',
           )
         ],
