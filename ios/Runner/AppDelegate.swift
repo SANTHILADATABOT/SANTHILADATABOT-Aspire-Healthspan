@@ -1,4 +1,4 @@
-import Flutter
+import  Flutter
 import UIKit
 import FirebaseCore
 import BackgroundTasks
@@ -409,6 +409,9 @@ print("Syncing: \(notification.object ?? "")")
                print("shortSleepState: \(mimute.shortSleepState)")
                print("shortSleepSecond: \(mimute.shortSleepSecond)")
                print("bWear: \(mimute.bWear)")
+               print("fspo2: \(mimute.fspo2)")
+        
+               
                
                
                let shortSleepState = mimute.shortSleepState
@@ -456,7 +459,8 @@ print("Syncing: \(notification.object ?? "")")
                                    "spo2": mimute.spo2,
                                    "sleepState": mimute.shortSleepState,
                                    "sleepSeconds": mimute.shortSleepSecond,
-                                   "is_wear": mimute.bWear
+                                   "is_wear": mimute.bWear,
+                                   "fspo2" : mimute.fspo2
                                ]
 
                                methodChannel.invokeMethod("onSyncDataReceived", arguments: data)
@@ -495,6 +499,8 @@ print("Syncing: \(notification.object ?? "")")
         print("sleepEfficent: \(daily.sleepEfficent)")
         print("heartRate: \(daily.heartRate)")
         print("bWear: \(daily.bWear)")
+        print("weightkg: \(daily.weightkg)")
+        print("iWeightTime: \(daily.iWeightTime)")
                let data: [String: Any] = [
                    "daybeginTime" : daily.daybeginTime,
                    "iBPHigh":daily.iBPHigh,
@@ -512,7 +518,9 @@ print("Syncing: \(notification.object ?? "")")
                    "caloriesMetabolism": daily.caloriesMetabolism,
                    "spo2" : daily.spo2,
                    "stress": daily.stress,
-                   "is_wear": daily.bWear
+                   "is_wear": daily.bWear,
+                   "weightkg":daily.weightkg,
+                   "iWeightTime": daily.iWeightTime
                ]
         
         ClingBLEModel.reloadDeviceData()
