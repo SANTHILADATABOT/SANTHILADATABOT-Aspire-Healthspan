@@ -190,8 +190,8 @@ class _AddWeightState extends State<AddWeight> {
       ) {
     return SlideTransition(
       position: Tween<Offset>(
-        begin: Offset(1.2, 0.0), // far right
-        end: Offset(-1.2, 0.0),  // f // Slide to original position
+        begin: Offset(1.2, 0.0), // start from right off-screen
+        end: Offset(0.0, 0.0),   // slide to original position
       ).animate(CurvedAnimation(
         parent: controller,
         curve: Curves.easeInOut,
@@ -199,6 +199,7 @@ class _AddWeightState extends State<AddWeight> {
       child: child,
     );
   }
+
 
   // showToast(String msg) {
   //   Fluttertoast.showToast(
@@ -467,7 +468,7 @@ class _AddWeightState extends State<AddWeight> {
           isLoading ?
           Center(child: Image.asset(
             Appimages.applogo,
-            height: 50,
+            height: size.height * 0.07,
             fit: BoxFit.contain,
           ),) :
           Padding(

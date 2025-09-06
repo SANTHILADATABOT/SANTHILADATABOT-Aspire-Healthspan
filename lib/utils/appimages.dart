@@ -8,5 +8,5 @@ class Appimages {
   static const sleep_logo  = "assets/gif/sleep_logo.png";
   static const Weight_logo  = "assets/gif/weight_logo.png";
   static const spo2_logo  = "assets/gif/O2.png";
-
+  static const o2_blood  = "assets/gif/blood-drop 1.png";
 }

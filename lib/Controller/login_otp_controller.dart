@@ -150,51 +150,6 @@ class LoginOtpController {
   }
 
 
-  // Future<void> otpResend({
-  //   required String mobileno,
-  //  required StateSetter setState,
-  //   required String newotp,
-  //   required Function(bool) resend,
-  //   required CountdownController controller,
-  // }) async {
-  //   final String url = '$root/login_resend_otp';
-  //   final Map<String, String> userData = {
-  //     'mobile_no': mobileno,
-  //   };
-  //
-  //   try {
-  //     final response = await http.post(
-  //       Uri.parse(url),
-  //       body: userData,
-  //     );
-  //
-  //
-  //     print("otpresend Status Code: ${response.statusCode}");
-  //     print("otpresend Headers: ${response.headers}");
-  //     print("otpresend Body: ${response.body}");
-  //     print("otpresend_userData:$userData");
-  //
-  //     if (response.statusCode == 200) {
-  //       final Map<String, dynamic> jsonResponse = json.decode(response.body);
-  //       print('OTP Resend Response: $jsonResponse');
-  //
-  //       if (jsonResponse["status"] == "SUCCESS") {
-  //         print('OTP Resend success: $jsonResponse');
-  //         setState(() {
-  //           newotp = (jsonResponse['data']['mobile_otp'].toString());
-  //           resend(false);
-  //         });
-  //
-  //         controller.restart(); // Restart the countdown timer
-  //       }
-  //     } else {
-  //       print('Request failed with status: ${response.statusCode}.');
-  //     }
-  //   } catch (e) {
-  //     print('Error: $e');
-  //   }
-  // }
-
   Future<void> otpVerify({
     required String? mobileno,
     required String? enteredOtp,
@@ -202,7 +157,7 @@ class LoginOtpController {
     String? newOtp, required String user, required String mobileOTP,
   }) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var token = prefs.getString('token');
+      var token = prefs.getString('token') ?? 'No FCM Token';
       String? _registeredDevice;
       print('FCM Token: ${token == null ? " " : token}');
       print('OTP screen token read: $token');
@@ -224,14 +179,14 @@ class LoginOtpController {
         body: userData,
       );
 
-      print("Login response:${response.body}");
+      print("login_otp_verify_response1:${response.body}");
 
       if (response.statusCode == 200) {
         print("Login response1:${response.body}");
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
 
         if (jsonResponse["status"] == "SUCCESS") {
-          print("Login response2:${response.body}");
+          print("login_otp_verify_success:${response.body}");
           final String user_id = jsonResponse["user_id"].toString();
           final String name = jsonResponse["name"].toString();
           final String mobile_no = jsonResponse["mobile_no"].toString();
@@ -252,6 +207,7 @@ class LoginOtpController {
 
           // Navigate to next screen
           Get.to(() => BluetoothPair());
+          //Get.to(()=> DashboardScreen(deviceID: _registeredDevice!));
         } else {
           showToast("OTP Mismatch. Please try again.");
         }
@@ -263,50 +219,6 @@ class LoginOtpController {
       showToast("Something went wrong. Please try again.");
     }
   }
-
-  // Future<void> otpResend({
-  //   required String mobileno,
-  //   required CountdownController controller,
-  //   required String newotp,
-  // }) async {
-  //   final String url = '$root/login_resend_otp';
-  //
-  //   final Map<String, String> userData = {
-  //     'mobile_no': mobileno,
-  //   };
-  //
-  //   try {
-  //     final response = await http.post(
-  //       Uri.parse(url),
-  //       headers: {
-  //         'Content-Type': 'application/x-www-form-urlencoded',
-  //       },
-  //       body: userData,
-  //     );
-  //
-  //     print("otp resend:${response.body}");
-  //
-  //     if (response.statusCode == 200) {
-  //       print("otp resend1:$response");
-  //       final Map<String, dynamic> jsonResponse = json.decode(response.body);
-  //
-  //       if (jsonResponse["status"] == "SUCCESS") {
-  //         print("otp resend2:$jsonResponse");
-  //         final String newOtp = jsonResponse['data']['mobile_otp'].toString();
-  //         showToast("OTP Resent Successfully");
-  //         // Restart countdown
-  //         controller.restart();
-  //       } else {
-  //         showToast("Failed to resend OTP");
-  //       }
-  //     } else {
-  //       showToast("Resend request failed: ${response.statusCode}");
-  //     }
-  //   } catch (e) {
-  //     print("Error during OTP resend: $e");
-  //     showToast("Something went wrong. Please try again.");
-  //   }
-  // }
 
 
 

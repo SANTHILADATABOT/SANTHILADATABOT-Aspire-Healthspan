@@ -1,6 +1,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:azpire_new/root/root.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -42,7 +43,7 @@ class HealthDataController {
     String formattedDate1 = DateFormat('yyyy-MM-dd').format(DateTime.now());
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var user_id = prefs.getString('user_id') ?? "";
-    final url = Uri.parse("https://app.aspirehealthspan.ai/aspire_api/health_variable/add");
+    final url = Uri.parse("$root/add");
 
     final body = {
       "heart_rate": heartRate.toString(),

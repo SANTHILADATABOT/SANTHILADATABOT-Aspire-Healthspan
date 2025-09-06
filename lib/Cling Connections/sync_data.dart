@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:azpire_new/Cling%20Connections/clingchannelHandler.dart';
 import 'package:azpire_new/Cling%20Connections/hive_model.dart';
+import 'package:azpire_new/root/root.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -51,6 +52,7 @@ class SyncService {
         systolicBP: data['iBPHigh']?.toInt() ?? 0,
         diastolicBP: data['iBPLow']?.toInt() ?? 0,
         totalSleep: data['totalSleep']?.toInt() ?? 0,
+        totalspo2: data['spo2']?.toInt() ?? 0
       );
     };
 
@@ -143,11 +145,12 @@ class SyncService {
     required int systolicBP,
     required int diastolicBP,
     required int totalSleep,
+    required int totalspo2,
   }) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var user_id = prefs.getString('user_id') ?? "";
     print("sendHeartRateToAPI");
-    final url = Uri.parse("https://app.aspirehealthspan.ai/aspire_api/health_variable/add");
+    final url = Uri.parse("$root/health_variable/add");
 
     final body = {
       "heart_rate": heartRate.toString(),
@@ -157,9 +160,12 @@ class SyncService {
       "blood_pressure_diastolic": diastolicBP.toString(),
       "no_of_steps": totalSteps.toString(),
       "sleep": totalSleep.toString(),
+      "spo2" : totalspo2.toString(),
       "weight": "50",
       "datetime_now": DateFormat('yyyy-MM-dd').format(DateTime.now()),
     };
+    
+    print("spo2_data:$body");
 
     try {
       final response = await http.post(
@@ -181,7 +187,7 @@ class SyncService {
       } else {
         print("Retry after 5 minutes if the request fails: ${response.statusCode}");
         // Retry after 5 minutes if the request fails
-        await _retrySendHeartRateToAPI(heartRate, totalSteps, systolicBP, diastolicBP, totalSleep);
+        await _retrySendHeartRateToAPI(heartRate, totalSteps, systolicBP, diastolicBP, totalSleep,totalspo2);
       }
     } catch (e) {
       print("Error sending DailyData: $e");
@@ -196,6 +202,7 @@ class SyncService {
       int systolicBP,
       int diastolicBP,
       int totalSleep,
+      int totalspo2
       ) async {
     print("Retrying in 5 minutes...");
     // Wait for 5 minutes before retrying the API call
@@ -207,6 +214,7 @@ class SyncService {
       systolicBP: systolicBP,
       diastolicBP: diastolicBP,
       totalSleep: totalSleep,
+      totalspo2: totalspo2
     );
   }
 
@@ -215,7 +223,7 @@ class SyncService {
     print("sendBulkMinuteDataToApi");
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var user_id = prefs.getString('user_id') ?? "";
-    final url = Uri.parse('https://app.aspirehealthspan.ai/aspire_api/minute_health_variable/add');
+    final url = Uri.parse('$root/minute_health_variable/add');
 
     try {
       final response = await http.post(

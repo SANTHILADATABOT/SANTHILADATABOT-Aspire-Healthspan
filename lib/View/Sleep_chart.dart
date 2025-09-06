@@ -22,6 +22,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../utils/appimages.dart';
 import '../widgets/shimmer_effects.dart';
+import 'Dashboard_screen.dart';
 
 
 class SleepChartPage extends StatefulWidget {
@@ -555,11 +556,18 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
-
     Size size = MediaQuery.of(context).size;
     return WillPopScope(
+        // onWillPop: () async {
+        //   ExitAppDialog();
+        //   return true;
+        // },
         onWillPop: () async {
-          ExitAppDialog();
+          if (_advancedDrawerController.value.visible) {
+            _advancedDrawerController.hideDrawer();
+            return false; // stop navigation
+          }
+          // if drawer is closed, allow normal back
           return true;
         },
         child:AdvancedDrawer(
@@ -601,7 +609,14 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
           ),
           leading: IconButton(
             onPressed: () {
-              Get.back();
+              if (_advancedDrawerController.value.visible) {
+                _advancedDrawerController.hideDrawer();
+              } else {
+                //Get.back();
+                Get.offAll(() => DashboardScreen(
+                  deviceID: '', // pass params if needed
+                ));
+              }
             },
             icon: Icon(Icons.arrow_back_ios),
           ),
@@ -1288,7 +1303,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                       ), _isLoading ?
                       Center(child: Image.asset(
                         Appimages.applogo,
-                        height: 50,
+                        height: size.height * 0.07,
                         fit: BoxFit.contain,
                       ),) :
                       Padding(

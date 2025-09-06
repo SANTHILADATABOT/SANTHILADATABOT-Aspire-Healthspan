@@ -240,8 +240,8 @@ Widget _slideFromRight(
     ) {
   return SlideTransition(
     position: Tween<Offset>(
-      begin: Offset(1.2, 0.0), // far right
-      end: Offset(-1.2, 0.0),  // f // Slide to original position
+      begin: Offset(1.2, 0.0), // start from right off-screen
+      end: Offset(0.0, 0.0),   // slide to original position
     ).animate(CurvedAnimation(
       parent: controller,
       curve: Curves.easeInOut,
@@ -249,6 +249,7 @@ Widget _slideFromRight(
     child: child,
   );
 }
+
 
 // showToast(String msg) {
 //   Fluttertoast.showToast(

@@ -2,6 +2,7 @@
 import 'dart:ui';
 import 'package:azpire_new/Controller/steps_controller.dart';
 import 'package:azpire_new/Model/steps_model.dart';
+import 'package:azpire_new/View/Dashboard_screen.dart';
 import 'package:azpire_new/View/profile.dart';
 import 'package:azpire_new/menu/NavMneu.dart';
 import 'package:azpire_new/utils/app_color.dart';
@@ -334,27 +335,6 @@ class _StepsChartPageState extends State<StepsChartPage>
 
   @override
   Widget build(BuildContext context) {
-    //Find the maximum steps value in the data
-    // int maxSteps = _stepsData.isNotEmpty
-    //     ? _stepsData.map((data) => data.dailySteps).reduce((a, b) => a > b ? a : b)
-    //     : 0;
-    //
-    // double maxinterval = ((maxSteps + 150) / 100).ceil() * 100.0;
-    //
-    // Size size = MediaQuery.of(context).size;
-
-    // int maxSteps = _stepsData.isNotEmpty
-    //     ? _stepsData.map((data) => data.dailySteps).reduce((a, b) => a > b ? a : b)
-    //     : 0;
-    //
-    // double maxinterval = ((maxSteps + 50 + 49) ~/ 50) * 50;
-
-    // int maxSteps = _stepsData.isNotEmpty
-    //     ? _stepsData.map((data) => data.dailySteps).reduce((a, b) => a > b ? a : b)
-    //     : 0;
-    //
-    // double maxinterval = ((maxSteps + 49) / 50).ceil() * 50;
-
     int maxSteps = _stepsData.isNotEmpty
         ? _stepsData.map((data) => data.dailySteps).reduce((a, b) => a > b ? a : b)
         : 0;
@@ -363,8 +343,16 @@ class _StepsChartPageState extends State<StepsChartPage>
 
     Size size = MediaQuery.of(context).size;
     return WillPopScope(
+        // onWillPop: () async {
+        //   ExitAppDialog();
+        //   return true;
+        // },
         onWillPop: () async {
-          ExitAppDialog();
+          if (_advancedDrawerController.value.visible) {
+            _advancedDrawerController.hideDrawer();
+            return false; // stop navigation
+          }
+          // if drawer is closed, allow normal back
           return true;
         },
         child:AdvancedDrawer(
@@ -406,7 +394,14 @@ class _StepsChartPageState extends State<StepsChartPage>
           ),
           leading: IconButton(
             onPressed: () {
-              Get.back();
+              if (_advancedDrawerController.value.visible) {
+                _advancedDrawerController.hideDrawer();
+              } else {
+               // Get.back();
+                Get.offAll(() => DashboardScreen(
+                  deviceID: '', // pass params if needed
+                ));
+              }
             },
             icon: Icon(Icons.arrow_back_ios),
           ),
@@ -1042,7 +1037,7 @@ class _StepsChartPageState extends State<StepsChartPage>
                   _isLoading ?
                   Center(child: Image.asset(
                     Appimages.applogo,
-                    height: 50,
+                    height: size.height * 0.07,
                     fit: BoxFit.contain,
                   ),) :
                   Padding(

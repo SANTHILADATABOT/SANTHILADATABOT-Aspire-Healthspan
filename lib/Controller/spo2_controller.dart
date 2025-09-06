@@ -9,6 +9,69 @@ import 'package:intl/intl.dart';
 
 class spo2Controller extends GetxController {
 
+  // Future<Map<String, dynamic>> fetchDayChart({
+  //   required String userId,
+  //   required String date,
+  //   required String type,
+  // }) async {
+  //   final url = Uri.parse('$root/daily_spo2_data');
+  //   final payload = {
+  //     "user_id": userId,
+  //     "date": date,
+  //     "type": type,
+  //   };
+  //
+  //   print("📤 Sending request to: $url");
+  //   print("📦 Payload: ${jsonEncode(payload)}");
+  //
+  //   try {
+  //     final response = await http.post(
+  //       url,
+  //       headers: {"Content-Type": "application/json"},
+  //       body: jsonEncode(payload),
+  //     );
+  //
+  //     print("📥 Response Status Code: ${response.statusCode}");
+  //
+  //     if (response.statusCode == 200) {
+  //       final jsonResponse = json.decode(response.body);
+  //       print("spo2 Response Body: $jsonResponse");
+  //
+  //       if (jsonResponse['status'] == "SUCCESS") {
+  //         print("API SUCCESS:$jsonResponse");
+  //
+  //         final dateString = jsonResponse['date'];
+  //         final entries = (jsonResponse['hourly_spo2_data'] as List)
+  //             .map((e) => BloodOxygenData.fromJson(e, dateString))
+  //             .toList();
+  //         // final entries = (jsonResponse['hourly_spo2_data'] as List)
+  //         //     .where((e) => e['spo2'] != null)
+  //         //     .map((e) => BloodOxygenData.fromJson(e, dateString))
+  //         //     .toList();
+  //
+  //
+  //         return {
+  //           'mainDate': jsonResponse['date'],
+  //           'targetNormal': (jsonResponse['target_spo2_normal'] as num?)?.toInt() ?? 91,
+  //           'targetHigh': (jsonResponse['target_spo2_high'] as num?)?.toInt() ?? 95,
+  //           'recentSpo2': (jsonResponse['recent_spo2'] as num?)?.round() ?? 0,
+  //           'recentDatetime': jsonResponse['recent_datetime'],
+  //           'chartData': entries,
+  //         };
+  //       } else {
+  //         print("API returned failure status: ${jsonResponse['status']}");
+  //         throw Exception("API returned failure status.");
+  //       }
+  //     } else {
+  //       print("Server error: ${response.statusCode}");
+  //       throw Exception("Failed with status code: ${response.statusCode}");
+  //     }
+  //   } catch (e) {
+  //     print("Exception in fetchDayChart: $e");
+  //     rethrow;
+  //   }
+  // }
+
   Future<Map<String, dynamic>> fetchDayChart({
     required String userId,
     required String date,
@@ -20,6 +83,14 @@ class spo2Controller extends GetxController {
       "date": date,
       "type": type,
     };
+
+    // Safe number parser
+    int parseToInt(dynamic value, {int defaultValue = 0}) {
+      if (value == null) return defaultValue;
+      if (value is num) return value.toInt();
+      if (value is String) return int.tryParse(value) ?? defaultValue;
+      return defaultValue;
+    }
 
     print("📤 Sending request to: $url");
     print("📦 Payload: ${jsonEncode(payload)}");
@@ -38,32 +109,25 @@ class spo2Controller extends GetxController {
         print("spo2 Response Body: $jsonResponse");
 
         if (jsonResponse['status'] == "SUCCESS") {
-          print("API SUCCESS:$jsonResponse");
+          print("API SUCCESS: $jsonResponse");
 
           final dateString = jsonResponse['date'];
           final entries = (jsonResponse['hourly_spo2_data'] as List)
               .map((e) => BloodOxygenData.fromJson(e, dateString))
               .toList();
-          // final entries = (jsonResponse['hourly_spo2_data'] as List)
-          //     .where((e) => e['spo2'] != null)
-          //     .map((e) => BloodOxygenData.fromJson(e, dateString))
-          //     .toList();
-
 
           return {
             'mainDate': jsonResponse['date'],
-            'targetNormal': (jsonResponse['target_spo2_normal'] as num?)?.toInt() ?? 91,
-            'targetHigh': (jsonResponse['target_spo2_high'] as num?)?.toInt() ?? 95,
-            'recentSpo2': (jsonResponse['recent_spo2'] as num?)?.round() ?? 0,
+            'targetNormal': parseToInt(jsonResponse['target_spo2_normal'], defaultValue: 91),
+            'targetHigh': parseToInt(jsonResponse['target_spo2_high'], defaultValue: 95),
+            'recentSpo2': parseToInt(jsonResponse['recent_spo2']),
             'recentDatetime': jsonResponse['recent_datetime'],
             'chartData': entries,
           };
         } else {
-          print("API returned failure status: ${jsonResponse['status']}");
-          throw Exception("API returned failure status.");
+          throw Exception("API returned failure status: ${jsonResponse['status']}");
         }
       } else {
-        print("Server error: ${response.statusCode}");
         throw Exception("Failed with status code: ${response.statusCode}");
       }
     } catch (e) {
@@ -71,6 +135,8 @@ class spo2Controller extends GetxController {
       rethrow;
     }
   }
+
+
 
 
   Future<Map<String, dynamic>> Week_Chart({
@@ -108,26 +174,52 @@ class spo2Controller extends GetxController {
           double spo2Sum = 0;
           int validDays = 0;
 
+          // for (var dayData in weeklyData) {
+          //   DateTime date = DateFormat('yyyy-MM-dd').parse(dayData['date']);
+          //   String dayName = DateFormat('E').format(date); // Short day name (Mon, Tue, etc.)
+          //
+          //   double spo2Avg = dayData['average_spo2']?.toDouble() ?? 0;
+          //
+          //   if (spo2Avg > 0 ) {
+          //     spo2Sum += spo2Avg;
+          //     validDays++;
+          //   }
+          //
+          //   // In Week_Chart method, modify the chartData creation:
+          //   chartData.add(BloodOxygenData
+          //     (spo2: spo2Avg.toInt(),
+          //       day:dayName,
+          //       date: date, months: '', Year: ''));
+          // }
+
           for (var dayData in weeklyData) {
             DateTime date = DateFormat('yyyy-MM-dd').parse(dayData['date']);
-            String dayName = DateFormat('E').format(date); // Short day name (Mon, Tue, etc.)
+            String dayName = DateFormat('E').format(date);
 
-            double spo2Avg = dayData['average_spo2']?.toDouble() ?? 0;
+            // Safely parse average_spo2 whether it's string, int, or double
+            double spo2Avg = double.tryParse(dayData['average_spo2'].toString()) ?? 0;
 
-            if (spo2Avg > 0 ) {
+            if (spo2Avg > 0) {
               spo2Sum += spo2Avg;
               validDays++;
             }
 
-            // In Week_Chart method, modify the chartData creation:
-            chartData.add(BloodOxygenData
-              (spo2: spo2Avg.toInt(),
-                day:dayName,
-                date: date, months: '', Year: ''));
+            chartData.add(
+              BloodOxygenData(
+                spo2: spo2Avg.toInt(),
+                day: dayName,
+                date: date,
+                months: '',
+                Year: '',
+              ),
+            );
           }
 
-          // Calculate weekly averages
-          int recentspo2 = jsonResponse['recent_spo2']?.toInt() ?? 0;
+          // // Calculate weekly averages
+          // int recentspo2 = jsonResponse['recent_spo2']?.toInt() ?? 0;
+
+          // Safely parse recent_spo2
+          int recentspo2 = int.tryParse(jsonResponse['recent_spo2'].toString()) ?? 0;
 
           return {
 
@@ -145,7 +237,7 @@ class spo2Controller extends GetxController {
         throw Exception('Failed to load data. Status code: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error fetching weekly BP data: $e');
+      print('Error fetching weekly spo2 data: $e');
       rethrow;
     }
   }

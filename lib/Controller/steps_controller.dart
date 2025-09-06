@@ -414,7 +414,7 @@ class StepsController extends GetxController{
     required String userId,
     required String date,
   }) async {
-    final String url = 'https://app.aspirehealthspan.ai/aspire_api/daily_step_data';
+    final String url = '$root/daily_step_data';
     final Map<String, dynamic> payload = {
       'user_id': userId,
       'date': date,

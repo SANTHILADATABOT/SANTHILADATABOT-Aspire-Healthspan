@@ -266,239 +266,242 @@ class _DashboardScreenState extends State<DashboardScreen> {
        ExitAppDialog();
        return true;
       },
-      child: AdvancedDrawer(
-        controller: _advancedDrawerController,
-        backdropColor: Colors.grey.shade100,
-        drawer: NavMenu(name: name, email : email, profile:profilephoto, noti_count: noti_count, ),
-        child: Scaffold(
-          backgroundColor: AppColors.White,
-          appBar: AppBar(
-              automaticallyImplyLeading: false,
-              backgroundColor: AppColors.White,
-              title: isLoading
-                  ? ShimmerLoadingItem()
-                  : Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  GestureDetector(
-                    onTap: (){
-                      Get.to(()=>Profile());
-                    },
-                    child:profilephoto !=null ? CircleAvatar(
-                      backgroundImage: NetworkImage(profilephoto),
-                      radius: 20,
-                    ):CircleAvatar(
-                      backgroundImage: AssetImage(Appimages.profilelogo),
-                      radius: 20,
+      child: Container(
+        width: kIsWeb ? 250 : MediaQuery.of(context).size.width * 0.7,
+        child: AdvancedDrawer(
+          controller: _advancedDrawerController,
+          backdropColor: Colors.grey.shade100,
+          drawer: NavMenu(name: name, email : email, profile:profilephoto, noti_count: noti_count, ),
+          child: Scaffold(
+            backgroundColor: AppColors.White,
+            appBar: AppBar(
+                automaticallyImplyLeading: false,
+                backgroundColor: AppColors.White,
+                title: isLoading
+                    ? ShimmerLoadingItem()
+                    : Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    GestureDetector(
+                      onTap: (){
+                        Get.to(()=>Profile());
+                      },
+                      child:profilephoto !=null ? CircleAvatar(
+                        backgroundImage: NetworkImage(profilephoto),
+                        radius: 20,
+                      ):CircleAvatar(
+                        backgroundImage: AssetImage(Appimages.profilelogo),
+                        radius: 20,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: 20),
-                  TextTitle1(
-                    title: "Hi, ${name.toString().capitalizeFirst}",
-                    color: Colors.black,
-                  ),
-                  Spacer(),
-                  IconButton(
-                    onPressed: () {
-                      _advancedDrawerController.showDrawer();
-                    },
-                    icon: Icon(
-                      Icons.menu,
+                    SizedBox(width: 20),
+                    TextTitle1(
+                      title: "Hi, ${name.toString().capitalizeFirst}",
                       color: Colors.black,
                     ),
-                  ),
-                ],
-              ),
-      ),
-          body: isLoading
-              ? Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            child: ListView(
-              physics: BouncingScrollPhysics(),
-              children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: Shimmer.fromColors(
-                    baseColor: Colors.grey[300]!,
-                    highlightColor: Colors.grey[100]!,
-                    child: Container(
-                      height: 24,
-                      width: 100,
-                      color: Colors.grey[300],
+                    Spacer(),
+                    IconButton(
+                      onPressed: () {
+                        _advancedDrawerController.showDrawer();
+                      },
+                      icon: Icon(
+                        Icons.menu,
+                        color: Colors.black,
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-                SizedBox(height: 20),
-                for (int i = 0; i < 4; i++)
+        ),
+            body: isLoading
+                ? Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: ListView(
+                physics: BouncingScrollPhysics(),
+                children: [
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
+                    padding: EdgeInsets.symmetric(horizontal: 10),
                     child: Shimmer.fromColors(
                       baseColor: Colors.grey[300]!,
                       highlightColor: Colors.grey[100]!,
                       child: Container(
-                        height: 120,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                        height: 24,
+                        width: 100,
+                        color: Colors.grey[300],
                       ),
                     ),
                   ),
+                  SizedBox(height: 20),
+                  for (int i = 0; i < 4; i++)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(
+                          height: 120,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            )
+                : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Daily Dashboard: $weekdate',
+                        style: Apptextstyle.s18wbcB,
+                      ),
+                    ],
+                    //padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+                    //child:
+                  ),
+                ),
+                Expanded(
+                  child: ListView(
+                    physics: BouncingScrollPhysics(),
+                    padding: EdgeInsets.symmetric(horizontal: 15),
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 10),
+                          ValueListenableBuilder<bool>(
+                            valueListenable: settings.showBloodPressure,
+                            builder: (context, show, _) {
+                              return show
+                                  ? CustomCard1(
+                                title: AppText.bp,
+                                t1: bps,
+                                t2: '$bpd',
+                                Bps: AppText.SYS,
+                                Bpd: AppText.DIA,
+                                bpunit: AppText.bp_unit,
+                                t2fontsize: 24,
+                                datetime: AppText.avg_bp,
+                                chart: BloodPressureChart(),
+                                press: () {
+                                  Get.to(()=>BloodPressureChartPage(name: name, email : email, profile:profilephoto, noti_count: noti_count,));
+                                },
+                                color1: AppColors.color1,
+                                color2: AppColors.color2,
+                              )
+                                  : SizedBox.shrink();
+                            },
+                          ),
+                          ValueListenableBuilder<bool>(
+                            valueListenable: settings.showHeartRate,
+                            builder: (context, show, _) {
+                              return show
+                                  ? CustomCard(
+                                title: AppText.HR,
+                                t1: heartRate,
+                                t2: AppText.HR_unit,
+                                t2fontsize: 15,
+                                datetime: AppText.avg_hr,
+                                chart: HeartRateChartPage(),
+                                press: () {
+                                  Get.to(()=>HeartRateChart(name: name, email : email,profile:profilephoto, noti_count: noti_count,));
+                                },
+                                color: Color(0xFFe13b4a), heading: 'heart',
+                              )
+                                  : SizedBox.shrink();
+                            },
+                          ),
+                          ValueListenableBuilder<bool>(
+                            valueListenable: settings.showSteps,
+                            builder: (context, show, _) {
+                              return show
+                                  ? CustomCard(
+                                title: AppText.dailysteps,
+                                t1: NumberFormat.decimalPattern('en_US').format(int.tryParse(steps) ?? 0),
+                                t2: AppText.D_Steps,
+                                t2fontsize: 15,
+                                datetime:  AppText.avg_steps,
+                                chart: StepsChart(),
+                                press: () {
+                                  Get.to(()=>StepsChartPage(name: name, email : email,profile:profilephoto, noti_count: noti_count));
+                                },
+                                color: Color(0xFF9C53C7), heading: 'steps',
+                              )
+                                  : SizedBox.shrink();
+                            },
+                          ),
+                          ValueListenableBuilder<bool>(
+                            valueListenable: settings.showSleep,
+                            builder: (context, show, _) {
+                              return show
+                                  ? CustomCardsleep(
+                                title: AppText.dailysleep,
+                                t1: sleep,
+                                t2: "",
+                                t2fontsize: 15,
+                                datetime: AppText.avg_sleep,
+                                chart: SleepChart(),
+                                press: () {
+                                  Get.to(()=>SleepChartPage(name: name, email : email,profile:profilephoto, noti_count: noti_count));
+                                },
+                                color: AppColors.color3,
+                                deepPercentage: _formatPercentage(deepPercentage),
+                                middlePercentage: _formatPercentage(middlePercentage),
+                                lightPercentage: _formatPercentage(lightPercentage),
+
+                              )
+                                  : SizedBox.shrink();
+                            },
+                          ),
+                          ValueListenableBuilder<bool>(
+                            valueListenable: settings.showSpo2,
+                            builder: (context, show, _) {
+                              return show
+                                  ? CustomCardspo2(
+                                title: AppText.blood_oxygen,
+                                t1: "96%",
+                                t2: "",
+                                t2fontsize: 15,
+                                datetime: AppText.avg,
+                                chart: BloodOxygenChartPage(),
+                                press: () {
+                                  //Navigator.push(context, MaterialPageRoute(builder: (context) => BloodoxygenPressureChartPage()));
+                                  Get.to(()=>BloodoxygenPressureChartPage(name: name, email : email,profile:profilephoto, noti_count: noti_count));
+                                },
+                                color: AppColors.color4,
+                              )
+                                  : SizedBox.shrink();
+                            },
+                          ),
+                          CustomCard(
+                            title: AppText.weight,
+                            t1: weight.toString(),
+                            t2: AppText.pounds,
+                            t2fontsize: 15,
+                            datetime: AppText.avg,
+                            chart: WeightChartPage(),
+                            press: () {
+                              Get.to(()=>WeightChart(name: name, email : email,profile:profilephoto, noti_count: noti_count));
+                            },
+                            color: Color(0xffF5B849), heading: 'weight',
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
-          )
-              : Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Daily Dashboard: $weekdate',
-                      style: Apptextstyle.s18wbcB,
-                    ),
-                  ],
-                  //padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-                  //child:
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  physics: BouncingScrollPhysics(),
-                  padding: EdgeInsets.symmetric(horizontal: 15),
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 10),
-                        ValueListenableBuilder<bool>(
-                          valueListenable: settings.showBloodPressure,
-                          builder: (context, show, _) {
-                            return show
-                                ? CustomCard1(
-                              title: AppText.bp,
-                              t1: bps,
-                              t2: '$bpd',
-                              Bps: AppText.SYS,
-                              Bpd: AppText.DIA,
-                              bpunit: AppText.bp_unit,
-                              t2fontsize: 24,
-                              datetime: AppText.avg_bp,
-                              chart: BloodPressureChart(),
-                              press: () {
-                                Get.to(()=>BloodPressureChartPage(name: name, email : email, profile:profilephoto, noti_count: noti_count,));
-                              },
-                              color1: AppColors.color1,
-                              color2: AppColors.color2,
-                            )
-                                : SizedBox.shrink();
-                          },
-                        ),
-                        ValueListenableBuilder<bool>(
-                          valueListenable: settings.showHeartRate,
-                          builder: (context, show, _) {
-                            return show
-                                ? CustomCard(
-                              title: AppText.HR,
-                              t1: heartRate,
-                              t2: AppText.HR_unit,
-                              t2fontsize: 15,
-                              datetime: AppText.avg_hr,
-                              chart: HeartRateChartPage(),
-                              press: () {
-                                Get.to(()=>HeartRateChart(name: name, email : email,profile:profilephoto, noti_count: noti_count,));
-                              },
-                              color: Color(0xFFe13b4a), heading: 'heart',
-                            )
-                                : SizedBox.shrink();
-                          },
-                        ),
-                        ValueListenableBuilder<bool>(
-                          valueListenable: settings.showSteps,
-                          builder: (context, show, _) {
-                            return show
-                                ? CustomCard(
-                              title: AppText.dailysteps,
-                              t1: NumberFormat.decimalPattern('en_US').format(int.tryParse(steps) ?? 0),
-                              t2: AppText.D_Steps,
-                              t2fontsize: 15,
-                              datetime:  AppText.avg_steps,
-                              chart: StepsChart(),
-                              press: () {
-                                Get.to(()=>StepsChartPage(name: name, email : email,profile:profilephoto, noti_count: noti_count));
-                              },
-                              color: Color(0xFF9C53C7), heading: 'steps',
-                            )
-                                : SizedBox.shrink();
-                          },
-                        ),
-                        ValueListenableBuilder<bool>(
-                          valueListenable: settings.showSleep,
-                          builder: (context, show, _) {
-                            return show
-                                ? CustomCardsleep(
-                              title: AppText.dailysleep,
-                              t1: sleep,
-                              t2: "",
-                              t2fontsize: 15,
-                              datetime: AppText.avg_sleep,
-                              chart: SleepChart(),
-                              press: () {
-                                Get.to(()=>SleepChartPage(name: name, email : email,profile:profilephoto, noti_count: noti_count));
-                              },
-                              color: AppColors.color3,
-                              deepPercentage: _formatPercentage(deepPercentage),
-                              middlePercentage: _formatPercentage(middlePercentage),
-                              lightPercentage: _formatPercentage(lightPercentage),
-
-                            )
-                                : SizedBox.shrink();
-                          },
-                        ),
-                        ValueListenableBuilder<bool>(
-                          valueListenable: settings.showSpo2,
-                          builder: (context, show, _) {
-                            return show
-                                ? CustomCardspo2(
-                              title: AppText.blood_oxygen,
-                              t1: "96%",
-                              t2: "",
-                              t2fontsize: 15,
-                              datetime: AppText.avg,
-                              chart: BloodOxygenChartPage(),
-                              press: () {
-                                //Navigator.push(context, MaterialPageRoute(builder: (context) => BloodoxygenPressureChartPage()));
-                                Get.to(()=>BloodoxygenPressureChartPage(name: name, email : email,profile:profilephoto, noti_count: noti_count));
-                              },
-                              color: AppColors.color4,
-                            )
-                                : SizedBox.shrink();
-                          },
-                        ),
-                        CustomCard(
-                          title: AppText.weight,
-                          t1: weight.toString(),
-                          t2: AppText.pounds,
-                          t2fontsize: 15,
-                          datetime: AppText.avg,
-                          chart: WeightChartPage(),
-                          press: () {
-                            Get.to(()=>WeightChart(name: name, email : email,profile:profilephoto, noti_count: noti_count));
-                          },
-                          color: Color(0xffF5B849), heading: 'weight',
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            //bottomNavigationBar: CustomBottomNavBar(controller: _controller),
+            bottomNavigationBar: (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+                ? CustomBottomNavBar(controller: _controller)
+                : null,
           ),
-          //bottomNavigationBar: CustomBottomNavBar(controller: _controller),
-          bottomNavigationBar: (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
-              ? CustomBottomNavBar(controller: _controller)
-              : null,
         ),
       ),
     );

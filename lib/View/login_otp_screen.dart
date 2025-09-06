@@ -36,7 +36,7 @@ class _MobileOtpScreenState extends State<MobileOtpScreen> {
 
   @override
   void initState(){
-    print("User: ${widget.user}");
+    print("User: ${widget.user ?? 'No User'}");
     print("mobileno: ${widget.mobileno}");
   }
 

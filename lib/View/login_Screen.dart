@@ -10,6 +10,7 @@ import 'package:azpire_new/utils/apptextstyle.dart';
 import 'package:azpire_new/web_app/platform_utils_io.dart';
 import 'package:azpire_new/widgets/custom_button/My_Button.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:azpire_new/widgets/custom_textfield.dart';
@@ -47,6 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isLoading = false;
   String? token;
   bool _isPhoneValid = true;
+  bool isweb = false;
   late SharedPreferences prefs; // Declare SharedPreferences instance
 
 
@@ -64,7 +66,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> initializePreferences() async {
     prefs = await SharedPreferences.getInstance();
-    token = prefs.getString('token');
+
+    //token = prefs.getString('token');
+   token =  prefs.getString('token') ?? 'No FCM Token';
     getToken();
   }
 
@@ -130,6 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    precacheImage(const AssetImage("assets/gif/logo.webp"), context);
     Size size = MediaQuery.of(context).size;
     return WillPopScope(
         onWillPop: () async {
@@ -152,8 +157,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       SizedBox(height: 180),
+                      kIsWeb==true?Image.asset(
+                        "assets/gif/logo.webp",
+                        height: size.height * 0.15,
+                        fit: BoxFit.cover,
+                      ):
                       Image.asset(
-                        Appimages.applogo,
+                        "assets/gif/logo.gif",
                         height: size.height * 0.15,
                         fit: BoxFit.cover,
                       ),
@@ -188,6 +198,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               completePhoneNumber = number;
                               _isPhoneValid = isValid;
                             });
+                          }, onEnterPressed: () {
+                            login();
                           },
                         ),
                             SizedBox(height: 25),

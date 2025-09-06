@@ -4,6 +4,7 @@ import 'package:azpire_new/utils/app_color.dart';
 import 'package:azpire_new/utils/appimages.dart';
 import 'package:azpire_new/utils/apptextstyle.dart';
 import 'package:azpire_new/widgets/custom_button/My_Button.dart';
+import 'package:azpire_new/widgets/customphone_field.dart';
 import 'package:flutter/material.dart';
 import 'package:azpire_new/widgets/custom_textfield.dart';
 import 'package:azpire_new/View/login_Screen.dart';
@@ -114,31 +115,43 @@ class _SignupScreenState extends State<SignupScreen> {
                                   }
                                 },),
                               SizedBox(height: 10,),
-                              IntlPhoneField(
-                                flagsButtonPadding: const EdgeInsets.all(0),
-                                dropdownIconPosition: IconPosition.trailing,
-                                dropdownIcon: Icon(
-                                  Icons.arrow_drop_down,
-                                  size: 15.0,
-                                  color: Colors.black,
-                                ),
-                                decoration: InputDecoration(
-                                  hintText: AppText.Phone_number,
-                                  border: UnderlineInputBorder(),
-                                  counterText: '',
-                                  errorText: _isPhoneValid ? null : AppText.valid_phoneno, // Show error message
-                                ),
+                              // IntlPhoneField(
+                              //   flagsButtonPadding: const EdgeInsets.all(0),
+                              //   dropdownIconPosition: IconPosition.trailing,
+                              //   dropdownIcon: Icon(
+                              //     Icons.arrow_drop_down,
+                              //     size: 15.0,
+                              //     color: Colors.black,
+                              //   ),
+                              //   decoration: InputDecoration(
+                              //     hintText: AppText.Phone_number,
+                              //     border: UnderlineInputBorder(),
+                              //     counterText: '',
+                              //     errorText: _isPhoneValid ? null : AppText.valid_phoneno, // Show error message
+                              //   ),
+                              //   initialCountryCode: AppText.country,
+                              //   autovalidateMode: AutovalidateMode.disabled,
+                              //   onChanged: (phone) {
+                              //     setState(() {
+                              //       completePhoneNumber = phone.completeNumber;
+                              //       _isPhoneValid = phone.completeNumber.length >= 10;  // Example validation
+                              //     });
+                              //   },
+                              //   inputFormatters: [
+                              //     FilteringTextInputFormatter.digitsOnly, // Allow only digits
+                              //   ],
+                              // ),
+                              CustomPhoneField(
                                 initialCountryCode: AppText.country,
-                                autovalidateMode: AutovalidateMode.disabled,
-                                onChanged: (phone) {
+                                isPhoneValid: _isPhoneValid,
+                                onChanged: (number, isValid) {
                                   setState(() {
-                                    completePhoneNumber = phone.completeNumber;
-                                    _isPhoneValid = phone.completeNumber.length >= 10;  // Example validation
+                                    completePhoneNumber = number;
+                                    _isPhoneValid = isValid;
                                   });
-                                },
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly, // Allow only digits
-                                ],
+                                }, onEnterPressed: () {
+                                registerUser();
+                              },
                               ),
                               SizedBox(height: 10,),
                               CustomTextfield(

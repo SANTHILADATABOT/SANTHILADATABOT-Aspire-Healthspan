@@ -85,12 +85,16 @@ class Emailotpcontroller {
         body: {'email': email},
       );
 
+      print('OTP resend Response: ${response.body}');
+
       if (response.statusCode == 200) {
+        print('OTP resend Response1: ${response.body}');
         final jsonResponse = json.decode(response.body);
         return {
           'success': jsonResponse['status'] == "SUCCESS",
           'data': jsonResponse['data'],
         };
+
       } else {
         return {
           'success': false,

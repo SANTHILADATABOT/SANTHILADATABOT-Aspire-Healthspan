@@ -13,7 +13,6 @@ import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
-
 import '../utils/apptext.dart';
 
 class Profile extends StatefulWidget {

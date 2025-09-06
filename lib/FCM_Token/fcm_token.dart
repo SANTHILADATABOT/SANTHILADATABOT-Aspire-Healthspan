@@ -26,7 +26,8 @@ Future<void> getToken({
     // Listen for token refresh
     FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
       print('FCM Token refreshed: $newToken');
-      prefs.setString('token', newToken); // Update token
+     // prefs.setString('token', newToken); // Update token
+      prefs.setString('token', newToken ?? '');
       setState(() {
         token = newToken;
       });

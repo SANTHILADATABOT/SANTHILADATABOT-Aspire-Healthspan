@@ -21,6 +21,7 @@ import '../utils/appimages.dart';
 import '../utils/apptext.dart';
 import '../utils/apptextstyle.dart';
 import '../widgets/shimmer_effects.dart';
+import 'Dashboard_screen.dart';
 
 
 class BloodoxygenPressureChartPage extends StatefulWidget {
@@ -367,8 +368,16 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return WillPopScope(
+        // onWillPop: () async {
+        //   ExitAppDialog();
+        //   return true;
+        // },
         onWillPop: () async {
-          ExitAppDialog();
+          if (_advancedDrawerController.value.visible) {
+            _advancedDrawerController.hideDrawer();
+            return false; // stop navigation
+          }
+          // if drawer is closed, allow normal back
           return true;
         },
         child:AdvancedDrawer(
@@ -410,7 +419,14 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
           ),
           leading: IconButton(
             onPressed: () {
-              Get.back();
+              if (_advancedDrawerController.value.visible) {
+                _advancedDrawerController.hideDrawer();
+              } else {
+                Get.back();
+                Get.offAll(() => DashboardScreen(
+                  deviceID: '', // pass params if needed
+                ));
+              }
             },
             icon: Icon(Icons.arrow_back_ios),
           ),
@@ -1043,7 +1059,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                 isLoading ?
                 Center(child: Image.asset(
                   Appimages.applogo,
-                  height: 50,
+                  height: size.height * 0.07,
                   fit: BoxFit.contain,
                 ),) :
                 Padding(
@@ -1226,49 +1242,6 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                 fontWeight: FontWeight.bold
             )
         ),
-        // primaryXAxis: ismonth == true ? CategoryAxis(
-        //   title: AxisTitle(text: Xaxistitle),
-        //   // minimum: 0,
-        //   // maximum: 23,
-        //   // interval: 1,
-        //   axisLine: const AxisLine(width: 0),
-        //   majorGridLines: const MajorGridLines(width: 0),
-        //   majorTickLines: const MajorTickLines(size: 0),
-        //   labelPlacement: LabelPlacement.onTicks,
-        //   edgeLabelPlacement: EdgeLabelPlacement.shift,
-        //   labelIntersectAction: AxisLabelIntersectAction.none, //
-        //   axisLabelFormatter: (AxisLabelRenderDetails args) {
-        //     return ChartAxisLabel(
-        //       args.text, // args.text will be the time string like "08:05 AM"
-        //       const TextStyle(fontSize: 9,
-        //           fontWeight: FontWeight.bold,
-        //           color: Colors.black
-        //       ),
-        //     );
-        //   },
-        //   // axisLabelFormatter: (AxisLabelRenderDetails args) {
-        //   //   return ChartAxisLabel(
-        //   //     args.value.toInt().toString(), // show 0 to 23
-        //   //     const TextStyle(fontSize: 7),
-        //   //   );
-        //   // },
-        // ):
-        // CategoryAxis(
-        //   title: AxisTitle(text: Xaxistitle),
-        //   axisLine: const AxisLine(width: 0),
-        //   labelStyle: TextStyle(
-        //     fontSize: 9,
-        //     fontWeight: FontWeight.bold,
-        //     color: Colors.black,
-        //   ),
-        //   majorGridLines: const MajorGridLines(width: 0),
-        //   majorTickLines: const MajorTickLines(size: 0),
-        //   labelPlacement: LabelPlacement.onTicks,
-        //   //edgeLabelPlacement: EdgeLabelPlacement.shift,
-        //   labelIntersectAction: AxisLabelIntersectAction.none,
-        //   maximumLabels: 12,
-        //   // axisLabelFormatter: (AxisLabelRenderDetails args) {
-        // ),
         primaryXAxis: isMonth == true ?
         CategoryAxis(
           title: AxisTitle(text: Xaxistitle),

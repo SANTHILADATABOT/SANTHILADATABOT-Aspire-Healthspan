@@ -108,6 +108,8 @@ class LoginController {
       'access_token': token,
     };
 
+    print("userData_login:$userData");
+
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -117,7 +119,10 @@ class LoginController {
         body: userData,
       );
 
+      print("login_response: ${response.body}");
+
       if (response.statusCode == 200) {
+        print("LoginResponse: ${response.body}");
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
 
         if (jsonResponse["status"] == "SUCCESS") {
@@ -129,21 +134,22 @@ class LoginController {
 
           showToast("OTP Sent Successfully");
 
-          Get.to(() => MobileOtpScreen(
-            MobileOTP: onOtpReceived,
-            user: onUserReceived,
-            mobileno: onMobileNoReceived,
-          ));
+          Get.to(() =>
+              MobileOtpScreen(
+                MobileOTP: onOtpReceived,
+                user: onUserReceived,
+                mobileno: onMobileNoReceived,
+              ));
         } else {
           showToast("User not Registered");
         }
       } else {
-        print(response.body);
-        showToast("Invalid Username");
+        print("failed_response:${response.body}");
+        //showToast("Invalid Username");
         print("Request failed with status: ${response.statusCode}.");
       }
     } catch (e) {
-      print("Error: $e");
+      print("Log_Error: $e");
     }
   }
 

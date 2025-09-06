@@ -299,6 +299,9 @@ import 'dart:io';
 import 'package:azpire_new/Cling%20Connections/hive_model.dart';
 import 'package:azpire_new/root/root.dart';
 import 'package:azpire_new/web_app/platform_utils_stub.dart';
+import 'package:azpire_new/widgets/notifications_mobile.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -318,17 +321,18 @@ import 'utils/app_color.dart';
 import 'utils/appimages.dart';
 import 'utils/apptext.dart';
 import 'utils/apptextstyle.dart';
+import 'dart:html' as html;
 
-
-
-
-
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  _showNotification(message.notification?.title, message.notification?.body);
+
+  if (message.notification == null) {
+    print("Background message has no notification payload, skipping notification display.");
+    return;
+  }
+
+  await showNotification(message.notification?.title, message.notification?.body);
 }
 
 Future<void> main() async {
@@ -344,7 +348,6 @@ Future<void> main() async {
     return true;
   };
 
-
   if (kIsWeb) {
     await Firebase.initializeApp(
       options: const FirebaseOptions(
@@ -359,57 +362,27 @@ Future<void> main() async {
     );
   } else {
     await Firebase.initializeApp();
+    await initLocalNotifications(); // only runs on mobile
   }
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  // if (isIOS) {
-  //   final status = await AppTrackingTransparency.trackingAuthorizationStatus;
-  //   if (status == TrackingStatus.notDetermined) {
-  //     await AppTrackingTransparency.requestTrackingAuthorization();
-  //     print("ATT prompt shown to the user.");
-  //   } else {
-  //     print("ATT already determined: $status");
-  //   }
-  // }
-
-
-
-
   await Hive.initFlutter();
   await Hive.openBox('minuteDataBox');
-  await Hive.initFlutter(); // initialize Hive for Flutter
   Hive.registerAdapter(MinuteDataAdapter());
 
-  const AndroidInitializationSettings initializationSettingsAndroid =
-  AndroidInitializationSettings('@mipmap/ic_launcher');
-  const DarwinInitializationSettings initializationSettingsIOS =
-  DarwinInitializationSettings();
-
-  const InitializationSettings initializationSettings = InitializationSettings(
-    android: initializationSettingsAndroid,
-    iOS: initializationSettingsIOS,
+  runApp(
+    OKToast(
+      position: kIsWeb ? ToastPosition.top : ToastPosition.bottom,
+      child: MyApp(),
+    ),
   );
 
+  // Future.delayed(Duration(milliseconds: 100), () {
+  //   final splash = html.document.getElementById('splash-screen');
+  //   splash?.remove();
+  // });
 
-  runApp(
-      OKToast(
-          position: kIsWeb ? ToastPosition.top : ToastPosition.bottom,
-          child: MyApp()));
-
-
-  // if (Platform.isIOS) {
-  //   final status = await AppTrackingTransparency.trackingAuthorizationStatus;
-  //   if (status == TrackingStatus.notDetermined) {
-  //     await Future.delayed(const Duration(milliseconds: 500));
-  //     final newStatus = await AppTrackingTransparency.requestTrackingAuthorization();
-  //     print("ATT prompt shown to the user. New status: $newStatus");
-  //   } else {
-  //     print("ATT already determined: $status");
-  //   }
-  // } else {
-  //   print("Not running on iOS, skipping ATT");
-  // }
 }
 
 class MyApp extends StatelessWidget {
@@ -418,14 +391,15 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'Aspire Healthspan',
       debugShowCheckedModeBanner: false,
-      home: SplashPage(),
+    // home: SplashPage(),
+      home: kIsWeb
+          ? (LoginScreen())
+          : SplashPage(),
     );
   }
 }
 
 class SplashPage extends StatefulWidget {
-  SplashPage({Key? key}) : super(key: key);
-
   @override
   _SplashPageState createState() => _SplashPageState();
 }
@@ -441,11 +415,10 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
     initializeNotifications();
-    print('Platform is iOS: $isIOS');
 
-    if (isIOS) {
+    if (!kIsWeb && isIOS) {
       Future.delayed(const Duration(seconds: 1), () async {
-        if (!mounted) return; //
+        if (!mounted) return;
         final status = await AppTrackingTransparency.trackingAuthorizationStatus;
         print("Current ATT status: $status");
 
@@ -458,26 +431,13 @@ class _SplashPageState extends State<SplashPage> {
         }
       });
     }
-    // print('Platform is iOS: $isIOS');
-    // WidgetsBinding.instance.addPostFrameCallback((_) async {
-    //   if (Platform.isIOS) {
-    //     final status = await AppTrackingTransparency.trackingAuthorizationStatus;
-    //     if (status == TrackingStatus.notDetermined) {
-    //       await Future.delayed(const Duration(milliseconds: 500));
-    //       final newStatus = await AppTrackingTransparency.requestTrackingAuthorization();
-    //       print("📢 New ATT status: $newStatus");
-    //     }
-    //   }
-    // });
+
     checkSession();
   }
 
 
 
-
-
   Future<void> initializeNotifications() async {
-    // Request notification permission (works for both Web & Mobile)
     NotificationSettings settings = await messaging.requestPermission();
     print('Permission status: ${settings.authorizationStatus}');
 
@@ -487,28 +447,19 @@ class _SplashPageState extends State<SplashPage> {
       final prefs = await SharedPreferences.getInstance();
 
       if (kIsWeb) {
-        // Web FCM token
         final token = await messaging.getToken(
-          vapidKey:
-          "BBDchPDDIaVe_9T10UA-yxAzZfhWN68KuYExqsvwdOwZxcKItXJhj93VYGgyoaAaoafelKRzcfJWggC2ftMRXuA",
+          vapidKey: "BBDchPDDIaVe_9T10UA-yxAzZfhWN68KuYExqsvwdOwZxcKItXJhj93VYGgyoaAaoafelKRzcfJWggC2ftMRXuA",
         );
         print("Web FCM Token: $token");
         await prefs.setString('token', token ?? "");
       } else {
-        // Mobile FCM token
         final token = await messaging.getToken();
         print("FCM Token: ${token ?? 'null'}");
         await prefs.setString('token', token ?? "");
 
-        // Only listen for foreground notifications on mobile
         FirebaseMessaging.onMessage.listen((RemoteMessage message) {
           print("Foreground Notification Received");
-
-          // Show local notification (not supported on Web)
-          _showNotification(
-            message.notification?.title,
-            message.notification?.body,
-          );
+          showNotification(message.notification?.title, message.notification?.body);
         });
       }
     } else {
@@ -516,58 +467,39 @@ class _SplashPageState extends State<SplashPage> {
     }
   }
 
-
-
-
   Future<void> checkSession() async {
     final prefs = await SharedPreferences.getInstance();
     bool loggedIn = prefs.getBool('isLoggedIn') ?? false;
 
-    if(mounted)
-    setState(() {
-      isLoggedIn = loggedIn;
-      isLoading = false;
-    });
-
-
+    if (mounted) {
+      setState(() {
+        isLoggedIn = loggedIn;
+        isLoading = false;
+      });
+    }
 
     if (!kIsWeb && loggedIn) {
       try {
-        final String? lastDeviceID = await platform.invokeMethod('getLastActiveDevice');
+        final String? lastDeviceID = await platform.invokeMethod(
+            'getLastActiveDevice');
         if (lastDeviceID != null && lastDeviceID.isNotEmpty) {
           if (mounted) setState(() => _registeredDevice = lastDeviceID);
-          Future.delayed(Duration(seconds: 1), _navigateToSyncScreen);
+          Future.delayed(Duration(seconds: 3), _navigateToSyncScreen);
         } else {
-          Future.delayed(Duration(seconds: 1), () {
+          Future.delayed(Duration(seconds: 3), () {
             Get.offAll(() => BluetoothPair());
           });
         }
       } on PlatformException catch (e) {
         print("Failed to get last active device: ${e.message}");
       }
-    } else if (!loggedIn) {
-      Future.delayed(Duration(seconds: 1), () {
-        Get.offAll(() => LoginScreen());
-      });
     }
-
-
-
-    // setState(() {
-    //   isLoading = false;
-    // });
+    // } else if (!loggedIn) {
+    //   Future.delayed(Duration(seconds: 1), () {
+    //     Get.offAll(() => LoginScreen());
+    //   });
+    // }
   }
-
-  // Future<void> checkSession() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   bool loggedIn = prefs.getBool('isLoggedIn') ?? false;
-  //
-  //   setState(() {
-  //     isLoggedIn = loggedIn;
-  //     isLoading = false;
-  //   });
-  // }
-
 
   void _navigateToSyncScreen() {
     if (_registeredDevice != null) {
@@ -577,6 +509,7 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
+    precacheImage(const AssetImage("assets/gif/logo.gif"), context);
     if (isLoading) {
       return Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -586,42 +519,16 @@ class _SplashPageState extends State<SplashPage> {
     return EasySplashScreen(
       logo: Image.asset(Appimages.applogo),
       title: Text(
-          AppText.splashAppname,
-          style: Apptextstyle.s16wbcothers),
+        AppText.splashAppname,
+        style: Apptextstyle.s16wbcothers,
+      ),
       logoWidth: 75,
       backgroundColor: Colors.white,
       showLoader: true,
-      navigator: isLoggedIn ? BluetoothPair() : LoginScreen(),
+     // navigator: isLoggedIn ? BluetoothPair() : LoginScreen(),
+      navigator: kIsWeb
+          ? (isLoggedIn ? BluetoothPair() : LoginScreen())
+          : null,
     );
   }
 }
-
-
-
-Future<void> _showNotification(String? title, String? body) async {
-  if (title == null && body == null) {
-    print("Skipping notification: both title and body are null");
-    return;
-  }
-
-  const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-    'your_channel_id',
-    'your_channel_name',
-    importance: Importance.max,
-    priority: Priority.high,
-  );
-
-  const NotificationDetails platformDetails = NotificationDetails(
-    android: androidDetails,
-    iOS: DarwinNotificationDetails(),
-  );
-
-  await flutterLocalNotificationsPlugin.show(
-    0,
-    title ?? 'No Title',
-    body ?? 'No Body',
-    platformDetails,
-    payload: 'notification_payload',
-  );
-}
-

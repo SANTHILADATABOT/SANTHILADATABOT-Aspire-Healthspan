@@ -35,55 +35,6 @@ class _EmailScreenState extends State<EmailScreen> {
   final EmailLoginController _controller = EmailLoginController();
    final _formKey = GlobalKey<FormState>();
 
-  // Future<void> emaillogin() async {
-  //   setState(() {
-  //     isLoading = true;
-  //   });
-  //   final String url = '$root/email_login_resend_otp';
-  //
-  //   final Map<String, String> userData = {
-  //     'email': emailcontroller.text,
-  //   };
-  //
-  //   try {
-  //     final response = await http.post(
-  //       Uri.parse(url),
-  //       body: userData,
-  //     );
-  //
-  //     if (response.statusCode == 200) {
-  //       final Map<String, dynamic> jsonResponse = json.decode(response.body);
-  //       print("email otp response$jsonResponse");
-  //       if(jsonResponse['status'] == "SUCCESS"){
-  //         String emailOtp = jsonResponse['data']['email_otp'].toString()  ;
-  //         var email = jsonResponse['data']["email"];
-  //         showToast("OTP sent to Email");
-  //         Get.to(() => VerificationOtpScreen(
-  //           email: email!,
-  //           emailOtp: emailOtp,
-  //         ));
-  //       } else {
-  //         showToast("Email not Registered");
-  //         setState(() {
-  //           isLoading = false;
-  //         });
-  //       }
-  //     } else {
-  //       print('Request failed with status: ${response.statusCode}.');
-  //       setState(() {
-  //         isLoading = false;
-  //       });
-  //     }
-  //   } catch (e) {
-  //     print('Error: $e');
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-  //   }
-  // }
-
-
-
   Future<void> emaillogin() async {
     setState(() {
       isLoading = true;
@@ -94,13 +45,13 @@ class _EmailScreenState extends State<EmailScreen> {
     if (result['success']) {
       final emailOtp = result['data']['email_otp'].toString();
       final email = result['data']["email"];
-      showToast(result['message']);
+      showCustomToast(result['message']);
       Get.to(() => VerificationOtpScreen(
         email: email!,
         emailOtp: emailOtp,
       ));
     } else {
-      showToast(result['message']);
+      showCustomToast(result['message']);
       setState(() {
         isLoading = false;
       });
@@ -170,9 +121,10 @@ class _EmailScreenState extends State<EmailScreen> {
    }
 }
 
-void showToast(String msg) {
+void showCustomToast(String msg) {
   showToastWidget(
     _buildToastWidget(msg),
+    duration: Duration(seconds: 2),
     position: kIsWeb ? ToastPosition.top : ToastPosition.bottom,
     animationCurve: kIsWeb ? Curves.easeInOut : Curves.easeIn,
     animationDuration: const Duration(milliseconds: 400),
@@ -199,14 +151,16 @@ Widget _buildToastWidget(String msg) {
   );
 }
 
-Widget _slideFromRight(BuildContext context,
+Widget _slideFromRight(
+    BuildContext context,
     Widget child,
     AnimationController controller,
-    double percent,) {
+    double percent,
+    ) {
   return SlideTransition(
     position: Tween<Offset>(
-      begin: Offset(1.2, 0.0), // far right
-      end: Offset(-1.2, 0.0), // f // Slide to original position
+      begin: Offset(1.2, 0.0), // start from right off-screen
+      end: Offset(0.0, 0.0),   // slide to original position
     ).animate(CurvedAnimation(
       parent: controller,
       curve: Curves.easeInOut,
@@ -214,6 +168,7 @@ Widget _slideFromRight(BuildContext context,
     child: child,
   );
 }
+
 
 
 

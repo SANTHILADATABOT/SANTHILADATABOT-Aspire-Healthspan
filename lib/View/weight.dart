@@ -7,6 +7,7 @@ import 'package:azpire_new/menu/NavMneu.dart';
 import 'package:azpire_new/utils/app_color.dart';
 import 'package:azpire_new/utils/appimages.dart';
 import 'package:azpire_new/widgets/Appexithelper.dart';
+import 'package:azpire_new/widgets/shimmer_effects.dart';
 import 'package:azpire_new/widgets/text_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
@@ -19,7 +20,9 @@ import 'package:shimmer/shimmer.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../utils/apptext.dart';
 import '../utils/apptextstyle.dart';
-import '../widgets/shimmer_effects.dart';
+import 'Dashboard_screen.dart';
+
+
 
 
 
@@ -319,14 +322,27 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_advancedDrawerController.value.visible) {
+        _advancedDrawerController.hideDrawer();
+      }
+    });
     Size size = MediaQuery
         .of(context)
         .size;
     return WillPopScope(
-      onWillPop: () async {
-        ExitAppDialog();
-        return true;
-      },
+      // onWillPop: () async {
+      //   ExitAppDialog();
+      //   return true;
+      // },
+        onWillPop: () async {
+          if (_advancedDrawerController.value.visible) {
+            _advancedDrawerController.hideDrawer();
+            return false; // stop navigation
+          }
+          // if drawer is closed, allow normal back
+          return true;
+        },
       child:AdvancedDrawer(
           controller: _advancedDrawerController,
           backdropColor: Colors.grey.shade100,
@@ -366,7 +382,12 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
         ),
         leading: IconButton(
           onPressed: () {
-            Get.back();
+            if (_advancedDrawerController.value.visible) {
+              _advancedDrawerController.hideDrawer();
+            } else {
+              Get.back();
+              //Get.to(()=>DashboardScreen(deviceID: ''));
+            }
           },
           icon: Icon(Icons.arrow_back_ios),
         ),
@@ -1141,7 +1162,7 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
               isLoading ?
               Center(child: Image.asset(
                 Appimages.applogo,
-                height: 50,
+                height: size.height * 0.07,
                 fit: BoxFit.contain,
               ),) :
               Padding(

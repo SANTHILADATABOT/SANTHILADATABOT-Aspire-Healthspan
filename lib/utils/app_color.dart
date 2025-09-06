@@ -59,4 +59,8 @@ class AppColors {
   static const Color spo2_l1 = Color(0xFFF6CCCC);
   static const Color spo2_l2 = Color(0xFFF38F8F);
 
+  //Nav menu
+  static const Color C_others = Color(0xFF254a6c);
+  static const Color C_others1 = Color(0xFF505970);
+
 }

@@ -527,7 +527,7 @@ class _edit_phone_numberState extends State<edit_phone_number> {
                         text: AppText.SUBMIT,
                       ) : Center(child: Image.asset(
                         Appimages.applogo,
-                        height: 50,
+                        height: size.height * 0.07,
                         fit: BoxFit.contain,
                       ),),
                     ) : SizedBox()

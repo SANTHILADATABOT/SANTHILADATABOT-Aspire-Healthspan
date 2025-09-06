@@ -513,6 +513,25 @@ class Apptextstyle {
     color: Colors.black,
   );
 
+  //Nav Menu
+  static  var s18wbco= TextStyle(
+    fontFamily: "Inter",
+    color: Colors.blue.shade900,
+    fontSize: 18,
+    fontWeight: FontWeight.bold,
+  );
+
+  static  const s14wnco= TextStyle(
+    fontFamily: "Inter",
+    color: AppColors.C_others1,
+    fontSize: 14,
+    fontWeight: FontWeight.normal,
+  );
+
+
+
+
+
 
 
 

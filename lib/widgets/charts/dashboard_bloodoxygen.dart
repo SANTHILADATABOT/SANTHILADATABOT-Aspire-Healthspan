@@ -175,7 +175,7 @@ class _BloodOxygenChartPageState extends State<BloodOxygenChartPage>
                name: 'SpO₂',
                dataSource: chartData,
                xValueMapper: (BloodOxygenData data, _) => data.day,
-               yValueMapper: (data, _) => data.spo2,
+               yValueMapper: (data, _) =>  data.spo2 == 0 ? null : data.spo2,
                color: const Color(0xffFF0000),
                markerSettings: const MarkerSettings(
                    isVisible: true,

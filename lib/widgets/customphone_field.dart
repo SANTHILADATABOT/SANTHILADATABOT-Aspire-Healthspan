@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
@@ -5,6 +6,7 @@ import 'package:intl_phone_field/intl_phone_field.dart';
 class CustomPhoneField extends StatelessWidget {
   final String initialCountryCode;
   final bool isPhoneValid;
+  final VoidCallback? onEnterPressed;
   final Function(String completeNumber, bool isValid) onChanged;
 
   const CustomPhoneField({
@@ -12,6 +14,7 @@ class CustomPhoneField extends StatelessWidget {
     required this.initialCountryCode,
     required this.isPhoneValid,
     required this.onChanged,
+    required this.onEnterPressed,
   });
 
   @override
@@ -35,6 +38,11 @@ class CustomPhoneField extends StatelessWidget {
         String number = phoneno.completeNumber;
         bool isValid = number.length >= 10;
         onChanged(number, isValid);
+      },
+      onSubmitted: (value) { // ✅ catches Enter + NumpadEnter
+        if (kIsWeb && onEnterPressed != null) {
+          onEnterPressed!();
+        }
       },
       autovalidateMode: AutovalidateMode.disabled,
       inputFormatters: [

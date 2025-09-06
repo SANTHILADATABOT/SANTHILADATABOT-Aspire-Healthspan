@@ -206,7 +206,7 @@ class EditPhoneController {
 void showCustomToast(String msg) {
   showToast(
     msg,
-   // duration: Duration(seconds: 2),
+   duration: Duration(seconds: 2),
     position: kIsWeb ? ToastPosition.top : ToastPosition.bottom,
     backgroundColor: Colors.black,
     radius: 8.0,
@@ -230,8 +230,8 @@ Widget _slideFromRight(
     ) {
   return SlideTransition(
     position: Tween<Offset>(
-      begin: Offset(1.2, 0.0), // far right
-      end: Offset(-1.2, 0.0),  // f // Slide to original position
+      begin: Offset(1.2, 0.0), // start from right off-screen
+      end: Offset(0.0, 0.0),   // slide to original position
     ).animate(CurvedAnimation(
       parent: controller,
       curve: Curves.easeInOut,
@@ -239,6 +239,7 @@ Widget _slideFromRight(
     child: child,
   );
 }
+
 
 // showToast(String msg) {
 //   Fluttertoast.showToast(

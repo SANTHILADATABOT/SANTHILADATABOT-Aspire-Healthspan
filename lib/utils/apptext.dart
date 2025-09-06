@@ -83,8 +83,6 @@ class AppText {
   static const avg = "Avg";
 
 
-
-
   //Profile Screen
   static const profile = "Profile";
   static const editprofile = "Edit Profile";
@@ -165,7 +163,7 @@ class AppText {
   //appbar headings
   static const BP_heading = "Blood Pressure";
   static const spo2_heading = "Blood Oxygen";
-  static const hr_heading = "Heart  Rate";
+  static const hr_heading = "Heart Rate";
   static const steps_heading = "Avg Daily Steps";
   static const weight_heading = "Weight";
   static const add_weight_headings = "Add Weight";
@@ -226,6 +224,15 @@ class AppText {
 
   //notifications
   static const no_notifications = "No Notifications";
+
+  //Nav menu
+  static const dashboard_m = "Dashboard";
+  static const set_target = "Set Target";
+  static const stepscount = "Steps Count";
+  static const sleep = "Sleep";
+  static const unpaired_device = "Unpaired Device";
+  static const logout = "Logout";
+
 
 
 

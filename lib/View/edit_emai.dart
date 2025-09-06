@@ -6,6 +6,7 @@ import 'package:azpire_new/utils/app_color.dart';
 import 'package:azpire_new/utils/appimages.dart';
 import 'package:azpire_new/utils/apptextstyle.dart';
 import 'package:azpire_new/widgets/custom_button/My_Button.dart';
+import 'package:azpire_new/widgets/custompincodetextfield.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -352,13 +353,6 @@ class _edit_emailState extends State<edit_email> {
   }
 
 
-
-
-
-
-
-
-
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery
@@ -368,8 +362,8 @@ class _edit_emailState extends State<edit_email> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          'Edit Profile',
-          style: Apptextstyle.s17wbcapp_b
+            'Edit Profile',
+            style: Apptextstyle.s17wbcapp_b
         ),
         backgroundColor: Color(0xFFffffff),
 
@@ -394,10 +388,12 @@ class _edit_emailState extends State<edit_email> {
                           onChanged: _onTextChanged,
                           controller: emailController,
                           keyboardType: TextInputType.emailAddress,
-                          validator:  (value) {
+                          validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please enter an email address';
-                            } else if (!RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$').hasMatch(value)) {
+                            } else if (!RegExp(
+                                r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
+                                .hasMatch(value)) {
                               return 'Please enter a valid email address';
                             }
                             return null;
@@ -417,13 +413,12 @@ class _edit_emailState extends State<edit_email> {
                         onTap: () {
                           if (emailController.text.isEmpty) {
                             showToast("Email is Empty");
-                          }  else {
+                          } else {
                             verify_mob();
                           }
-
                         },
                         child: isLoading_1 == true ? Center(
-                          child: CircularProgressIndicator(),) :Container(
+                          child: CircularProgressIndicator(),) : Container(
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
                               gradient: AppColors.button
@@ -431,8 +426,8 @@ class _edit_emailState extends State<edit_email> {
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(30, 8, 30, 8),
                             child: Text(
-                             AppText.verify,
-                              style: Apptextstyle.s16wbcW
+                                AppText.verify,
+                                style: Apptextstyle.s16wbcW
                             ),
                           ),
                         ),
@@ -472,39 +467,16 @@ class _edit_emailState extends State<edit_email> {
                                 SizedBox(height: 20),
                                 Text(
                                   AppText.verificationcode,
-                                  style: TextStyle(
-                                    fontFamily: "Inter",
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
-                                  ),
+                                    style: Apptextstyle.s18wbcB
                                 ),
                                 SizedBox(height: 10),
                                 Text(
                                   AppText.emailsentotp,
-                                  style: TextStyle(
-                                    fontFamily: "Inter",
-                                    fontSize: 14.0,
-                                    color: Color(0xFF7c6666),
-                                  ),
+                                    style: Apptextstyle.s14wncLb
                                 ),
                                 SizedBox(height: 20),
-                                PinCodeTextField(
+                                CustomPinCodeField(
                                   appContext: context,
-                                  length: 5,
-                                  obscureText: false,
-                                  //animationType: AnimationType.fade,
-                                  keyboardType: TextInputType.number,
-                                  autoFocus: true,
-                                  pinTheme: PinTheme(
-                                    shape: PinCodeFieldShape.underline,
-                                    borderRadius: BorderRadius.circular(5),
-                                    fieldHeight: 50,
-                                    fieldWidth: 40,
-                                    activeColor: Colors.black,
-                                    inactiveColor: Colors.black,
-                                    selectedColor: Colors.black,
-                                  ),
                                   onChanged: (value) {
                                     print(value);
                                   },
@@ -581,7 +553,7 @@ class _edit_emailState extends State<edit_email> {
                           text: AppText.SUBMIT,
                         ) : Center(child: Image.asset(
                           Appimages.applogo,
-                          height: 50,
+                          height: size.height * 0.07,
                           fit: BoxFit.contain,
                         ),),
                       ) : SizedBox()
@@ -611,23 +583,22 @@ class _edit_emailState extends State<edit_email> {
           style: TextStyle(fontSize: 16.0, color: Colors.white),
         ),
       ),
-      position: ToastPosition.bottom,
-      //duration: Duration(seconds: 2),
+      position: kIsWeb ? ToastPosition.top : ToastPosition.bottom,
+      duration: Duration(seconds: 2),
       animationCurve: kIsWeb ? Curves.easeInOut : Curves.easeIn,
       animationDuration: const Duration(milliseconds: 400),
       animationBuilder: kIsWeb ? _slideFromRight : null,
     );
   }
-  Widget _slideFromRight(
-      BuildContext context,
+
+  Widget _slideFromRight(BuildContext context,
       Widget child,
       AnimationController controller,
-      double percent,
-      ) {
+      double percent,) {
     return SlideTransition(
       position: Tween<Offset>(
-        begin: Offset(1.2, 0.0), // far right
-        end: Offset(-1.2, 0.0),  // f // Slide to original position
+        begin: Offset(1.2, 0.0), // start from right off-screen
+        end: Offset(0.0, 0.0), // slide to original position
       ).animate(CurvedAnimation(
         parent: controller,
         curve: Curves.easeInOut,
