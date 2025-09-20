@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="icons/Icon-192.png" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="icons/favicon.png" />
+    <link rel="icon" type="image/webp" href="icons/App_iocn.webp" />
 
     <!-- Base path -->
     <base href="/" />
@@ -25,7 +25,7 @@
 
     <!-- Preload critical resources -->
     <link rel="preload" href="main.dart.js" as="script">
-    <link rel="preload" href="favicon.png" as="image">
+    <link rel="preload" href="icons/App_iocn.webp" as="image">
 
     <!-- Flutter Bootstrap -->
     <script src="flutter_bootstrap.js" defer></script>
@@ -45,6 +45,8 @@
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
+          width: 200px;   /* Adjust splash logo size */
+          height: auto;   /* Keep aspect ratio */
         }
     </style>
 </head>
@@ -63,19 +65,16 @@
         });
     }
 </script>
-<!-- Splash using favicon.png with full <picture> flow -->
+
+<!-- Optimized splash logo -->
 <picture id="splash">
-    <source
-            srcset="icons/favicon.png 1x, icons/favicon.png 2x, icons/favicon.png 3x, icons/favicon.png 4x"
-            media="(prefers-color-scheme: light)">
-    <source
-            srcset="icons/favicon.png 1x, icons/favicon.png 2x, icons/favicon.png 3x, icons/favicon.png 4x"
-            media="(prefers-color-scheme: dark)">
-    <img class="center" aria-hidden="true" src="favicon.png" alt="Splash logo">
+    <source srcset="icons/App_iocn.webp" type="image/webp">
+    <img class="center" aria-hidden="true" src="icons/App_icon.png" alt="Splash logo">
 </picture>
 
 </body>
 </html>
+
 
 
 

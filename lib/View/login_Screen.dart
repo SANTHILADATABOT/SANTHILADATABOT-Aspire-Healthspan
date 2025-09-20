@@ -134,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    precacheImage(const AssetImage("assets/gif/logo.webp"), context);
+    precacheImage(const AssetImage("assets/gif/logo.gif"), context);
     Size size = MediaQuery.of(context).size;
     return WillPopScope(
         onWillPop: () async {
@@ -157,11 +157,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       SizedBox(height: 180),
-                      kIsWeb==true?Image.asset(
-                        "assets/gif/logo.webp",
-                        height: size.height * 0.15,
-                        fit: BoxFit.cover,
-                      ):
+                      // kIsWeb==true?Image.asset(
+                      //   "assets/gif/logo.webp",
+                      //   height: size.height * 0.15,
+                      //   fit: BoxFit.cover,
+                      // ):
                       Image.asset(
                         "assets/gif/logo.gif",
                         height: size.height * 0.15,

@@ -321,7 +321,7 @@ import 'utils/app_color.dart';
 import 'utils/appimages.dart';
 import 'utils/apptext.dart';
 import 'utils/apptextstyle.dart';
-import 'dart:html' as html;
+
 
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -532,3 +532,5 @@ class _SplashPageState extends State<SplashPage> {
     );
   }
 }
+
+
