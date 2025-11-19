@@ -87,9 +87,6 @@ class _SignupScreenState extends State<SignupScreen> {
     final userType = isAdmin ? "Admin" : "User";
     print("Selected userType: $userType");
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user_type', userType);
-
     try {
       if (!_isPhoneValid || completePhoneNumber == null || completePhoneNumber!.isEmpty) {
         setState(() {

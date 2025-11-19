@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:azpire_new/Controller/login_otp_controller.dart';
-import 'package:azpire_new/View/bluetoothscreen.dart';
 import 'package:azpire_new/root/root.dart';
 import 'package:azpire_new/utils/app_color.dart';
 import 'package:azpire_new/utils/appimages.dart';
@@ -20,7 +19,8 @@ class MobileOtpScreen extends StatefulWidget {
   final String MobileOTP;
   final String mobileno;
   final String user;
-  MobileOtpScreen({super.key, required this.MobileOTP, required this.user, required this.mobileno});
+  final String userType;
+  MobileOtpScreen({super.key, required this.MobileOTP, required this.user, required this.mobileno,required this.userType});
 
   @override
   State<MobileOtpScreen> createState() => _MobileOtpScreenState();
@@ -39,14 +39,13 @@ class _MobileOtpScreenState extends State<MobileOtpScreen> {
   void initState(){
     print("User: ${widget.user ?? 'No User'}");
     print("mobileno: ${widget.mobileno}");
+    print("User Type_login: ${widget.userType}");
+
   }
 
 
   Future<void> otpverify() async {
 
-    final prefs = await SharedPreferences.getInstance();
-    final userType = prefs.getString('user_type') ?? 'Unknown';
-    print("Retrieved user_type from SharedPreferences: $userType");
 
     setState(() {
       isLoading = true;
@@ -62,7 +61,7 @@ class _MobileOtpScreenState extends State<MobileOtpScreen> {
       controller: _controller,
       user: '',
       mobileOTP: '',
-      userType: userType
+      userType: widget.userType
     );
 
     setState(() {

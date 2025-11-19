@@ -98,6 +98,7 @@ class LoginController {
     required String onOtpReceived,
     required String onUserReceived,
     required String onMobileNoReceived,
+    required String userType
   }) async {
     final String url = '$root/login_resend_otp';
 
@@ -131,14 +132,16 @@ class LoginController {
           onOtpReceived = jsonResponse['data']['mobile_otp'].toString();
           onUserReceived = jsonResponse['data']['user'].toString();
           onMobileNoReceived = jsonResponse['data']['mobile_no'].toString();
+          final String responseUserType = jsonResponse['data']['user_type'].toString();
 
           showToast("OTP Sent Successfully");
+          print("user_Type:$responseUserType");
 
           Get.to(() =>
               MobileOtpScreen(
                 MobileOTP: onOtpReceived,
                 user: onUserReceived,
-                mobileno: onMobileNoReceived,
+                mobileno: onMobileNoReceived, userType: responseUserType,
               ));
         } else {
           showToast("User not Registered");

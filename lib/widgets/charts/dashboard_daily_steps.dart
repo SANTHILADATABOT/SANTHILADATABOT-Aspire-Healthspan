@@ -34,6 +34,8 @@ class _StepsChartState extends State<StepsChart> {
     Week_Chart(); // Fetch data on init
   }
 
+
+
   Future<void> Week_Chart() async {
     setState(() => _isLoading = true);
     final SharedPreferences prefs = await SharedPreferences.getInstance();

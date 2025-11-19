@@ -1,5 +1,7 @@
 
 import 'dart:io';
+import 'package:azpire_new/Controller/ToggleController.dart';
+import 'package:azpire_new/View/Dashboard_screen.dart';
 import 'package:azpire_new/root/root.dart';
 import 'package:azpire_new/web_app/platform_utils_stub.dart';
 import 'package:azpire_new/widgets/notifications_mobile.dart';
@@ -9,12 +11,12 @@ import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:oktoast/oktoast.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import 'package:easy_splash_screen/easy_splash_screen.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'View/login_Screen.dart';
-import 'View/bluetoothscreen.dart';
 import 'utils/appimages.dart';
 import 'utils/apptext.dart';
 import 'utils/apptextstyle.dart';
@@ -67,14 +69,14 @@ Future<void> main() async {
   runApp(
     OKToast(
       position: kIsWeb ? ToastPosition.top : ToastPosition.bottom,
-      child: MyApp(),
+      child: ChangeNotifierProvider(
+        create: (context) => ToggleService(),
+        child: MyApp(),
+      ),
     ),
   );
 
-  // Future.delayed(Duration(milliseconds: 100), () {
-  //   final splash = html.document.getElementById('splash-screen');
-  //   splash?.remove();
-  // });
+
 
 }
 
@@ -173,7 +175,7 @@ class _SplashPageState extends State<SplashPage> {
     Future.delayed(Duration(seconds: 3), () {
       if (!mounted) return;
       if (isLoggedIn) {
-        Get.offAll(() => BluetoothPair());
+        Get.offAll(() => DashboardScreen(deviceID: ''));
       } else {
         Get.offAll(() => LoginScreen());
       }
@@ -199,7 +201,7 @@ class _SplashPageState extends State<SplashPage> {
       backgroundColor: Colors.white,
       showLoader: true,
       navigator: kIsWeb
-          ? (isLoggedIn ? BluetoothPair() : LoginScreen())
+          ? (isLoggedIn ? DashboardScreen(deviceID: "") : LoginScreen())
           : null,
     );
   }

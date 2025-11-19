@@ -31,6 +31,7 @@ class _BloodOxygenChartPageState extends State<BloodOxygenChartPage>
   int? targetHigh;
 
   Future<void> Week_Chart() async {
+
     setState(() => _isLoading = true);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var user_id = prefs.getString('user_id') ?? "";
@@ -70,6 +71,8 @@ class _BloodOxygenChartPageState extends State<BloodOxygenChartPage>
     _tabController = TabController(length: 3, vsync: this);
     Week_Chart(); // Fetch data on init
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -125,6 +128,7 @@ class _BloodOxygenChartPageState extends State<BloodOxygenChartPage>
        SizedBox(height: 20,),
        Expanded(
          child: SfCartesianChart(
+
            //margin: const EdgeInsets.only(left: 10, right: 20),
            plotAreaBorderWidth: 0.0,
            backgroundColor: Color(0xFFffffff),

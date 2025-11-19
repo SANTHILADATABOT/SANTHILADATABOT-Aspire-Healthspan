@@ -3,7 +3,6 @@
 
 import 'dart:convert';
 import 'package:azpire_new/View/Dashboard_screen.dart';
-import 'package:azpire_new/View/bluetoothscreen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -204,14 +203,13 @@ class LoginOtpController {
           await prefs.setString('mobile_no', mobile_no);
           await prefs.setString('email', email);
           await prefs.setString('pofile', profile);
+          await prefs.setString('user_type', userType);
 
+          print("login_type:$userType");
 
           showToast("OTP Verified Successfully");
           controller.pause();
-
-          // Navigate to next screen
-          Get.to(() => BluetoothPair());
-          //Get.to(()=> DashboardScreen(deviceID: _registeredDevice!));
+          Get.to(()=> DashboardScreen(deviceID: ''));
         } else {
           showToast("OTP Mismatch. Please try again.");
         }

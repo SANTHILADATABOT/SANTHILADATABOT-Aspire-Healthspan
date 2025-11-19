@@ -69,7 +69,7 @@ class CustomBottomNavBar extends StatelessWidget {
                 onTap: (index) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (index == 0) {
-                      Get.to(() => DashboardScreen(deviceID:_registeredDevice ?? ''));
+                      Get.to(() => DashboardScreen(deviceID:''));
                     } else if (index == 1) {
                       Get.to(() => Notifications_Screen());
                     } else if (index == 2) {

@@ -225,8 +225,6 @@ class RegisterController {
   }) async {
     final String url = '$root/signin';
 
-    ///final String finalUserType = (userType == "Admin") ? "Admin" : "User";
-
     final Map<String, String> userData = {
       'username': username,
       'mobile_no': completePhoneNumber,
@@ -247,6 +245,10 @@ class RegisterController {
         final jsonResponse = json.decode(response.body);
 
         if (jsonResponse["status"] == "SUCCESS") {
+
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('user_type', userType);
+
           String mobileOtp = jsonResponse['data']['mobile_otp'].toString();
           showToast("OTP Sent Successfully");
 
@@ -254,6 +256,7 @@ class RegisterController {
             MobileOTP: mobileOtp,
             user: username,
             mobileno: completePhoneNumber,
+            userType: userType,
           ));
         } else {
           showToast(jsonResponse["message"] ?? "Registration failed");
@@ -266,6 +269,66 @@ class RegisterController {
       showToast("Something went wrong. Please try again.");
     }
   }
+
+  // Future<void> registerUser({
+  //   required String completePhoneNumber,
+  //   required String username,
+  //   required String email,
+  //   required String userType,
+  // }) async {
+  //   final String url = '$root/signin';
+  //
+  //   // Define your admin mobile number
+  //   final String adminMobileNumber = "+919363645727"; // Change this to your specific admin number
+  //
+  //   // Auto-detect user type based on mobile number
+  //   final String detectedUserType = completePhoneNumber == adminMobileNumber ? "Admin" : "User";
+  //
+  //   print("Mobile: $completePhoneNumber | Auto-detected User Type: $detectedUserType");
+  //
+  //   final Map<String, String> userData = {
+  //     'username': username,
+  //     'mobile_no': completePhoneNumber,
+  //     'email': email,
+  //     'user_type': detectedUserType, // Use auto-detected user type
+  //   };
+  //
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse(url),
+  //       body: userData,
+  //     );
+  //
+  //     print("Register Status Code: ${response.statusCode}");
+  //     print("Register Response: ${response.body}");
+  //
+  //     if (response.statusCode == 200) {
+  //       final jsonResponse = json.decode(response.body);
+  //
+  //       if (jsonResponse["status"] == "SUCCESS") {
+  //         final prefs = await SharedPreferences.getInstance();
+  //         await prefs.setString('user_type', detectedUserType); // Store auto-detected type
+  //
+  //         String mobileOtp = jsonResponse['data']['mobile_otp'].toString();
+  //         showToast("OTP Sent Successfully");
+  //
+  //         Get.to(() => MobileOtpScreen(
+  //           MobileOTP: mobileOtp,
+  //           user: username,
+  //           mobileno: completePhoneNumber,
+  //           userType: detectedUserType, // Pass auto-detected type
+  //         ));
+  //       } else {
+  //         showToast(jsonResponse["message"] ?? "Registration failed");
+  //       }
+  //     } else {
+  //       showToast("Server error: ${response.statusCode}");
+  //     }
+  //   } catch (e) {
+  //     print("Register Exception: $e");
+  //     showToast("Something went wrong. Please try again.");
+  //   }
+  // }
 
 
 

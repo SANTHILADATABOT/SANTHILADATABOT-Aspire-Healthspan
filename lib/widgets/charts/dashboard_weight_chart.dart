@@ -36,6 +36,7 @@ class _WeightChartPageState extends State<WeightChartPage>
 
 
   Future<void> Week_Chart() async {
+
     setState(() {
       _isLoading = true;
     });
@@ -89,6 +90,8 @@ class _WeightChartPageState extends State<WeightChartPage>
     _tabController = TabController(length: 3, vsync: this);
     Week_Chart();
   }
+
+
 
   @override
   Widget build(BuildContext context) {

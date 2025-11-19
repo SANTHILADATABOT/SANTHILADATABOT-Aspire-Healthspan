@@ -92,7 +92,7 @@ bool is_loading = false;
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        Get.to(() => DashboardScreen(deviceID:_registeredDevice!));
+        Get.to(() => DashboardScreen(deviceID:''));
         return true;
       },
       child: Scaffold(
@@ -107,7 +107,7 @@ bool is_loading = false;
           leading: IconButton(
             icon: Icon(Icons.arrow_back_ios),
             onPressed: () {
-              Get.to(() => DashboardScreen(deviceID: _registeredDevice ?? ''));
+              Get.to(() => DashboardScreen(deviceID: ''));
             },
           ),
         ),

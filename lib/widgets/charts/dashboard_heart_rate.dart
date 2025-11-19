@@ -34,6 +34,7 @@ class _HeartRateChartPageState extends State<HeartRateChartPage>
   String? mainDate;
   final HeartRatecontroller _Heartratecontroller = Get.put(HeartRatecontroller());
   Future<void> Week_Chart() async {
+
     setState(() => _isLoading = true);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var user_id = prefs.getString('user_id') ?? "";
@@ -66,6 +67,8 @@ class _HeartRateChartPageState extends State<HeartRateChartPage>
     _tabController = TabController(length: 3, vsync: this);
     Week_Chart(); // Fetch data on init
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -120,6 +123,7 @@ class _HeartRateChartPageState extends State<HeartRateChartPage>
       height: portraitHeight * 0.28,
       // padding: EdgeInsets.all(8),
       child: SfCartesianChart(
+
         plotAreaBorderWidth: 0.0,
         backgroundColor: Color(0xFFffffff),
         tooltipBehavior: TooltipBehavior(

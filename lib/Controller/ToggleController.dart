@@ -1,95 +1,219 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import '../Model/Togglemodel.dart';
-import '../root/root.dart';
+// toggle_service.dart
+import 'package:azpire_new/Controller/AdminController.dart';
+import 'package:flutter/foundation.dart';
 
-// class ToggleStatusController {
-//  // final String _baseUrl = "https://app.aspirehealthspan.ai/aspire_api/";
+// class ToggleService with ChangeNotifier {
+//   static final ToggleService _instance = ToggleService._internal();
+//   factory ToggleService() => _instance;
+//   ToggleService._internal();
 //
-//   Future<ToggleStatusModel?> updateToggleStatus({
-//     required String tableType,
-//     required String toggleStatus,
-//   }) async {
-//     final Uri url = Uri.parse("$root/toggle_status");
+//   final AdminController _adminController = AdminController();
 //
+//   bool _showBloodPressure = true;
+//   bool _showHeartRate = true;
+//   bool _showSteps = true;
+//   bool _showSleep = true;
+//   bool _showSpo2 = true;
+//   bool _showWeight = true;
+//
+//   // Getters
+//   bool get showBloodPressure => _showBloodPressure;
+//   bool get showHeartRate => _showHeartRate;
+//   bool get showSteps => _showSteps;
+//   bool get showSleep => _showSleep;
+//   bool get showSpo2 => _showSpo2;
+//   bool get showWeight => _showWeight;
+//
+//   // Load toggle states from API
+//   Future<void> loadToggleStates() async {
 //     try {
-//       final response = await http.post(
-//         url,
-//         headers: {"Content-Type": "application/json"},
-//         body: jsonEncode({
-//           "table_type": tableType,
-//           "toggle_status": toggleStatus,
-//         }),
-//       );
+//       final result = await _adminController.fetchAllToggles();
 //
-//       print("togggle:${response.body}");
+//       if (result != null && result.data.isNotEmpty) {
+//         for (final toggle in result.data) {
+//           final isOn = toggle.toggleStatus.toUpperCase() == "ON";
 //
-//       if (response.statusCode == 200) {
-//         print("togglevalues:${response.body}");
-//         final data = jsonDecode(response.body);
-//         return ToggleStatusModel.fromJson(data);
-//       } else {
-//         print("Server Error: ${response.statusCode}");
-//         return null;
+//           switch (toggle.tableType) {
+//             case "BloodPressure":
+//               _showBloodPressure = isOn;
+//               break;
+//             case "HeartRate":
+//               _showHeartRate = isOn;
+//               break;
+//             case "Steps":
+//               _showSteps = isOn;
+//               break;
+//             case "Sleep":
+//               _showSleep = isOn;
+//               break;
+//             case "Spo2":
+//               _showSpo2 = isOn;
+//               break;
+//             case "Weight":
+//               _showWeight = isOn;
+//               break;
+//           }
+//         }
+//         notifyListeners();
 //       }
 //     } catch (e) {
-//       print("Error updating status: $e");
-//       return null;
+//       print("Error loading toggle states: $e");
 //     }
+//   }
+//
+//   // Update toggle states (used by AdminScreen)
+//   void updateToggleStates({
+//     bool? bloodPressure,
+//     bool? heartRate,
+//     bool? steps,
+//     bool? sleep,
+//     bool? spo2,
+//     bool? weight,
+//   }) {
+//     _showBloodPressure = bloodPressure ?? _showBloodPressure;
+//     _showHeartRate = heartRate ?? _showHeartRate;
+//     _showSteps = steps ?? _showSteps;
+//     _showSleep = sleep ?? _showSleep;
+//     _showSpo2 = spo2 ?? _showSpo2;
+//     _showWeight = weight ?? _showWeight;
+//     notifyListeners();
 //   }
 // }
 
 
-class ToggleStatusController {
-  final String root = "https://app.aspirehealthspan.ai/aspire_api";
+class ToggleService with ChangeNotifier {
+  // Remove the singleton pattern and use Provider properly
+  ToggleService() {
+    _initializeToggles();
+  }
 
-  Future<ToggleStatusModel?> updateOrFetchStatus({
-    required String tableType,
-    String? toggleStatus, // null = fetch mode
-  }) async {
-    final Uri url = Uri.parse("$root/toggle_status");
+  final AdminController _adminController = AdminController();
 
+  bool _showBloodPressure = true;
+  bool _showHeartRate = true;
+  bool _showSteps = true;
+  bool _showSleep = true;
+  bool _showSpo2 = true;
+  bool _showWeight = true;
+
+  // Getters
+  bool get showBloodPressure => _showBloodPressure;
+  bool get showHeartRate => _showHeartRate;
+  bool get showSteps => _showSteps;
+  bool get showSleep => _showSleep;
+  bool get showSpo2 => _showSpo2;
+  bool get showWeight => _showWeight;
+
+  Future<void> _initializeToggles() async {
+    await loadToggleStates();
+  }
+
+  // Load toggle states from API
+  Future<void> loadToggleStates() async {
     try {
-      // Build body dynamically
-      final Map<String, dynamic> body = {
-        "table_type": tableType,
-      };
+      final result = await _adminController.fetchAllToggles();
 
-      if (toggleStatus != null &&
-          (toggleStatus.toUpperCase() == "ON" || toggleStatus.toUpperCase() == "OFF")) {
-        body["toggle_status"] = toggleStatus;
-      }
+      if (result != null && result.data.isNotEmpty) {
+        bool changed = false;
 
-      print("📤 Sending body for $tableType → $body");
+        for (final toggle in result.data) {
+          final isOn = toggle.toggleStatus.toUpperCase() == "ON";
 
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(body),
-      );
-
-      print("🔄 API Response ($tableType): ${response.body}");
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data["status"] == "SUCCESS") {
-          return ToggleStatusModel.fromJson(data);
-        } else {
-          print("⚠️ ${data["message"]}");
+          switch (toggle.tableType) {
+            case "BloodPressure":
+              if (_showBloodPressure != isOn) {
+                _showBloodPressure = isOn;
+                changed = true;
+              }
+              break;
+            case "HeartRate":
+              if (_showHeartRate != isOn) {
+                _showHeartRate = isOn;
+                changed = true;
+              }
+              break;
+            case "Steps":
+              if (_showSteps != isOn) {
+                _showSteps = isOn;
+                changed = true;
+              }
+              break;
+            case "Sleep":
+              if (_showSleep != isOn) {
+                _showSleep = isOn;
+                changed = true;
+              }
+              break;
+            case "Spo2":
+              if (_showSpo2 != isOn) {
+                _showSpo2 = isOn;
+                changed = true;
+              }
+              break;
+            case "Weight":
+              if (_showWeight != isOn) {
+                _showWeight = isOn;
+                changed = true;
+              }
+              break;
+          }
         }
-      } else {
-        print("❌ HTTP ${response.statusCode}");
+
+        if (changed) {
+          notifyListeners();
+          print("Toggle states updated and listeners notified");
+        }
       }
-      return null;
     } catch (e) {
-      print("⚠️ Error for $tableType: $e");
-      return null;
+      print("Error loading toggle states: $e");
+    }
+  }
+
+  // Update toggle states (used by AdminScreen)
+  void updateToggleStates({
+    bool? bloodPressure,
+    bool? heartRate,
+    bool? steps,
+    bool? sleep,
+    bool? spo2,
+    bool? weight,
+  }) {
+    bool changed = false;
+
+    if (bloodPressure != null && _showBloodPressure != bloodPressure) {
+      _showBloodPressure = bloodPressure;
+      changed = true;
+      print("Blood Pressure updated to: $bloodPressure");
+    }
+    if (heartRate != null && _showHeartRate != heartRate) {
+      _showHeartRate = heartRate;
+      changed = true;
+      print("Heart Rate updated to: $heartRate");
+    }
+    if (steps != null && _showSteps != steps) {
+      _showSteps = steps;
+      changed = true;
+      print("Steps updated to: $steps");
+    }
+    if (sleep != null && _showSleep != sleep) {
+      _showSleep = sleep;
+      changed = true;
+      print("Sleep updated to: $sleep");
+    }
+    if (spo2 != null && _showSpo2 != spo2) {
+      _showSpo2 = spo2;
+      changed = true;
+      print("SpO2 updated to: $spo2");
+    }
+    if (weight != null && _showWeight != weight) {
+      _showWeight = weight;
+      changed = true;
+      print("Weight updated to: $weight");
+    }
+
+    if (changed) {
+      print("ToggleService: Notifying listeners about changes");
+      notifyListeners();
     }
   }
 }
-
-
-
-
-
-
