@@ -49,6 +49,12 @@
 	<string>We need access to your photo library so you can select and upload a profile picture to personalize your Aspire Healthspan account.</string>
 	<key>NSUserNotificationUsageDescription</key>
 	<string>This app requires notification access to alert you.</string>
+	<key>NSHealthShareUsageDescription</key>
+    <string>Aspire Healthspan requires access to your Health data so we can read steps, activity, heart rate, and other metrics to provide accurate health insights.</string>
+    <key>NSHealthUpdateUsageDescription</key>
+    <string>Aspire Healthspan requires permission to update your Health data to help log your wellness activities and keep your records up to date.</string>
+    <key>NSMotionUsageDescription</key>
+    <string>Aspire Healthspan uses motion data to track your physical activity and provide activity-related insights.</string>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>Your description here</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

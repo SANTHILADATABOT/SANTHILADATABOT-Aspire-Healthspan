@@ -12,6 +12,7 @@ import 'package:azpire_new/View/blood_oxygenpressure.dart';
 import 'package:azpire_new/View/blood_pressure.dart';
 import 'package:azpire_new/View/profile.dart';
 import 'package:azpire_new/View/weight.dart';
+import 'package:azpire_new/healthkit/HealthKit.dart';
 import 'package:azpire_new/utils/app_color.dart';
 import 'package:azpire_new/utils/appimages.dart';
 import 'package:azpire_new/utils/apptextstyle.dart';
@@ -103,6 +104,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     loaddata();
     _loadNotificationCount();
     _startToggleAutoRefresh();
+    _initHealthKit();
   }
 
   @override
@@ -110,6 +112,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.dispose();
     _toggleRefreshTimer?.cancel();
   }
+
+  Future<void> _initHealthKit() async {
+    try {
+      final hk = HealthKitService();
+
+      print("Requesting HealthKit Permission...");
+      await hk.requestAuthorization();
+
+      print("Fetching Heart Rate...");
+      final List<Map<String, dynamic>> hr = await hk.fetchHeartRate();
+
+      print("Heart Rate from HealthKit: $hr");
+
+      if (mounted && hr != null) {
+        setState(() {
+          heartRate = hr.toString(); // update UI
+        });
+      }
+    } catch (e) {
+      print("HealthKit error: $e");
+    }
+  }
+
 
   Future<void> loadDashboardData() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();

@@ -12,6 +12,7 @@
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		68924824B81A7392E3125AC2 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E3E44D2E6A928F283660E1D /* Pods_RunnerTests.framework */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
+		8AD5AC852ECF0AFB006A8357 /* HealthKitBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD5AC842ECF0AF8006A8357 /* HealthKitBridge.swift */; };
 		8ADDCE012D03046700C4F9A0 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8ADDCE002D03046700C4F9A0 /* GoogleService-Info.plist */; };
 		91FC083FE0BCD94397E5D6EE /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ECA31F96E2C2FF7943A6FB0D /* Pods_Runner.framework */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
@@ -56,6 +57,7 @@
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
+		8AD5AC842ECF0AF8006A8357 /* HealthKitBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitBridge.swift; sourceTree = "<group>"; };
 		8ADDCE002D03046700C4F9A0 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		8AFA11372CD8C55D00800483 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
@@ -146,6 +148,7 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				8AD5AC842ECF0AF8006A8357 /* HealthKitBridge.swift */,
 				8ADDCE002D03046700C4F9A0 /* GoogleService-Info.plist */,
 				8AFA11372CD8C55D00800483 /* Runner.entitlements */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
@@ -405,6 +408,7 @@
 			files = (
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
+				8AD5AC852ECF0AFB006A8357 /* HealthKitBridge.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -501,11 +505,11 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12.3;
+				CURRENT_PROJECT_VERSION = 12.4;
 				DEVELOPMENT_TEAM = J66P36JNBL;
 				ENABLE_BITCODE = NO;
 				FLUTTER_BUILD_NAME = 12;
-				FLUTTER_BUILD_NUMBER = 12.3;
+				FLUTTER_BUILD_NUMBER = 12.4;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Aspire Healthspan";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
@@ -717,11 +721,11 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12.3;
+				CURRENT_PROJECT_VERSION = 12.4;
 				DEVELOPMENT_TEAM = J66P36JNBL;
 				ENABLE_BITCODE = NO;
 				FLUTTER_BUILD_NAME = 12;
-				FLUTTER_BUILD_NUMBER = 12.3;
+				FLUTTER_BUILD_NUMBER = 12.4;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Aspire Healthspan";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
@@ -756,11 +760,11 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12.3;
+				CURRENT_PROJECT_VERSION = 12.4;
 				DEVELOPMENT_TEAM = J66P36JNBL;
 				ENABLE_BITCODE = NO;
 				FLUTTER_BUILD_NAME = 12;
-				FLUTTER_BUILD_NUMBER = 12.3;
+				FLUTTER_BUILD_NUMBER = 12.4;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Aspire Healthspan";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
