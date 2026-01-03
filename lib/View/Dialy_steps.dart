@@ -796,7 +796,11 @@ class _StepsChartPageState extends State<StepsChartPage>
                                 isyears: true
 
                             ),
-
+                  SizedBox(height: 5,),
+                  Align(
+                      alignment: Alignment.center,
+                      child:
+                      Text("Touch the Bar for more details",style: Apptextstyle.s13wbcB,)),
                   SizedBox(height: 20,),
                   stespsvalue == null ?
                   Padding(

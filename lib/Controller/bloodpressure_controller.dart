@@ -1,10 +1,15 @@
 
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:aspire/Model/bloodpressure_model.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:aspire/root/root.dart';
 import 'package:intl/intl.dart';
+import 'package:oktoast/oktoast.dart';
+import 'package:flutter/foundation.dart'; // for kIsWeb
 
  class BloodPressureController extends GetxController  {
 
@@ -24,7 +29,14 @@ import 'package:intl/intl.dart';
       final response = await http.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(payload),
+        body: jsonEncode(payload))
+          .timeout(Duration(seconds: 10),
+        onTimeout: () {
+          // Just show toast, no need to throw
+         // showCustomToast("Time Out");
+          // Return a dummy response so code continues
+          throw TimeoutException("Request Timeout");
+        },
       );
 
       if (response.statusCode == 200) {
@@ -101,6 +113,15 @@ import 'package:intl/intl.dart';
         throw Exception('Failed Day Chart: ${response.statusCode}');
       }
     } catch (e) {
+      if (e is TimeoutException) {
+        showCustomToast("Timed Out");
+      }
+      else if (e is SocketException) {
+        showCustomToast("No Internet Connection");
+      }
+      else {
+        showCustomToast("Something went wrong. Please try again.");
+      }
       print('Error fetching Day Chart: $e');
       rethrow;
     }
@@ -123,7 +144,14 @@ import 'package:intl/intl.dart';
       final response = await http.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(payload),
+        body: jsonEncode(payload))
+          .timeout(Duration(seconds: 10),
+        onTimeout: () {
+          // Just show toast, no need to throw
+         // showCustomToast("Time Out");
+          // Return a dummy response so code continues
+          throw TimeoutException("Request Timeout");
+        },
       );
 
 
@@ -208,6 +236,15 @@ import 'package:intl/intl.dart';
         throw Exception('Failed to load data. Status code: ${response.statusCode}');
       }
     } catch (e) {
+      if (e is TimeoutException) {
+        showCustomToast("Timed Out");
+      }
+      else if (e is SocketException) {
+        showCustomToast("No Internet Connection");
+      }
+      else {
+        showCustomToast("Something went wrong. Please try again.");
+      }
       print('Error fetching weekly BP data: $e');
       rethrow;
     }
@@ -227,7 +264,14 @@ import 'package:intl/intl.dart';
       final response = await http.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(payload),
+        body: jsonEncode(payload))
+          .timeout(Duration(seconds: 10),
+        onTimeout: () {
+          // Just show toast, no need to throw
+          //showCustomToast("Time Out");
+          // Return a dummy response so code continues
+          throw TimeoutException("Request Timeout");
+        },
       );
 
       if (response.statusCode == 200) {
@@ -309,6 +353,15 @@ import 'package:intl/intl.dart';
         throw Exception('Failed to load data. Status code: ${response.statusCode}');
       }
     } catch (e) {
+      if (e is TimeoutException) {
+        showCustomToast("Timed Out");
+      }
+      else if (e is SocketException) {
+        showCustomToast("No Internet Connection");
+      }
+      else {
+        showCustomToast("Something went wrong. Please try again.");
+      }
       print('Error fetching monthly BP data: $e');
       rethrow;
     }
@@ -328,7 +381,14 @@ import 'package:intl/intl.dart';
       final response = await http.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(payload),
+        body: jsonEncode(payload))
+          .timeout(Duration(seconds: 10),
+        onTimeout: () {
+          // Just show toast, no need to throw
+          showCustomToast("Time Out");
+          // Return a dummy response so code continues
+          throw TimeoutException("Request Timeout");
+        },
       );
 
       if (response.statusCode == 200) {
@@ -392,6 +452,15 @@ import 'package:intl/intl.dart';
         throw Exception('Failed to load data. Status code: ${response.statusCode}');
       }
     } catch (e) {
+      if (e is TimeoutException) {
+        showCustomToast("Timed Out");
+      }
+      else if (e is SocketException) {
+        showCustomToast("No Internet Connection");
+      }
+      else {
+        showCustomToast("Something went wrong. Please try again.");
+      }
       print('Error fetching yearly BP data: $e');
       rethrow;
     }
@@ -415,7 +484,14 @@ import 'package:intl/intl.dart';
       final response = await http.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(payload),
+        body: jsonEncode(payload))
+          .timeout(Duration(seconds: 10),
+        onTimeout: () {
+          // Just show toast, no need to throw
+          //showCustomToast("Time Out");
+          // Return a dummy response so code continues
+          throw TimeoutException("Request Timeout");
+        },
       );
 
       print('Response Body: ${response.body}');
@@ -491,104 +567,54 @@ import 'package:intl/intl.dart';
         throw Exception('Failed to load data. Status code: ${response.statusCode}');
       }
     } catch (e) {
+      if (e is TimeoutException) {
+        showCustomToast("Timed Out");
+      }
+      else if (e is SocketException) {
+        showCustomToast("No Internet Connection");
+      }
+      else {
+        showCustomToast("Something went wrong. Please try again.");
+      }
       print('Error fetching multi-year BP data: $e');
       rethrow;
     }
   }
 
-  // Future<Map<String, dynamic>> MultiYear_Chart(String userId, int fromYear, int fromMonth, int toYear, int toMonth) async {
-  //   final String url = '$root/get_multiyear_bp_data';
-  //   print("URL: $url");
-  //
-  //   final Map<String, dynamic> payload = {
-  //     'user_id': userId,
-  //     'from_year': '${fromYear.toString()}-${fromMonth.toString().padLeft(2, '0')}',
-  //     'to_year': '${toYear.toString()}-${toMonth.toString().padLeft(2, '0')}',
-  //   };
-  //
-  //   print("Request Payload: $payload");
-  //
-  //   try {
-  //     final response = await http.post(
-  //       Uri.parse(url),
-  //       headers: {'Content-Type': 'application/json'},
-  //       body: jsonEncode(payload),
-  //     );
-  //
-  //     print('Response Body: ${response.body}');
-  //
-  //     if (response.statusCode == 200) {
-  //       final Map<String, dynamic> jsonResponse = json.decode(response.body);
-  //       print('MultiYear Response: $jsonResponse');
-  //
-  //       if (jsonResponse['status'] == "SUCCESS") {
-  //         final Map<String, dynamic> multiYearData = jsonResponse['multiyear_bp_data'] ?? {};
-  //         List<BloodPressureData> chartData = [];
-  //
-  //         int targetSystolic = jsonResponse['target_systolic_bp'] ?? 120;
-  //         int targetDiastolic = jsonResponse['target_diastolic_bp'] ?? 80;
-  //         final String? recentDate = jsonResponse['recent_datetime']?.toString();
-  //
-  //         // Initialize for last processed values
-  //         double systolicAvg = 0.0;
-  //         double diastolicAvg = 0.0;
-  //         double systolicSdHigh = 0.0;
-  //         double systolicSdLow = 0.0;
-  //         double diastolicSdHigh = 0.0;
-  //         double diastolicSdLow = 0.0;
-  //
-  //         List<String> sortedYears = multiYearData.keys.toList()..sort();
-  //
-  //         for (String yearKey in sortedYears) {
-  //           var data = multiYearData[yearKey];
-  //
-  //           systolicAvg = data?['average_systolic']?.toDouble() ?? 0;
-  //           diastolicAvg = data?['average_diastolic']?.toDouble() ?? 0;
-  //           systolicSdHigh = (data['systolic_sd_high'] as num?)?.toDouble() ?? 0.0;
-  //           systolicSdLow = (data['systolic_sd_low'] as num?)?.toDouble() ?? 0.0;
-  //           diastolicSdHigh = (data['diastolic_sd_high'] as num?)?.toDouble() ?? 0.0;
-  //           diastolicSdLow = (data['diastolic_sd_low'] as num?)?.toDouble() ?? 0.0;
-  //
-  //           chartData.add(BloodPressureData(
-  //             date: DateTime(int.parse(yearKey)),
-  //             systolic: systolicAvg.round(),
-  //             diastolic: diastolicAvg.round(),
-  //             day: '',
-  //             months: '',
-  //             Year: yearKey,
-  //             targetSystolic: targetSystolic,
-  //             targetDiastolic: targetDiastolic,
-  //             diastolic_sd_high: diastolicSdHigh,
-  //             diastolic_sd_low: diastolicSdLow,
-  //             systolic_sd_high: systolicSdHigh,
-  //             systolic_sd_low: systolicSdLow,
-  //           ));
-  //         }
-  //
-  //         return {
-  //           'chartData': chartData,
-  //           'targetSystolic': targetSystolic,
-  //           'targetDiastolic': targetDiastolic,
-  //           'mainDate': '${jsonResponse['from_year']} to ${jsonResponse['to_year']}',
-  //           'recent_datetime': recentDate,
-  //           'weekBpSystolic': systolicAvg.round(),
-  //           'weekBpDiastolic': diastolicAvg.round(),
-  //           'systolic_sd_high': systolicSdHigh,
-  //           'systolic_sd_low': systolicSdLow,
-  //           'diastolic_sd_high': diastolicSdHigh,
-  //           'diastolic_sd_low': diastolicSdLow,
-  //         };
-  //       } else {
-  //         throw Exception('API Error: ${jsonResponse['error'] ?? jsonResponse['message']}');
-  //       }
-  //     } else {
-  //       throw Exception('Failed to load data. Status code: ${response.statusCode}');
-  //     }
-  //   } catch (e) {
-  //     print('Error fetching multi-year BP data: $e');
-  //     rethrow;
-  //   }
-  // }
+  void showCustomToast(String msg) {
+    showToast(
+      msg,
+      duration: Duration(seconds: 2),
+      position: kIsWeb ? ToastPosition.top : ToastPosition.bottom,
+      backgroundColor: Colors.black,
+      radius: 8.0,
+      textPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+      textStyle: TextStyle(
+        fontSize: 16.0,
+        color: Colors.white,
+      ),
+      textAlign: TextAlign.center,
+      animationCurve: kIsWeb ? Curves.easeInOut : Curves.easeIn,
+      animationDuration: const Duration(milliseconds: 400),
+      animationBuilder: kIsWeb ? _slideFromRight : null,
+    );
+  }
+
+  Widget _slideFromRight(BuildContext context,
+      Widget child,
+      AnimationController controller,
+      double percent,) {
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: Offset(1.2, 0.0), // far right
+        end: Offset(-1.2, 0.0), // f // Slide to original position
+      ).animate(CurvedAnimation(
+        parent: controller,
+        curve: Curves.easeInOut,
+      )),
+      child: child,
+    );
+  }
 
 
 

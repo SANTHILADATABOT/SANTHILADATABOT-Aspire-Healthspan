@@ -73,6 +73,8 @@ dependencies:
   percent_indicator: ^4.2.5
   cached_network_image: ^3.4.1
   precached_network_image: ^1.2.4
+  dio: ^5.9.0
+  http_certificate_pinning: ^3.0.1
 
 
 

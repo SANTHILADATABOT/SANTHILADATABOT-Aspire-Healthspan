@@ -20,7 +20,9 @@ class MobileOtpScreen extends StatefulWidget {
   final String MobileOTP;
   final String mobileno;
   final String user;
-  MobileOtpScreen({super.key, required this.MobileOTP, required this.user, required this.mobileno});
+  final String userType;
+  MobileOtpScreen({super.key, required this.MobileOTP, required this.user, required this.mobileno,
+    required this.userType});
 
   @override
   State<MobileOtpScreen> createState() => _MobileOtpScreenState();
@@ -41,6 +43,7 @@ class _MobileOtpScreenState extends State<MobileOtpScreen> {
   void initState(){
     print("User: ${widget.user}");
     print("mobileno: ${widget.mobileno}");
+    print("User Type_login: ${widget.userType}");
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (kIsWeb) {
         _focusNode.requestFocus();
@@ -62,22 +65,29 @@ class _MobileOtpScreenState extends State<MobileOtpScreen> {
 
   Future<void> otpverify() async {
 
+    // final prefs = await SharedPreferences.getInstance();
+    // final userType = prefs.getString('user_type') ?? 'Unknown';
+    // print("Retrieved user_type : $userType");
+
+
 
     setState(() {
       isLoading = true;
     });
 
     await otpController.otpVerify(
-     //context: context,
+      //context: context,
       //setState: setState,
-      enteredOtp: enteredOtp,
-      newOtp: newotp,
-      user: widget.user,
-      mobileno: widget.mobileno,
-      mobileOTP: widget.MobileOTP,
-     // setLoading: (value) => setState(() => isLoading = value),
-      controller: _controller,
+        enteredOtp: enteredOtp,
+        newOtp: newotp,
+        user: widget.user,
+        mobileno: widget.mobileno,
+        mobileOTP: widget.MobileOTP,
+        // setLoading: (value) => setState(() => isLoading = value),
+        controller: _controller,
+        userType: widget.userType
     );
+
 
 
     setState(() {

@@ -35,23 +35,26 @@ class _SignupScreenState extends State<SignupScreen> {
   bool isLoading = false;
   String? completePhoneNumber = '';
   bool _isPhoneValid = true;
+  bool isAdmin = true; // change to false for User
 
   Future<void> registerUser() async {
     print("usernameController: ${_usernameController.text}");
     print("emailController: ${_emailController.text}");
     print("completePhoneNumber: $completePhoneNumber");
 
-    try{
+    final userType = isAdmin ? "Admin" : "User";
+    print("Selected userType: $userType");
 
-      if (!_isPhoneValid || completePhoneNumber == null
-          || completePhoneNumber!.isEmpty) {
+    try {
+      if (!_isPhoneValid || completePhoneNumber == null || completePhoneNumber!.isEmpty) {
         setState(() {
-          _isPhoneValid = false; // ✅ Force error display
+          _isPhoneValid = false;
         });
         return;
       }
 
       setState(() {
+
         isLoading = true;
       });
 
@@ -59,17 +62,18 @@ class _SignupScreenState extends State<SignupScreen> {
         username: _usernameController.text,
         email: _emailController.text,
         completePhoneNumber: completePhoneNumber.toString(),
+        userType: userType,
       );
-    }
-    catch(e){
-      print("signup error:$e");
-    }
-    finally{
+
+
+
+    } catch (e) {
+      print("signup error: $e");
+    } finally {
       setState(() {
         isLoading = false;
       });
     }
-
   }
 
 

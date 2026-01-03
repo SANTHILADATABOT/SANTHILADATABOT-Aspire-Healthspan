@@ -869,6 +869,11 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
                           ),
                         ],
                       ),
+              SizedBox(height: 5,),
+              Align(
+                  alignment: Alignment.center,
+                  child:
+                  Text("Touch the bubble for more details",style: Apptextstyle.s13wbcB,)),
               SizedBox(height: 30),
               Padding(
                 padding: EdgeInsets.only(left: 20, right: 10),

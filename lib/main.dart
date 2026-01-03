@@ -295,6 +295,7 @@
 //
 
 import 'dart:io';
+import 'package:aspire/Controller/ToggleController.dart';
 import 'package:aspire/web_app/platform_utils_io.dart';
 import 'package:aspire/widgets/notifications_mobile.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -304,6 +305,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:oktoast/oktoast.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import 'package:easy_splash_screen/easy_splash_screen.dart';
@@ -448,6 +450,19 @@ import 'utils/apptextstyle.dart';
 //   }
 // }
 
+// class IPv4HttpOverrides extends HttpOverrides {
+//   @override
+//   HttpClient createHttpClient(SecurityContext? context) {
+//     final client = super.createHttpClient(context);
+//
+//     client.connectionTimeout = const Duration(seconds: 15);
+//
+//     // IMPORTANT: do NOT disable certificate validation
+//     client.badCertificateCallback = null;
+//
+//     return client;
+//   }
+// }
 
 
 
@@ -464,6 +479,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+ //HttpOverrides.global = MyHttpOverrides();
 
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
@@ -499,10 +516,16 @@ Future<void> main() async {
   await Hive.openBox('minuteDataBox');
   Hive.registerAdapter(MinuteDataAdapter());
 
+  //HttpOverrides.global = IPv4HttpOverrides();
+
   runApp(
+
     OKToast(
       position: kIsWeb ? ToastPosition.top : ToastPosition.bottom,
-      child: MyApp(),
+      child: ChangeNotifierProvider(
+        create: (context) => ToggleService(),
+        child: MyApp(),
+      ),
     ),
   );
 
@@ -512,6 +535,8 @@ Future<void> main() async {
   // });
 
 }
+
+
 
 class MyApp extends StatelessWidget {
   @override
@@ -659,11 +684,12 @@ class _SplashPageState extends State<SplashPage> {
             Get.offAll(() => DashboardScreen(deviceID: _registeredDevice!));
           }
         });
-      } else {
-        // No device found → go to BluetoothPair after 3 sec
-        Future.delayed(const Duration(seconds: 3), () {
-          if (mounted) Get.offAll(() => BluetoothPair());
-        });
+        // } else {
+        //   // No device found → go to BluetoothPair after 3 sec
+        //   Future.delayed(const Duration(seconds: 3), () {
+        //     if (mounted) Get.offAll(() => BluetoothPair());
+        //   });
+        // }
       }
     } on PlatformException catch (e) {
       print("Failed to get last active device: ${e.message}");
@@ -701,4 +727,12 @@ class _SplashPageState extends State<SplashPage> {
   }
 }
 
-
+// class MyHttpOverrides extends HttpOverrides {
+//   @override
+//   HttpClient createHttpClient(SecurityContext? context) {
+//     return super.createHttpClient(context)
+//       ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;}
+// // print('🔓 Bypassing SSL for: $host:$port');
+// // return host.contains('aspirehealthspan.ai'); // Only your domain
+//
+// }

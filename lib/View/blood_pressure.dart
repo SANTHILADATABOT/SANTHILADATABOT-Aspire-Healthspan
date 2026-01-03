@@ -800,6 +800,12 @@ class _BloodPressureChartPageState extends State<BloodPressureChartPage>
                                   title: 'Avg Yearly Blood Pressure',
                                   isMonth: false
                               ),
+
+                  SizedBox(height: 5,),
+                  Align(
+                      alignment: Alignment.center,
+                      child:
+                      Text("Touch the bubble for more details",style: Apptextstyle.s13wbcB,)),
                   SizedBox(
                     height: 30,
                   ),

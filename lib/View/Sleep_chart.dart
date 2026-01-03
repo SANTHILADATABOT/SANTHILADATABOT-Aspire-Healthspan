@@ -1098,6 +1098,11 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                     xAxisInterval: 1,
                       isyears: true
                   ),
+                  SizedBox(height: 5,),
+                  Align(
+                      alignment: Alignment.center,
+                      child:
+                      Text("Touch the Bar for more details",style: Apptextstyle.s13wbcB,)),
                       SizedBox(height: 20,),
                       deepPercentage == null ?
                       Padding(

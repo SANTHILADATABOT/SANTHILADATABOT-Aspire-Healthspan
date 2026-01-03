@@ -35,29 +35,61 @@ class _EmailScreenState extends State<EmailScreen> {
   final EmailLoginController _controller = EmailLoginController();
    final _formKey = GlobalKey<FormState>();
 
+  // Future<void> emaillogin() async {
+  //   setState(() {
+  //     isLoading = true;
+  //   });
+  //
+  //   final result = await _controller.emailLogin(emailcontroller.text);
+  //
+  //   if (result['success']) {
+  //     final emailOtp = result['data']['email_otp'].toString();
+  //     final email = result['data']["email"];
+  //     showCustomToast(result['message']);
+  //     Get.to(() => VerificationOtpScreen(
+  //       email: email!,
+  //       emailOtp: emailOtp,
+  //     ));
+  //   } else {
+  //     showCustomToast(result['message']);
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //   }
+  // }
+
   Future<void> emaillogin() async {
     setState(() {
       isLoading = true;
     });
 
-    final result = await _controller.emailLogin(emailcontroller.text);
+    try {
+      final result = await _controller.emailLogin(emailcontroller.text);
 
-    if (result['success']) {
-      final emailOtp = result['data']['email_otp'].toString();
-      final email = result['data']["email"];
-      showCustomToast(result['message']);
-      Get.to(() => VerificationOtpScreen(
-        email: email!,
-        emailOtp: emailOtp,
-      ));
-    } else {
-      showCustomToast(result['message']);
+      if (result['success'] == true) {
+        final emailOtp = result['data']['email_otp'].toString();
+        final String email = result['data']['email'];
+
+        showCustomToast(result['message']);
+
+        Get.to(() => VerificationOtpScreen(
+          email: email,
+          emailOtp: emailOtp,
+        ));
+      } else {
+        showCustomToast(result['message']);
+      }
+    } catch (e) {
+      // Handle API / network / unexpected errors
+      showCustomToast('Something went wrong. Please try again.');
+      debugPrint('Email login error: $e');
+    } finally {
+      // Always stop loading
       setState(() {
         isLoading = false;
       });
     }
   }
-
 
 
 
@@ -105,12 +137,11 @@ class _EmailScreenState extends State<EmailScreen> {
                  SizedBox(height: 60,),
                  Padding(
                      padding: EdgeInsets.symmetric(horizontal: 20),
-                     child:MyButton(press: (){
-
+                     child:isLoading == false ?MyButton(press: (){
                      if (_formKey.currentState!.validate()) {
                        emaillogin();
                      }
-                     }, text: AppText.emailsendotp)
+                     }, text: AppText.emailsendotp):Center(child: CircularProgressIndicator())
                  )
                ],
              ),

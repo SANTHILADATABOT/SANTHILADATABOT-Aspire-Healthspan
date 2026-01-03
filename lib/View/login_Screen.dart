@@ -92,6 +92,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> login() async {
 
+    final prefs = await SharedPreferences.getInstance();
+    final userType = prefs.getString('user_type') ?? 'Unknown';
+    print("Retrieved user_type from SharedPreferences: $userType");
+
     if (!_isPhoneValid || completePhoneNumber == null || completePhoneNumber!.isEmpty) {
       setState(() {
         _isPhoneValid = false; // ✅ Force error display
@@ -100,9 +104,9 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     if(mounted)
-    setState(() {
-      isLoading = true;
-    });
+      setState(() {
+        isLoading = true;
+      });
 
     try {
       await _controller.login(
@@ -111,6 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
         onOtpReceived: MobileOTP.toString(),
         onUserReceived: user.toString(),
         onMobileNoReceived: mobileno.toString(),
+        userType: userType,
       );
 
     } catch (e) {

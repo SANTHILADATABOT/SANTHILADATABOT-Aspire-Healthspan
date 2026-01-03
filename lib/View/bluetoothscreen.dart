@@ -34,7 +34,6 @@ class _BluetoothPairState extends State<BluetoothPair> {
     _startScanning();
     super.initState();
 
-
   }
 
 
@@ -241,3 +240,4 @@ class _BluetoothPairState extends State<BluetoothPair> {
     );
   }
 }
+

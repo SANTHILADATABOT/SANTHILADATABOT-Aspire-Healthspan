@@ -19,7 +19,8 @@ class MobileOtpScreen extends StatefulWidget {
   final String MobileOTP;
   final String mobileno;
   final String user;
-  MobileOtpScreen({super.key, required this.MobileOTP, required this.user, required this.mobileno});
+  final String userType;
+  MobileOtpScreen({super.key, required this.MobileOTP, required this.user, required this.mobileno, required this.userType});
 
   @override
   State<MobileOtpScreen> createState() => _MobileOtpScreenState();
@@ -38,10 +39,12 @@ class _MobileOtpScreenState extends State<MobileOtpScreen> {
   void initState(){
     print("User: ${widget.user ?? 'No User'}");
     print("mobileno: ${widget.mobileno}");
+    print("User Type_login: ${widget.userType}");
   }
 
 
   Future<void> otpverify() async {
+
 
     setState(() {
       isLoading = true;
@@ -51,12 +54,13 @@ class _MobileOtpScreenState extends State<MobileOtpScreen> {
     await otpcontroller.otpVerify(
       // context: context,
       // setState: setState,
-      mobileno: widget.mobileno,
-      enteredOtp: enteredOtp,
-      //setLoading: (value) => setState(() => isLoading = value),
-      controller: _controller,
-      user: '',
-      mobileOTP: '',
+        mobileno: widget.mobileno,
+        enteredOtp: enteredOtp,
+        //setLoading: (value) => setState(() => isLoading = value),
+        controller: _controller,
+        user: '',
+        mobileOTP: '',
+        userType: widget.userType
     );
 
     setState(() {

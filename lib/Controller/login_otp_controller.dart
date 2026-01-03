@@ -1,7 +1,10 @@
 
 
 
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'package:aspire/View/Dashboard_screen.dart';
 import 'package:aspire/View/bluetoothscreen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -119,7 +122,14 @@ class LoginOtpController {
     try {
       final response = await http.post(
         Uri.parse(url),
-        body: userData,
+        body: userData)
+          .timeout(Duration(seconds: 10),
+        onTimeout: () {
+          // Just show toast, no need to throw
+          //showCustomToast("Time Out");
+          // Return a dummy response so code continues
+          throw TimeoutException("Request Timeout");
+        },
       );
 
       print("otpresend Status Code: ${response.statusCode}");
@@ -144,38 +154,128 @@ class LoginOtpController {
         print('Request failed with status: ${response.statusCode}.');
       }
     } catch (e) {
+      if (e is TimeoutException) {
+        showCustomToast("Timed Out");
+      }
+      else if (e is SocketException) {
+        showCustomToast("No Internet Connection");
+      }
+      else {
+        showCustomToast("Something went wrong. Please try again.");
+      }
       print('Error: $e');
     }
   }
 
 
+  // Future<void> otpVerify({
+  //   required String? mobileno,
+  //   required String? enteredOtp,
+  //   required CountdownController controller,
+  //   String? newOtp, required String user, required String mobileOTP,
+  // }) async {
+  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //     var token = prefs.getString('token') ?? 'No FCM Token';
+  //     String? _registeredDevice;
+  //     print('FCM Token: ${token == null ? " " : token}');
+  //     print('OTP screen token read: $token');
+  //   final String url = '$root/mobile_otp_verified';
+  //
+  //   final Map<String, String> userData = {
+  //     'mobile_no': mobileno ?? '',
+  //     'mobile_otp': enteredOtp ?? '',
+  //     "access_token": token ?? "",
+  //     //'user_id' :user ?? ''
+  //   };
+  //
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse(url),
+  //       headers: {
+  //         'Content-Type': 'application/x-www-form-urlencoded',
+  //       },
+  //       body: userData,
+  //     );
+  //
+  //     print("login_otp_verify_response1:${response.body}");
+  //
+  //     if (response.statusCode == 200) {
+  //       print("Login response1:${response.body}");
+  //       final Map<String, dynamic> jsonResponse = json.decode(response.body);
+  //
+  //       if (jsonResponse["status"] == "SUCCESS") {
+  //         print("login_otp_verify_success:${response.body}");
+  //         final String user_id = jsonResponse["user_id"].toString();
+  //         final String name = jsonResponse["name"].toString();
+  //         final String mobile_no = jsonResponse["mobile_no"].toString();
+  //         final String email = jsonResponse["email"].toString();
+  //         final String profile = jsonResponse["pofile"] ?? "";
+  //
+  //         final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //         prefs.setBool('isLoggedIn', true);
+  //         await prefs.setString('user_id', user_id);
+  //         await prefs.setString('name', name);
+  //         await prefs.setString('mobile_no', mobile_no);
+  //         await prefs.setString('email', email);
+  //         await prefs.setString('pofile', profile);
+  //
+  //
+  //         showToast("OTP Verified Successfully");
+  //         controller.pause();
+  //
+  //         // Navigate to next screen
+  //         Get.to(() => BluetoothPair());
+  //         //Get.to(()=> DashboardScreen(deviceID: _registeredDevice!));
+  //       } else {
+  //         showToast("OTP Mismatch. Please try again.");
+  //       }
+  //     } else {
+  //       showToast("Request failed with status: ${response.statusCode}");
+  //     }
+  //   } catch (e) {
+  //     print("Error during OTP verification: $e");
+  //     showToast("Something went wrong. Please try again.");
+  //   }
+  // }
+
   Future<void> otpVerify({
     required String? mobileno,
     required String? enteredOtp,
     required CountdownController controller,
+    required String userType,
     String? newOtp, required String user, required String mobileOTP,
   }) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var token = prefs.getString('token') ?? 'No FCM Token';
-      String? _registeredDevice;
-      print('FCM Token: ${token == null ? " " : token}');
-      print('OTP screen token read: $token');
+    var token = prefs.getString('token') ?? 'No FCM Token';
+
+
+    String? _registeredDevice;
+    print('FCM Token: ${token == null ? " " : token}');
+    print('OTP screen token read: $token');
     final String url = '$root/mobile_otp_verified';
 
     final Map<String, String> userData = {
       'mobile_no': mobileno ?? '',
       'mobile_otp': enteredOtp ?? '',
       "access_token": token ?? "",
+      'user_type': userType
       //'user_id' :user ?? ''
     };
 
     try {
       final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          Uri.parse(url),
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: userData)
+          .timeout(Duration(seconds: 10),
+        onTimeout: () {
+          // Just show toast, no need to throw
+          //showCustomToast("Time Out");
+          // Return a dummy response so code continues
+          throw TimeoutException("Request Timeout");
         },
-        body: userData,
       );
 
       print("login_otp_verify_response1:${response.body}");
@@ -199,14 +299,13 @@ class LoginOtpController {
           await prefs.setString('mobile_no', mobile_no);
           await prefs.setString('email', email);
           await prefs.setString('pofile', profile);
+          await prefs.setString('user_type', userType);
 
+          print("login_type:$userType");
 
           showToast("OTP Verified Successfully");
           controller.pause();
-
-          // Navigate to next screen
-          Get.to(() => BluetoothPair());
-          //Get.to(()=> DashboardScreen(deviceID: _registeredDevice!));
+          Get.to(()=> DashboardScreen(deviceID: ''));
         } else {
           showToast("OTP Mismatch. Please try again.");
         }
@@ -214,11 +313,19 @@ class LoginOtpController {
         showToast("Request failed with status: ${response.statusCode}");
       }
     } catch (e) {
+      if (e is TimeoutException) {
+        showCustomToast("Timed Out");
+      }
+      else if (e is SocketException) {
+        showCustomToast("No Internet Connection");
+      }
+      else {
+        showCustomToast("Something went wrong. Please try again.");
+      }
       print("Error during OTP verification: $e");
-      showToast("Something went wrong. Please try again.");
+      //showToast("Something went wrong. Please try again.");
     }
   }
-
 
 
   Future<void> otpTimeout({required String mobileno}) async {
@@ -231,7 +338,14 @@ class LoginOtpController {
     try {
       final response = await http.post(
         Uri.parse(url),
-        body: userData,
+        body: userData)
+          .timeout(Duration(seconds: 10),
+        onTimeout: () {
+          // Just show toast, no need to throw
+          //showCustomToast("Time Out");
+          // Return a dummy response so code continues
+          throw TimeoutException("Request Timeout");
+        },
       );
 
       if (response.statusCode == 200) {
@@ -241,6 +355,15 @@ class LoginOtpController {
         print('Request failed with status: ${response.statusCode}.');
       }
     } catch (e) {
+      if (e is TimeoutException) {
+        showCustomToast("Timed Out");
+      }
+      else if (e is SocketException) {
+        showCustomToast("No Internet Connection");
+      }
+      else {
+        showCustomToast("Something went wrong. Please try again.");
+      }
       print('Error: $e');
     }
   }

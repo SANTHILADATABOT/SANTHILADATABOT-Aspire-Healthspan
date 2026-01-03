@@ -1,5 +1,6 @@
 
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:aspire/View/profile.dart';
@@ -47,7 +48,14 @@ class EditProfileController {
     try {
       final response = await http.post(
         Uri.parse(Url),
-        body: userData,
+        body: userData)
+          .timeout(Duration(seconds: 10),
+        onTimeout: () {
+          // Just show toast, no need to throw
+          showCustomToast("Time Out");
+          // Return a dummy response so code continues
+          throw TimeoutException("Request Timeout");
+        },
       );
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);

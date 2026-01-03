@@ -1,5 +1,7 @@
 
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:aspire/View/edit_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -32,7 +34,14 @@ class EditPhoneController {
       final response = await http.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: userData,
+        body: userData)
+          .timeout(Duration(seconds: 10),
+        onTimeout: () {
+          // Just show toast, no need to throw
+         // showCustomToast("Time Out");
+          // Return a dummy response so code continues
+          throw TimeoutException("Request Timeout");
+        },
       );
 
       if (response.statusCode == 200) {
@@ -51,7 +60,16 @@ class EditPhoneController {
         return false;
       }
     } catch (e) {
-      showToast("Error: $e");
+      if (e is TimeoutException) {
+        showCustomToast("Timed Out");
+      }
+      else if (e is SocketException) {
+        showCustomToast("No Internet Connection");
+      }
+      else {
+        showCustomToast("Something went wrong. Please try again.");
+      }
+      //showToast("Error: $e");
       return false;
     }
   }
@@ -72,7 +90,14 @@ class EditPhoneController {
     try {
       final response = await http.post(
         Uri.parse(url),
-        body: userData,
+        body: userData)
+          .timeout(Duration(seconds: 10),
+        onTimeout: () {
+          // Just show toast, no need to throw
+          //showCustomToast("Time Out");
+          // Return a dummy response so code continues
+          throw TimeoutException("Request Timeout");
+        },
       );
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
@@ -81,6 +106,15 @@ class EditPhoneController {
         print('Request failed with status: ${response.statusCode}.');
       }
     } catch (e) {
+      if (e is TimeoutException) {
+        showCustomToast("Timed Out");
+      }
+      else if (e is SocketException) {
+        showCustomToast("No Internet Connection");
+      }
+      else {
+        showCustomToast("Something went wrong. Please try again.");
+      }
       print('Error:3 $e');
     }
   }
@@ -110,7 +144,14 @@ class EditPhoneController {
     try {
       final response = await http.post(
         Uri.parse(url),
-        body: userData,
+        body: userData)
+          .timeout(Duration(seconds: 10),
+        onTimeout: () {
+          // Just show toast, no need to throw
+         // showCustomToast("Time Out");
+          // Return a dummy response so code continues
+          throw TimeoutException("Request Timeout");
+        },
       );
 
       if (response.statusCode == 200) {
@@ -129,6 +170,15 @@ class EditPhoneController {
         print('Request failed with status: ${response.statusCode}.');
       }
     } catch (e) {
+      if (e is TimeoutException) {
+        showCustomToast("Timed Out");
+      }
+      else if (e is SocketException) {
+        showCustomToast("No Internet Connection");
+      }
+      else {
+        showCustomToast("Something went wrong. Please try again.");
+      }
       print('Error: $e');
     }
   }
@@ -165,7 +215,14 @@ class EditPhoneController {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: userData,
+        body: userData)
+          .timeout(Duration(seconds: 10),
+        onTimeout: () {
+          // Just show toast, no need to throw
+          //showCustomToast("Time Out");
+          // Return a dummy response so code continues
+          throw TimeoutException("Request Timeout");
+        },
       );
 
       if (response.statusCode == 200) {
@@ -190,7 +247,15 @@ class EditPhoneController {
         showToast("Request failed with status: ${response.statusCode}.");
       }
     } catch (e) {
-      showToast("Error:2 $e");
+      if (e is TimeoutException) {
+        showCustomToast("Timed Out");
+      }
+      else if (e is SocketException) {
+        showCustomToast("No Internet Connection");
+      }
+      else {
+        showCustomToast("Something went wrong. Please try again.");
+      }
     } finally {
       setState(() {
         isLoading = false;

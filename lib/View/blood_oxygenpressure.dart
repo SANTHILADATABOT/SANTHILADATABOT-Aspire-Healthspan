@@ -752,6 +752,11 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                             Xaxistitle: 'Years',
                               xValueMapper: (d, _) => d.Year
                           ),
+                SizedBox(height: 5,),
+                Align(
+                    alignment: Alignment.center,
+                    child:
+                    Text("Touch the bubble for more details",style: Apptextstyle.s13wbcB,)),
                 SizedBox(height: 30),
                 Column(
                     children: [

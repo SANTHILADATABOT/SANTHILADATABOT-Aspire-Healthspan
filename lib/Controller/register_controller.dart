@@ -1,16 +1,19 @@
 
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:aspire/root/root.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Model/register_screen_model.dart';
 import '../View/signup_Mobile_otp.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:flutter/foundation.dart';
 
-class RegisterController{
+class RegisterController {
 
   // Future<void> registerUser({
   //   required BuildContext context,
@@ -91,10 +94,59 @@ class RegisterController{
   //     }
   //   }
 
+  // Future<void> registerUser({
+  //   required String completePhoneNumber,
+  //   required String username,
+  //   required String email,
+  // }) async {
+  //   final String url = '$root/signin';
+  //
+  //   final Map<String, String> userData = {
+  //     'username': username,
+  //     'mobile_no': completePhoneNumber,
+  //     'email': email,
+  //   };
+  //
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse(url),
+  //       body: userData,
+  //     );
+  //
+  //     print("Register Status Code: ${response.statusCode}");
+  //     print("Register Response: ${response.body}");
+  //
+  //     if (response.statusCode == 200) {
+  //       final jsonResponse = json.decode(response.body);
+  //
+  //       if (jsonResponse["status"] == "SUCCESS") {
+  //         String mobileOtp = jsonResponse['data']['mobile_otp'].toString();
+  //
+  //         showToast("OTP Sent Successfully");
+  //
+  //         Get.to(() => MobileOtpScreen(
+  //           MobileOTP: mobileOtp,
+  //           user: username,
+  //           mobileno: completePhoneNumber,
+  //         ));
+  //       } else {
+  //         showToast(jsonResponse["message"] ?? "Registration failed");
+  //       }
+  //     } else {
+  //       showToast("Server error: ${response.statusCode}");
+  //     }
+  //   } catch (e) {
+  //     print("Register Exception: $e");
+  //     showToast("Something went wrong. Please try again.");
+  //   }
+  // }
+
+
   Future<void> registerUser({
     required String completePhoneNumber,
     required String username,
     required String email,
+    required String userType,
   }) async {
     final String url = '$root/signin';
 
@@ -102,12 +154,20 @@ class RegisterController{
       'username': username,
       'mobile_no': completePhoneNumber,
       'email': email,
+      'user_type': userType,
     };
 
     try {
       final response = await http.post(
         Uri.parse(url),
-        body: userData,
+        body: userData,)
+          .timeout(Duration(seconds: 10),
+        onTimeout: () {
+          // Just show toast, no need to throw
+          //showCustomToast("Time Out");
+          // Return a dummy response so code continues
+          throw TimeoutException("Request Timeout");
+        },
       );
 
       print("Register Status Code: ${response.statusCode}");
@@ -117,15 +177,19 @@ class RegisterController{
         final jsonResponse = json.decode(response.body);
 
         if (jsonResponse["status"] == "SUCCESS") {
-          String mobileOtp = jsonResponse['data']['mobile_otp'].toString();
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('user_type', userType);
 
+          String mobileOtp = jsonResponse['data']['mobile_otp'].toString();
           showToast("OTP Sent Successfully");
 
-          Get.to(() => MobileOtpScreen(
-            MobileOTP: mobileOtp,
-            user: username,
-            mobileno: completePhoneNumber,
-          ));
+          Get.to(() =>
+              MobileOtpScreen(
+                MobileOTP: mobileOtp,
+                user: username,
+                mobileno: completePhoneNumber,
+                userType: userType,
+              ));
         } else {
           showToast(jsonResponse["message"] ?? "Registration failed");
         }
@@ -133,15 +197,19 @@ class RegisterController{
         showToast("Server error: ${response.statusCode}");
       }
     } catch (e) {
+      if (e is TimeoutException) {
+        showCustomToast("Timed Out");
+      }
+      else if (e is SocketException) {
+        showCustomToast("No Internet Connection");
+      }
+      else {
+        showCustomToast("Something went wrong. Please try again.");
+      }
       print("Register Exception: $e");
-      showToast("Something went wrong. Please try again.");
+      //showToast("Something went wrong. Please try again.");
     }
   }
-
-
-
-
-
 }
 
   void showCustomToast(String msg) {

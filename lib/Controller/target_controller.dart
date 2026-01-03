@@ -1,4 +1,5 @@
 
+import 'dart:async';
 import 'dart:convert';
 import 'package:aspire/View/Dashboard_screen.dart';
 import 'package:flutter/material.dart';
@@ -43,7 +44,14 @@ class TargetController {
           'sleep_target': targetSleep,
            'weight_target': targetweight,
            'bmi_target': targetBmi
-        },
+        },)
+              .timeout(Duration(seconds: 10),
+          onTimeout: () {
+    // Just show toast, no need to throw
+    showCustomToast("Time Out");
+    // Return a dummy response so code continues
+    throw TimeoutException("Request Timeout");
+    },
       );
 
       print("Response status: ${response.statusCode}");
@@ -78,7 +86,14 @@ class TargetController {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: {'user_id': userId},
+        body: {'user_id': userId})
+          .timeout(Duration(seconds: 10),
+        onTimeout: () {
+          // Just show toast, no need to throw
+          showCustomToast("Time Out");
+          // Return a dummy response so code continues
+          throw TimeoutException("Request Timeout");
+        },
       );
 
       print("ViewTarget status: ${response.statusCode}");

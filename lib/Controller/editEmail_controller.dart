@@ -1,5 +1,7 @@
 
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:aspire/View/edit_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -22,7 +24,14 @@ class EditEmailController {
       final response = await http.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: {'email': email, 'user_id': userId},
+        body: {'email': email, 'user_id': userId})
+            .timeout(Duration(seconds: 10),
+          onTimeout: () {
+            // Just show toast, no need to throw
+            //showCustomToast("Time Out");
+            // Return a dummy response so code continues
+            throw TimeoutException("Request Timeout");
+          },
       );
 
       print("verifyresponse:${response.body}");
@@ -43,6 +52,15 @@ class EditEmailController {
         };
       }
     } catch (e) {
+      if (e is TimeoutException) {
+        showCustomToast("Timed Out");
+      }
+      else if (e is SocketException) {
+        showCustomToast("No Internet Connection");
+      }
+      else {
+        showCustomToast("Something went wrong. Please try again.");
+      }
       return {'success': false, 'message': 'Error: $e'};
     }
   }
@@ -63,7 +81,15 @@ class EditEmailController {
           'email': email,
           'user_id': userId,
           'mobile_email_otp': otp
+        })
+          .timeout(Duration(seconds: 10),
+        onTimeout: () {
+          // Just show toast, no need to throw
+          //showCustomToast("Time Out");
+          // Return a dummy response so code continues
+          throw TimeoutException("Request Timeout");
         },
+
       );
 
       print("verifyotpresponse:${response.body}");
@@ -84,6 +110,15 @@ class EditEmailController {
         };
       }
     } catch (e) {
+      if (e is TimeoutException) {
+        showCustomToast("Timed Out");
+      }
+      else if (e is SocketException) {
+        showCustomToast("No Internet Connection");
+      }
+      else {
+        showCustomToast("Something went wrong. Please try again.");
+      }
       return {'success': false, 'message': 'Error: $e'};
     }
   }
@@ -99,11 +134,27 @@ class EditEmailController {
     try {
       final response = await http.post(
         Uri.parse(url),
-        body: {'email': email, 'user_id': userId},
+        body: {'email': email, 'user_id': userId})
+          .timeout(Duration(seconds: 10),
+        onTimeout: () {
+          // Just show toast, no need to throw
+          //showCustomToast("Time Out");
+          // Return a dummy response so code continues
+          throw TimeoutException("Request Timeout");
+        },
       );
       print("timeoutresponse:${response.body}");
       return response.statusCode == 200;
     } catch (e) {
+    if (e is TimeoutException) {
+    showCustomToast("Timed Out");
+    }
+    else if (e is SocketException) {
+    showCustomToast("No Internet Connection");
+    }
+    else {
+    showCustomToast("Something went wrong. Please try again.");
+    }
       return false;
     }
   }
@@ -118,7 +169,14 @@ class EditEmailController {
     try {
       final response = await http.post(
         Uri.parse(url),
-        body: {'email': email, 'user_id': userId},
+        body: {'email': email, 'user_id': userId})
+    .timeout(Duration(seconds: 10),
+    onTimeout: () {
+    // Just show toast, no need to throw
+    //showCustomToast("Time Out");
+    // Return a dummy response so code continues
+    throw TimeoutException("Request Timeout");
+    },
       );
 
       print("otpresendresponse:${response.body}");
@@ -136,10 +194,53 @@ class EditEmailController {
         };
       }
     } catch (e) {
+      if (e is TimeoutException) {
+        showCustomToast("Timed Out");
+      }
+      else if (e is SocketException) {
+        showCustomToast("No Internet Connection");
+      }
+      else {
+        showCustomToast("Something went wrong. Please try again.");
+      }
       return {'success': false, 'message': 'Error: $e'};
     }
   }
 
+  void showCustomToast(String msg) {
+    showToast(
+      msg,
+      duration: Duration(seconds: 2),
+      position: kIsWeb ? ToastPosition.top : ToastPosition.bottom,
+      backgroundColor: Colors.black,
+      radius: 8.0,
+      textPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+      textStyle: TextStyle(
+        fontSize: 16.0,
+        color: Colors.white,
+      ),
+      textAlign: TextAlign.center,
+      animationCurve: kIsWeb ? Curves.easeInOut : Curves.easeIn,
+      animationDuration: const Duration(milliseconds: 400),
+      animationBuilder: kIsWeb ? _slideFromRight : null,
+    );
+  }
+
+  Widget _slideFromRight(BuildContext context,
+      Widget child,
+      AnimationController controller,
+      double percent,) {
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: Offset(1.2, 0.0), // far right
+        end: Offset(-1.2, 0.0), // f // Slide to original position
+      ).animate(CurvedAnimation(
+        parent: controller,
+        curve: Curves.easeInOut,
+      )),
+      child: child,
+    );
+  }
 
 }
 
