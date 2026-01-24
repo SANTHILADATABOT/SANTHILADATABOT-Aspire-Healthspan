@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "989276102678",
+    "project_id": "aspirenew-5085f",
+    "storage_bucket": "aspirenew-5085f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:989276102678:android:e25c1bd5ab360e5564d537",
+        "android_client_info": {
+          "package_name": "com.eugene.aspire"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCY6uItgHZJw7o7WqeIeNCjxKTdN8bU0wQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
