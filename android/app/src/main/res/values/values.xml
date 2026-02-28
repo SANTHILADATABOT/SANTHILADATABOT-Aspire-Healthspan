@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">clingsdk</string>
+<!--    <string name="permission_BlueTooth_ungranted">Please grant Bluetooth permissions at setting page in order to use product functions normally.</string>-->
+</resources>

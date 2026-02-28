@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta content="IE=Edge" http-equiv="X-UA-Compatible" />
+    <meta name="description" content="Aspire Healthspan Web App" />
+
+    <!-- iOS meta tags & icons -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="Aspire Healthspan" />
+    <link rel="apple-touch-icon" href="icons/Icon-192.png" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/webp" href="icons/App_iocn.webp" />
+
+    <!-- Base path -->
+    <base href="/" />
+
+    <title>Aspire Healthspan</title>
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="manifest.json" />
+
+    <!-- Preload critical resources -->
+    <link rel="preload" href="main.dart.js" as="script">
+    <link rel="preload" href="icons/App_iocn.webp" as="image">
+
+    <!-- Flutter Bootstrap -->
+    <script src="flutter_bootstrap.js" defer></script>
+
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+
+    <!-- Splash screen style -->
+    <style id="splash-screen-style">
+        html, body {
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          background-color: #ffffff;
+        }
+        .center {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 200px;   /* Adjust splash logo size */
+          height: auto;   /* Keep aspect ratio */
+        }
+    </style>
+</head>
+
+<body>
+<script defer>
+    // Register Firebase Messaging Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('firebase-messaging-sw.js')
+        .then((registration) => {
+          console.log('Service Worker registered:', registration);
+        })
+        .catch((err) => {
+          console.error('Service Worker registration failed:', err);
+        });
+    }
+</script>
+
+<!-- Optimized splash logo -->
+<picture id="splash">
+    <source srcset="icons/App_iocn.webp" type="image/webp">
+    <img class="center" aria-hidden="true" src="icons/App_icon.png" alt="Splash logo">
+</picture>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8" />-->
+<!--    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />-->
+<!--    <meta name="description" content="Aspire Healthspan Web App" />-->
+
+<!--    <meta name="apple-mobile-web-app-capable" content="yes" />-->
+<!--    <meta name="apple-mobile-web-app-status-bar-style" content="black" />-->
+<!--    <meta name="apple-mobile-web-app-title" content="Aspire Healthspan" />-->
+<!--    <link rel="apple-touch-icon" href="icons/Icon-192.png" />-->
+
+<!--    <link rel="icon" type="image/webp" href="icons/App_iocn.webp" />-->
+<!--    <base href="/" />-->
+
+<!--    <title>Aspire Healthspan</title>-->
+<!--    <link rel="manifest" href="manifest.json" />-->
+
+<!--    <link rel="preload" href="main.dart.js" as="script">-->
+<!--    <link rel="preload" href="icons/App_iocn.webp" as="image">-->
+
+<!--    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">-->
+
+<!--    <style>-->
+<!--        #splash-screen {-->
+<!--          position: fixed;-->
+<!--          top: 0; left: 0;-->
+<!--          width: 100%; height: 100%;-->
+<!--          background: white;-->
+<!--          display: flex;-->
+<!--          align-items: center;-->
+<!--          justify-content: center;-->
+<!--          z-index: 9999;-->
+<!--        }-->
+<!--        #splash-screen img {-->
+<!--          width: 150px;-->
+<!--          animation: pulse 1.5s infinite;-->
+<!--        }-->
+<!--        @keyframes pulse {-->
+<!--          0% { transform: scale(1); opacity: 1; }-->
+<!--          50% { transform: scale(1.05); opacity: 0.8; }-->
+<!--          100% { transform: scale(1); opacity: 1; }-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+
+<!--<body>-->
+<!--<div id="splash-screen">-->
+<!--    <img src="icons/App_iocn.webp" alt="App Icon" />-->
+<!--</div>-->
+
+<!--&lt;!&ndash; Load Flutter app after splash is visible &ndash;&gt;-->
+<!--<script>-->
+<!--    const script = document.createElement("script");-->
+<!--    script.src = "main.dart.js";-->
+<!--    script.defer = true;-->
+<!--    document.body.appendChild(script);-->
+
+<!--    // Remove splash once Flutter is ready-->
+<!--    window.addEventListener("flutter-first-frame", function () {-->
+<!--      document.getElementById("splash-screen").style.display = "none";-->
+<!--    });-->
+<!--</script>-->
+
+<!--&lt;!&ndash; Firebase SW &ndash;&gt;-->
+<!--<script defer>-->
+<!--    if ('serviceWorker' in navigator) {-->
+<!--      navigator.serviceWorker.register('firebase-messaging-sw.js')-->
+<!--        .then(reg => console.log('Service Worker registered:', reg))-->
+<!--        .catch(err => console.error('Service Worker failed:', err));-->
+<!--    }-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+
+
+
+
+
+
+
+
+
+
+
