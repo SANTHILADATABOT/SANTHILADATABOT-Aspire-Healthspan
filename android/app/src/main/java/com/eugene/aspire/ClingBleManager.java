@@ -128,9 +128,85 @@ public class ClingBleManager {
 
 
 
+//    public static void connect(String name) {
+//
+//        Log.e(TAG, "==============================");
+//        Log.e(TAG, "🔗 CONNECT CALLED with name → " + name);
+//
+//        ClingSdk.stopScan();
+//        ClingSdk.setUserId(USER_ID);
+//
+//        BluetoothDevice device = deviceMap.get(name);
+//
+//        if (device == null) {
+//            Log.e(TAG, "❌ Device not found in deviceMap");
+//            return;
+//        }
+//
+//        if (ClingSdk.isAccountBondWithCling()) {
+//
+//            Log.e(TAG, "⚠ Device already bonded → forcing clean reset");
+//
+//            ClingSdk.deregisterDevice(new OnBleListener.OnDeregisterDeviceListener() {
+//
+//                @Override
+//                public void onDeregisterDeviceSucceed() {
+//
+//                    Log.e(TAG, "✅ Deregister success → registering again");
+//
+//                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+//
+//                        ClingSdk.registerDevice(
+//                                USER_ID,
+//                                device,
+//                                new OnBleListener.OnRegisterDeviceListener() {
+//
+//                                    @Override
+//                                    public void onRegisterDeviceSucceed() {
+//                                        Log.e(TAG, "✅ Re-register success");
+//                                    }
+//
+//                                    @Override
+//                                    public void onRegisterDeviceFailed(int code, String msg) {
+//                                        Log.e(TAG, "❌ Re-register failed: " + msg);
+//                                    }
+//                                }
+//                        );
+//
+//                    }, 1000); // small delay to let SDK reset fully
+//                }
+//
+//                @Override
+//                public void onDeregisterDeviceFailed(int code, String msg) {
+//                    Log.e(TAG, "❌ Deregister failed: " + msg);
+//                }
+//            });
+//
+//            return;
+//        }
+//
+//        Log.e(TAG, "🆕 No bonded device → calling registerDevice()");
+//
+//        ClingSdk.registerDevice(
+//                USER_ID,
+//                device,
+//                new OnBleListener.OnRegisterDeviceListener() {
+//
+//                    @Override
+//                    public void onRegisterDeviceSucceed() {
+//                        Log.e(TAG, "✅ Register success");
+//                    }
+//
+//                    @Override
+//                    public void onRegisterDeviceFailed(int code, String msg) {
+//                        Log.e(TAG, "❌ Register failed: " + code + " " + msg);
+//                    }
+//                }
+//        );
+//    }
+
     public static void connect(String name) {
 
-        Log.e(TAG, "==============================");
         Log.e(TAG, "🔗 CONNECT CALLED with name → " + name);
 
         ClingSdk.stopScan();
@@ -139,30 +215,35 @@ public class ClingBleManager {
         BluetoothDevice device = deviceMap.get(name);
 
         if (device == null) {
-            Log.e(TAG, "❌ Device not found in deviceMap");
+            Log.e(TAG, "❌ Device not found");
             return;
         }
 
-        String clingId = ClingSdk.getBondClingDeviceName();
-        Log.e(TAG, "📌 Bonded clingId → " + clingId);
+        boolean bonded = ClingSdk.isAccountBondWithCling();
+        Log.e(TAG, "Bonded status → " + bonded);
 
-        if (clingId != null && !clingId.isEmpty()) {
+        if (bonded) {
 
-            Log.e(TAG, "⚡ Bond exists → forcing reconnect");
+            Log.e(TAG, "⚠ Bond exists → FIRST TAP → Only Deregister");
 
-            //ClingSdk.disconnectDevice(false);
+            ClingSdk.deregisterDevice(new OnBleListener.OnDeregisterDeviceListener() {
 
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                @Override
+                public void onDeregisterDeviceSucceed() {
+                    Log.e(TAG, "✅ Deregister success. Tap again to connect.");
+                }
 
-                Log.e(TAG, "🚀 Calling connectDeviceByClingid()");
-                ClingSdk.connectDeviceByClingid(USER_ID, clingId);
+                @Override
+                public void onDeregisterDeviceFailed(int code, String msg) {
+                    Log.e(TAG, "❌ Deregister failed: " + msg);
+                }
+            });
 
-            }, 800);
-
-            return;
+            return; // 🔥 STOP HERE
         }
 
-        Log.e(TAG, "🆕 No bonded device → calling registerDevice()");
+        // SECOND TAP FLOW
+        Log.e(TAG, "🆕 No bond → SECOND TAP → Registering");
 
         ClingSdk.registerDevice(
                 USER_ID,
@@ -172,11 +253,13 @@ public class ClingBleManager {
                     @Override
                     public void onRegisterDeviceSucceed() {
                         Log.e(TAG, "✅ Register success");
+
+
                     }
 
                     @Override
                     public void onRegisterDeviceFailed(int code, String msg) {
-                        Log.e(TAG, "❌ Register failed: " + code + " " + msg);
+                        Log.e(TAG, "❌ Register failed: " + msg);
                     }
                 }
         );
@@ -210,8 +293,9 @@ public class ClingBleManager {
                     public void onDeregisterDeviceSucceed() {
 
                         Log.i(TAG, "Device deregistered");
-//                        ClingSdk.clearDatabase();
-//                        deviceMap.clear();
+                        //ClingSdk.disconnectDevice(true);
+                        //deviceMap.clear();
+                        ClingSdk.stopScan();
                     }
 
                     @Override

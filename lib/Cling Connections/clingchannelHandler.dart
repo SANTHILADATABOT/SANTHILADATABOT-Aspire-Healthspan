@@ -75,17 +75,6 @@ class ClingChannelHandler {
   void _setupAndroid() {
     print("📡 Android channels attached");
 
-    // _minuteSub =
-    //     _minuteChannel.receiveBroadcastStream().listen((event) {
-    //
-    //       if (event is! Map) return;
-    //
-    //       final data = Map<String, dynamic>.from(event);
-    //
-    //
-    //       onMinuteData?.call([data]); // ✅ SAME AS iOS
-    //     });
-
     _minuteSub =
         _minuteChannel.receiveBroadcastStream().listen((event) {
 
@@ -109,23 +98,12 @@ class ClingChannelHandler {
           onMinuteData?.call([data]); // SAME AS iOS
         });
 
-    // _dailyChannel.setMethodCallHandler((call) async {
-    //   print("📩 Method call: ${call.method}");
-    //
-    //   if (call.method == 'onDailyData') {
-    //     final Map<String, dynamic> map =
-    //     Map<String, dynamic>.from(call.arguments);
-    //     print("🟢 ANDROID DAILY DATA RECEIVED:");
-    //     print(map);
-    //
-    //     onDailyData?.call(map);
-    //   }
-    // });
+
     _dailySub = _dailyChannel
         .receiveBroadcastStream()
         .listen((event) {
 
-      print("🟢 ANDROID DAILY DATA RECEIVED:");
+      print("🟢 ANDROID DAILY DATA :");
       print(event);
 
       if (event is! Map) return;
@@ -135,6 +113,99 @@ class ClingChannelHandler {
       onDailyData?.call(data);
     });
   }
+
+  // void _setupAndroid() {
+  //   print("📡 Android channels attached");
+  //
+  //   // 🔄 Cancel existing subscriptions (avoid duplicate streams)
+  //   _minuteSub?.cancel();
+  //   _dailySub?.cancel();
+  //
+  //   /// ==============================
+  //   /// 🕒 MINUTE DATA LISTENER
+  //   /// ==============================
+  //   _minuteSub = _minuteChannel
+  //       .receiveBroadcastStream()
+  //       .listen(
+  //
+  //         (event) {
+  //
+  //       print("📥 MINUTE_EVENT: $event");
+  //
+  //       if (event == null) {
+  //         print("❌ Minute event is NULL");
+  //         return;
+  //       }
+  //
+  //       if (event is! Map) {
+  //         print("❌ Minute event is not a Map → ${event.runtimeType}");
+  //         return;
+  //       }
+  //
+  //       final Map<String, dynamic> data =
+  //       Map<String, dynamic>.from(event);
+  //
+  //       print("🟢 Parsed Minute Data (${data.length} fields)");
+  //
+  //       data.forEach((key, value) {
+  //         print("🔹 $key = $value (${value.runtimeType})");
+  //       });
+  //
+  //       // ✅ Forward exactly like iOS (List wrapper)
+  //       onMinuteData?.call([data]);
+  //     },
+  //
+  //     onError: (error) {
+  //       print("❌ Minute stream error: $error");
+  //     },
+  //
+  //     onDone: () {
+  //       print("⚠️ Minute stream closed");
+  //     },
+  //
+  //     cancelOnError: false,
+  //   );
+  //
+  //   /// ==============================
+  //   /// 📊 DAILY DATA LISTENER
+  //   /// ==============================
+  //   _dailySub = _dailyChannel
+  //       .receiveBroadcastStream()
+  //       .listen(
+  //
+  //         (event) {
+  //
+  //       print("📊 DAILY_EVENT: $event");
+  //
+  //       if (event == null) {
+  //         print("❌ Daily event is NULL");
+  //         return;
+  //       }
+  //
+  //       if (event is! Map) {
+  //         print("❌ Daily event is not a Map → ${event.runtimeType}");
+  //         return;
+  //       }
+  //
+  //       final Map<String, dynamic> data =
+  //       Map<String, dynamic>.from(event);
+  //
+  //       print("🟢 Parsed Daily Data (${data.length} fields)");
+  //
+  //       onDailyData?.call(data);
+  //     },
+  //
+  //     onError: (error) {
+  //       print("❌ Daily stream error: $error");
+  //     },
+  //
+  //     onDone: () {
+  //       print("⚠️ Daily stream closed");
+  //     },
+  //
+  //     cancelOnError: false,
+  //   );
+  // }
 
   void dispose() {
     _minuteSub?.cancel();

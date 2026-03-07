@@ -47,17 +47,11 @@ class _BluetoothPairState extends State<BluetoothPair> {
     _hasNavigated = false;
     platform.setMethodCallHandler(_methodCallHandler);
     _listenForPairEvents();
-    _startScanning();
+    Future.delayed(const Duration(milliseconds: 1200), () {
+      _startScanning();
+    });
     // Android: listen to scan results and update _devices list
     if (Platform.isAndroid) {
-      //   _scanSub = ClingBleService.scanResults().listen((results) {
-      //     print("✅ Flutter received scan results: $results");
-      //     //final devices = results.map((d) => d['mac'].toString()).toList();
-      //     final devices = results.map((d) => d['name'].toString()).toList();
-      //     setState(() {
-      //       _devices = devices;
-      //     });
-      // });
       _scanSub = ClingBleService.scanResults().listen((results) {
 
         final devices = results.map((d) {
@@ -76,42 +70,12 @@ class _BluetoothPairState extends State<BluetoothPair> {
   }
 
   Future<void> _listenForPairEvents() async {
-
+    print("print9");
     if (!Platform.isAndroid) return;
-
-    // _pairSub = ClingBleService.pairStatusStream().listen((clingId) {
-    //
-    //   if (!mounted) return;
-    //
-    //   print("✅ Paired event received: $clingId");
-    //
-    //   setState(() {
-    //     _registeredDevice = clingId;
-    //     _pairingDevice = null;
-    //     _pairingStatus[clingId] = AppText.paired;
-    //   });
-    //
-    //   _startSyncListeners(clingId);
-    //
-    //   _hasNavigated = true;
-    //
-    //   // ✅ Navigate HERE
-    //   _navigateToSyncScreen();
-    //
-    // });
-
-    // _pairSub = ClingBleService.pairStatusStream().listen((clingId) {
-    //
-    //   if (!mounted) return;
-    //
-    //   print("✅ Real Bluetooth connected: $clingId");
-    //
-    //   setState(() {
-    //     _registeredDevice = clingId;
-    //     _pairingStatus[clingId] = AppText.paired;
-    //     _pairingDevice = null;
-    //   });
+    print("print10");
     _pairSub = ClingBleService.pairStatusStream().listen((connectedId) {
+      print("print11");
+      print("✅ Paired event received: $connectedId");
 
       if (!mounted) return;
 
@@ -119,41 +83,31 @@ class _BluetoothPairState extends State<BluetoothPair> {
         _pairingStatus[_pairingDevice ?? connectedId] = AppText.paired;
         _registeredDevice = _pairingDevice ?? connectedId;
         _pairingDevice = null;
+        print("print12");
       });
 
       _navigateToSyncScreen();
 
     });
 
+    // _pairSub = ClingBleService.pairStatusStream().listen((connectedId) {
+    //
+    //   print("✅ Paired event received: $connectedId");
+    //
+    //   if (!mounted) return;
+    //
+    //   setState(() {
+    //     _registeredDevice = connectedId;   // 🔥 Always trust native
+    //     _pairingStatus[connectedId] = AppText.paired;
+    //     _pairingDevice = null;
+    //   });
+    //
+    //   _navigateToSyncScreen();
+    // });
+
 
 
   }
-
-  void _startSyncListeners(String clingId) {
-
-    _minuteSub?.cancel();
-    _syncSub?.cancel();
-
-    _minuteSub = ClingBleService.minuteDataStream().listen((data) {
-      if (data.isNotEmpty) {
-        print("📊 Device sending data");
-      }
-    });
-
-    _syncSub = ClingBleService.syncStatusStream().listen((status) {
-      if (status['status'] == 'SYNC_COMPLETED') {
-        print("✅ Sync completed: $clingId");
-
-        _syncSub?.cancel();
-
-      }
-    });
-  }
-
-
-
-
-
 
 
 
@@ -175,24 +129,12 @@ class _BluetoothPairState extends State<BluetoothPair> {
     }
   }
 
-  // Future<void> _methodCallHandler(MethodCall call) async {
-  //   if (call.method == "onDevicesDiscovered") {
-  //
-  //     final names = List<String>.from(call.arguments);
-  //
-  //     setState(() {
-  //       _devices = names.map((name) => {
-  //         "name": name
-  //       }).toList();
-  //     });
-  //   }
-  // }
-
 
   Future<void> _startScanning() async {
     if (Platform.isAndroid) {
       ClingBleService.startScan();
-    } else if (Platform.isIOS) {
+    }
+    else if (Platform.isIOS) {
       // iOS scan
       try {
         await platform.invokeMethod('startScanning');
@@ -205,46 +147,26 @@ class _BluetoothPairState extends State<BluetoothPair> {
   }
 
   Future<void> _registerDevice(String deviceID) async {
-    // if (Platform.isAndroid) {
-    //
-    //   try {
-    //
-    //     setState(() {
-    //       _pairingDevice = deviceID;
-    //      // _hasNavigated = false;
-    //       // _pairingStatus[deviceID] = AppText.paired;
-    //     });
-    //
-    //     print("register_device:$deviceID");
-    //
-    //     _scaffoldMessengerKey.currentState?.showSnackBar(
-    //       SnackBar(content: Text("Device $deviceID registered successfully!")),
-    //     );
-    //     await ClingBleService.connectToDevice(deviceID);
-    //     print("Connecting paired event:$deviceID");
-    //   }
-    //   catch (e) {
-    //     print("Connect failed: $e");
-    //
-    //   }
-    //
-    // }
-
+print("print1");
     if (Platform.isAndroid) {
+      print("print2");
       try {
+        print("print3");
         setState(() {
           _pairingDevice = deviceID;
+          print("print4 $_pairingDevice");
           // 🔥 ADD THIS LINE
-          _pairingStatus[deviceID] = AppText.paired;
+          //_pairingStatus[deviceID] = AppText.paired;
         });
-
+        print("print5");
         print("register_device:$deviceID");
         await ClingBleService.connectToDevice(deviceID);
             _scaffoldMessengerKey.currentState?.showSnackBar(
               SnackBar(content: Text("Device $deviceID registered successfully!")),
             );
-
+        print("print6");
       } catch (e) {
+        print("print7");
         print("Connect failed: $e");
 
         setState(() {
@@ -253,6 +175,7 @@ class _BluetoothPairState extends State<BluetoothPair> {
         });
       }
       finally {
+        print("print8");
         setState(() {
           _pairingDevice = null; // Hide loader after pairing
         });
@@ -305,6 +228,7 @@ class _BluetoothPairState extends State<BluetoothPair> {
 
   void _navigateToSyncScreen() {
     if (_registeredDevice != null) {
+      print("print12");
       Navigator.pushReplacement(context,
           MaterialPageRoute(builder: (context) => SyncDataScreen(deviceID: _registeredDevice!,)));
     }
@@ -344,12 +268,7 @@ class _BluetoothPairState extends State<BluetoothPair> {
             backgroundColor:Colors.white,
             leading: IconButton(
               onPressed: () {
-                //Get.to(() => LoginScreen());
-                // Navigator.pushReplacement(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => LoginScreen()),
-                // );
-                //Navigator.pop(context);
+
                 SystemNavigator.pop();
               },
               icon: Icon(Icons.arrow_back_ios),
@@ -389,51 +308,6 @@ class _BluetoothPairState extends State<BluetoothPair> {
                     ? Center(child: Text(AppText.nodevices))
                     : ListView.builder(
                   itemCount: _devices.length,
-                  // itemBuilder: (context, index) {
-                  //  // String deviceID = _devices[index];
-                  //   final device = _devices[index];
-                  //   final deviceName = device['name']!;
-                  //   final deviceMac = device['mac']!;
-                  //   return Column(
-                  //     children: [
-                  //       ListTile(
-                  //         title: Text(deviceName),
-                  //         subtitle: Text(
-                  //           _pairingStatus[deviceName] ?? AppText.notpaired,
-                  //           style: _pairingStatus[deviceName] == AppText.paired
-                  //               ? Apptextstyle.s16wncGreen
-                  //               : _pairingStatus[deviceName] == AppText.failed
-                  //               ? Apptextstyle.s16wncR
-                  //               : Apptextstyle.s16wncB,
-                  //         ),
-                  //         onTap: () => _registerDevice(deviceName),
-                  //         trailing: _pairingDevice == deviceName
-                  //             ? const SizedBox(
-                  //           width: 24,
-                  //           height: 24,
-                  //           child: CircularProgressIndicator(strokeWidth: 2),
-                  //         ):
-                  //         Icon(
-                  //           Icons.bluetooth,
-                  //           color: _pairingStatus[deviceName] == AppText.paired
-                  //               ? AppColors.others
-                  //               : _pairingStatus[deviceName] == AppText.failed
-                  //               ? AppColors.Red
-                  //               : AppColors.Grey,
-                  //         ),
-                  //         //     : Icon(
-                  //         //   Icons.bluetooth,
-                  //         //   color: _pairingStatus[deviceID] == AppText.paired
-                  //         //       ? AppColors.others
-                  //         //       : _pairingStatus[deviceID] == AppText.failed
-                  //         //       ? AppColors.Red
-                  //         //       : AppColors.Grey,
-                  //         // ),
-                  //       ),
-                  //       const Divider(height: 0.5, thickness: 0.5),
-                  //     ],
-                  //   );
-                  // },
                   itemBuilder: (context, index) {
 
                     String deviceName;
@@ -507,246 +381,6 @@ class _BluetoothPairState extends State<BluetoothPair> {
   }
 }
 
-
-
-// class BluetoothPair extends StatefulWidget {
-//
-//   @override
-//   _BluetoothPairState createState() => _BluetoothPairState();
-// }
-//
-// class _BluetoothPairState extends State<BluetoothPair> {
-//   static const platform = MethodChannel('cling_sdk');
-//   final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
-//
-//   List<String> _devices = [];
-//   String? _registeredDevice;
-//   String? _pairingDevice;
-//   Map<String, String> _pairingStatus = {}; // Map to store pairing status
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     platform.setMethodCallHandler(_methodCallHandler);
-//     //_checkForPairedDevice();
-//     _startScanning();
-//     super.initState();
-//
-//
-//   }
-//
-//
-//   void onDeviceConnected() async {
-//     try {
-//       await platform.invokeMethod("setDeviceConfig");
-//       print("Device config updated successfully.");
-//     } catch (e) {
-//       print("Error setting device config: $e");
-//     }
-//   }
-//
-//   Future<void> _methodCallHandler(MethodCall call) async {
-//     if (call.method == "onDevicesDiscovered") {
-//       setState(() {
-//         _devices = List<String>.from(call.arguments);
-//       });
-//     }
-//   }
-//
-//   // Future<void> _checkForPairedDevice() async {
-//   //   try {
-//   //     final String? lastDeviceID = await platform.invokeMethod('getLastActiveDevice');
-//   //     if (lastDeviceID != null && lastDeviceID.isNotEmpty) {
-//   //       setState(() {
-//   //         _registeredDevice = lastDeviceID;
-//   //       });
-//   //
-//   //       // Navigate to Sync Screen immediately if a paired device is found
-//   //       Future.delayed(Duration(seconds: 1), () {
-//   //         _navigateToSyncScreen();
-//   //       });
-//   //     }
-//   //   } on PlatformException catch (e) {
-//   //     print("Failed to get last active device: ${e.message}");
-//   //   }
-//   // }
-//
-//   Future<void> _startScanning() async {
-//     try {
-//       await platform.invokeMethod('startScanning');
-//     } on PlatformException catch (e) {
-//       print("Failed to start scanning: ${e.message}");
-//     }
-//   }
-//
-//
-//   Future<void> _registerDevice(String deviceID) async {
-//     setState(() {
-//       _pairingDevice = deviceID; // Show loader for this device
-//     });
-//
-//     try {
-//       await platform.invokeMethod('registerDevice', {"deviceID": deviceID});
-//
-//       setState(() {
-//         _registeredDevice = deviceID;
-//         _pairingStatus[deviceID] = AppText.paired;
-//       });
-//
-//       _scaffoldMessengerKey.currentState?.showSnackBar(
-//         SnackBar(content: Text("Device $deviceID registered successfully!")),
-//       );
-//
-//       // Navigate to the Sync Screen after pairing
-//       Future.delayed(Duration(seconds: 1), () {
-//         _navigateToSyncScreen();
-//       });
-//
-//     } on PlatformException
-//     catch (e) {
-//       setState(() {
-//         _pairingStatus[deviceID] = AppText.failed;
-//       });
-//       print("Failed to register device: ${e.message}");
-//       _scaffoldMessengerKey.currentState?.showSnackBar(
-//         SnackBar(content: Text("Failed to register device: ${e.message}")),
-//       );
-//     } finally {
-//       setState(() {
-//         _pairingDevice = null; // Hide loader after pairing
-//       });
-//     }
-//   }
-//
-//   void _navigateToSyncScreen() {
-//     if (_registeredDevice != null) {
-//       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => SyncDataScreen(deviceID: _registeredDevice!)));
-//     }
-//   }
-//
-//   void _navigateToSkip() {
-//     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DashboardScreen(deviceID: '')));
-//
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       debugShowCheckedModeBanner: false,
-//       scaffoldMessengerKey: _scaffoldMessengerKey,
-//       home: WillPopScope(
-//         onWillPop: () async {
-//           bool shouldExit = await showExitConfirmationDialog(context);
-//           return shouldExit;
-//         },
-//         child: Scaffold(
-//           backgroundColor: Colors.white,
-//           appBar: AppBar(
-//             centerTitle: true,
-//             title: Text(AppText.SDK_headings,
-//               style:Apptextstyle.s18wbap,),
-//             backgroundColor:Colors.white,
-//             leading: IconButton(
-//               onPressed: () {
-//                 //Get.to(() => LoginScreen());
-//                 // Navigator.pushReplacement(
-//                 //   context,
-//                 //   MaterialPageRoute(builder: (context) => LoginScreen()),
-//                 // );
-//                 //Navigator.pop(context);
-//                 SystemNavigator.pop();
-//               },
-//               icon: Icon(Icons.arrow_back_ios),
-//             ),
-//           ),
-//           body: Column(
-//             children: [
-//               SizedBox(height: 10,),
-//               ElevatedButton(
-//                 onPressed: _startScanning,
-//                 style: ElevatedButton.styleFrom(
-//                   backgroundColor: AppColors.others, // Button background color
-//                   foregroundColor: Colors.white, // Text (and icon) color
-//                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-//                   shape: RoundedRectangleBorder(
-//                     borderRadius: BorderRadius.circular(10), // Rounded corners
-//                   ),
-//                 ),
-//                 child: const Text(AppText.scandevice),
-//               ),
-//               SizedBox(height: 20,),
-//               ElevatedButton(
-//                 onPressed: _navigateToSkip,
-//                 style: ElevatedButton.styleFrom(
-//                   backgroundColor: AppColors.others, // Button background color
-//                   foregroundColor: Colors.white, // Text (and icon) color
-//                   padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 12),
-//                   shape: RoundedRectangleBorder(
-//                     borderRadius: BorderRadius.circular(10), // Rounded corners
-//                   ),
-//                 ),
-//                 child: const Text(AppText.skip),
-//               ),//
-//               SizedBox(height: 20),
-//               Expanded(
-//                 child: _devices.isEmpty
-//                     ? Center(child: Text(AppText.nodevices))
-//                     : ListView.builder(
-//                   itemCount: _devices.length,
-//                   itemBuilder: (context, index) {
-//                     String deviceID = _devices[index];
-//                     return Column(
-//                       children: [
-//                         ListTile(
-//                           title: Text(deviceID),
-//                           subtitle: Text(
-//                             _pairingStatus[deviceID] ?? AppText.notpaired,
-//                             style: _pairingStatus[deviceID] == AppText.paired
-//                                 ? Apptextstyle.s16wncGreen
-//                                 : _pairingStatus[deviceID] == AppText.failed
-//                                 ? Apptextstyle.s16wncR
-//                                 : Apptextstyle.s16wncB,
-//                           ),
-//                           onTap: () => _registerDevice(deviceID),
-//                           trailing: _pairingDevice == deviceID
-//                               ? const SizedBox(
-//                             width: 24,
-//                             height: 24,
-//                             child: CircularProgressIndicator(strokeWidth: 2),
-//                           )
-//                               : Icon(
-//                             Icons.bluetooth,
-//                             color: _pairingStatus[deviceID] == AppText.paired
-//                                 ? AppColors.others
-//                                 : _pairingStatus[deviceID] == AppText.failed
-//                                 ? AppColors.Red
-//                                 : AppColors.Grey,
-//                           ),
-//                         ),
-//                         const Divider(height: 0.5, thickness: 0.5),
-//                       ],
-//                     );
-//                   },
-//                 ),
-//               ),
-//               if (_registeredDevice != null) ...[
-//                 Divider(),
-//                 Text(
-//                   "Registered Device: $_registeredDevice",
-//                   style: TextStyle(fontWeight: FontWeight.bold),
-//                 ),
-//                 ElevatedButton(
-//                   onPressed: _navigateToSyncScreen,
-//                   child: Text(AppText.syncdata),
-//                 ),
-//               ],
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
 
 
 /// Shows a confirmation dialog when the user presses the back button.

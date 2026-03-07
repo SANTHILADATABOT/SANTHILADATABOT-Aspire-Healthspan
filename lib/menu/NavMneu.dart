@@ -270,6 +270,11 @@ class _NavMenuState extends State<NavMenu> {
                     //Get.to(() => Bluetoothscreen());
                     if (Platform.isAndroid) {
                       await ClingBleService.deregisterDevice();
+                      await Future.delayed(const Duration(milliseconds: 500));
+                      // Navigator.pushReplacement(
+                      //   context,
+                      //   MaterialPageRoute(builder: (_) => BluetoothPair()),
+                      // );
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => BluetoothPair()),
