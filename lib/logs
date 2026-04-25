@@ -1,0 +1,55 @@
+I/flutter (13421): DailyData API response: {"status": "SUCCESS", "message": "Health variable added successfully", "data": {"health_id": 11933, "user_id": "102", "heart_rate": 74.0, "datetime_now": "2026-04-22"}}
+I/flutter (13421): NavMenu rebuilding with toggle states:
+I/flutter (13421): BP: true, HR: true,Steps: true,Sleep: true, Spo2: true,weight: true
+I/flutter (13421): 113.27....135.97
+I/flutter (13421): Uncaught platform error: Looking up a deactivated widget's ancestor is unsafe.
+I/flutter (13421): At this point the state of the widget's element tree is no longer stable.
+I/flutter (13421): To safely refer to a widget's ancestor in its dispose() method, save a reference to the ancestor by calling dependOnInheritedWidgetOfExactType() in the widget's didChangeDependencies() method.
+✓ Built build/app/outputs/flutter-apk/app-debug.apk
+I/flutter (13421): Uncaught platform error: Looking up a deactivated widget's ancestor is unsafe.
+I/flutter (13421): At this point the state of the widget's element tree is no longer stable.
+I/flutter (13421): To safely refer to a widget's ancestor in its dispose() method, save a reference to the ancestor by calling dependOnInheritedWidgetOfExactType() in the widget's didChangeDependencies() method.
+Installing build/app/outputs/flutter-apk/app-debug.apk...
+D/FlutterJNI(24716): Beginning load of flutter...
+D/FlutterJNI(24716): flutter (null) was loaded normally!
+I/flutter (24716): [IMPORTANT:flutter/shell/platform/android/android_context_vk_impeller.cc(62)] Using the Impeller rendering backend (Vulkan).
+Debug service listening on ws://127.0.0.1:59710/ooBHRpFKJIg=/ws
+Syncing files to device I2203...
+I/FLTFireBGExecutor(24716): Creating background FlutterEngine instance, with args: [--start-paused, --enable-dart-profiling]
+D/FLTFireContextHolder(24716): received application context.
+D/[FBP-Android](24716): [FBP] onAttachedToEngine
+I/AdrenoVK-0(24716): QUALCOMM build          : 0a31cc5b53, I80d2918b26
+I/AdrenoVK-0(24716): Build Date              : 09/27/23
+I/AdrenoVK-0(24716): Shader Compiler Version : EV031.32.02.17
+I/AdrenoVK-0(24716): Local Branch            : 
+I/AdrenoVK-0(24716): Remote Branch           : 
+I/AdrenoVK-0(24716): Remote Branch           : 
+I/AdrenoVK-0(24716): Reconstruct Branch      : 
+I/AdrenoVK-0(24716): Build Config            : S P 10.0.7 AArch64
+I/AdrenoVK-0(24716): Driver Path             : /vendor/lib64/hw/vulkan.adreno.so
+I/flutter (24716): [IMPORTANT:flutter/shell/platform/android/android_context_vk_impeller.cc(62)] Using the Impeller rendering backend (Vulkan).
+I/Choreographer(24716): Skipped 41 frames!  The application may be doing too much work on its main thread.
+D/ProfileInstaller(24716): Installing profile for com.eugene.aspire
+[GETX] Instance "GetMaterialController" has been created
+[GETX] Instance "GetMaterialController" has been initialized
+I/Choreographer(24716): Skipped 84 frames!  The application may be doing too much work on its main thread.
+W/FinalizerDaemon(24716): type=1400 audit(0.0:636492): avc:  denied  { getopt } for  path="/dev/socket/usap_pool_primary" scontext=u:r:untrusted_app:s0:c238,c276,c512,c768 tcontext=u:r:zygote:s0 tclass=unix_stream_socket permissive=0 app=com.eugene.aspire
+I/FLTFireMsgService(24716): FlutterFirebaseMessagingBackgroundService started!
+I/ClingSDK(24716): 💾 ClingId saved in SharedPreferences=HICGE00008D0B066F5DE
+I/flutter (24716): 🔥 Android Saved clingId → HICGE00008D0B066F5DE
+I/flutter (24716): Permission status: AuthorizationStatus.authorized
+I/flutter (24716): ✅ Notification permission granted
+I/ClingSDK(24716): 🔄 Starting native 2-stage reconnect for clingId: HICGE00008D0B066F5DE
+I/ClingBleService(24716): stopDeviceLeScan entered.
+I/ClingSdk(24716): setUserId(int nUserId)  nUserId is 876355
+I/ClingSdk(24716): setUserId(int nUserId)  mUserid is 876355
+I/ClingSdk(24716): setUserId(int nUserId)  upm.mMemberId is 876355
+I/ClingCommunicatorService(24716): setSdkUserId() mnSDKUserId is 876355
+I/ClingBleService(24716): getConnectionState(): 0
+I/ClingBleService(24716): updateBondedDeviceList is in
+I/ClingBleService(24716): Start scan for 15 seconds
+I/ClingBleService(24716): scan for cling service 0000FFE0-0000-1000-8000-00805f9b34fb
+D/BluetoothLeScanner(24716): onScannerRegistered() - status=0 scannerId=9 mScannerId=0
+I/ClingBleService(24716): BluetoothLeScanner scan times: 1
+V/ImeFocusController(24716): onWindowFocus: DecorView@210c133[MainActivity] softInputMode=STATE_UNSPECIFIED|ADJUST_RESIZE|IS_FORWARD_NAVIGATION
+I/flutter (24716): FCM Token: fuqtDSjNRC-WsnYi9HNZC-:APA91bGpl1LqYnBOe6tVf62_jM_2s6tqV__U0CqTzgHBhmyK2M55lIRXUScd36eZk4zqjoYOwaTCYiakv9PfQiA1DSK0GpHVt5f_rLI8zCSz068SkDxU2RY
