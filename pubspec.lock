@@ -760,6 +760,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  huawei_health:
+    dependency: "direct main"
+    description:
+      name: huawei_health
+      sha256: "52fb9990e1fc857e2fa1b1251dde63b2146086a13b2d9c50bdfc3c4f715c8a12"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.16.0+300"
   image_picker:
     dependency: "direct main"
     description:

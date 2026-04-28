@@ -83,7 +83,7 @@ class _VerificationOtpScreenState extends State<VerificationOtpScreen> {
       await prefs.setString('mobile_no', data["mobile_no"].toString());
       await prefs.setString('email', data["email"]);
       await prefs.setString('pofile', data["pofile"] ?? " ");
-
+print("mobile_no ${data["mobile_no"]}");
       showToast(result['message']);
       _controller.pause();
       Get.offAll(() => BluetoothPair());

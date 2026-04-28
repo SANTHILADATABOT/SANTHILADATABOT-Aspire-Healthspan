@@ -24,6 +24,7 @@ class AppText {
   static const Avgdaily = "Daily Blood Pressure Average";
   static const Avgmonth = "Monthly Blood Pressure Average";
   static const yearly = "Yearly Blood Pressure Average";
+    static const demo_mode = "Demo Mode";
 
   //SignUP Screen
   static const aspireTitle = "ASPIRE HEALTHSPAN";

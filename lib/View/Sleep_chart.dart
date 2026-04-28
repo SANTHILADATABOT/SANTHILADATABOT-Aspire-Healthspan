@@ -93,9 +93,11 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
 
   Future<void> loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      username = prefs.getString("name"); // or "username"
-    });
+    if (mounted) {
+      setState(() {
+        username = prefs.getString("name"); // or "username"
+      });
+    }
   }
 
 
@@ -134,7 +136,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
   }
 
   void simulateLoading(Future<void> Function() chartFunction) async {
-    setState(() {
+    if (mounted) setState(() {
       isLoading = true;
     });
 
@@ -146,7 +148,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
     } catch (e) {
       print('Chart loading error: $e'); // Optional: error logging
     } finally {
-      setState(() {
+      if (mounted) setState(() {
         isLoading = false;
       });
 
@@ -211,7 +213,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
   }
 
   Future<void> Day_Chart() async {
-    setState(() => _isLoading = true);
+    if (mounted) setState(() => _isLoading = true);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var user_id = prefs.getString('user_id') ?? "";
     try {
@@ -245,25 +247,25 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
       // });
 
 
-      setState(() {
-        _daySleepBars = result['chartData'];
-        _sleepsData = result['summaryData'];
-        mainDate = result['mainDate'];
-        deepsleep = result['recent_deep'];
-        lightsleep = result['recent_light'];
-        remsleep = result['recent_rem'];
-        deepPercentage = _formatPercentage(result['recent_deep_percent']);
-        lightPercentage = _formatPercentage(result['recent_light_percent']);
-        middlePercentage = _formatPercentage(result['recent_rem_percent']);
-        yAxisMax = result['y_axis_max'];
-        totalsleep = result['recent_total'];
-        totalPercentage = result['recent_total_percent'];
-        day_target_sleep = result['target_sleep']; // Original String
-        targetSleepValue = parseTargetSleep(day_target_sleep!);
-        target_visible = true;
-
-
-      });
+      if (mounted) {
+        setState(() {
+          _daySleepBars = result['chartData'];
+          _sleepsData = result['summaryData'];
+          mainDate = result['mainDate'];
+          deepsleep = result['recent_deep'];
+          lightsleep = result['recent_light'];
+          remsleep = result['recent_rem'];
+          deepPercentage = _formatPercentage(result['recent_deep_percent']);
+          lightPercentage = _formatPercentage(result['recent_light_percent']);
+          middlePercentage = _formatPercentage(result['recent_rem_percent']);
+          yAxisMax = result['y_axis_max'];
+          totalsleep = result['recent_total'];
+          totalPercentage = result['recent_total_percent'];
+          day_target_sleep = result['target_sleep']; // Original String
+          targetSleepValue = parseTargetSleep(day_target_sleep!);
+          target_visible = true;
+        });
+      }
 
       print("✅ Sleep Chart Data Loaded");
     } catch (e) {
@@ -292,23 +294,25 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
       totalsleep = result['recent_total'];
       totalPercentage = result['recent_total_percent'];
       totalsleep = result['daily_avg_sleep'];
-      setState(() {
-        _weekSleepBars = result['chartData'];
-        _sleepsData = result['summaryData'];
-        yAxisMax = (result['y_axis_max'] as num).toDouble();
-        mainDate = result['mainDate'];
-        target_sleep = result['target_sleep'];
-        targetSleepValue = parseTargetSleep(target_sleep!);
-        // target_sleep = result['target_sleep']?.toString();
-        // targetSleepValue = parseTargetSleep(target_sleep ?? "0");
-        target_visible = true;
-      });
+      if (mounted) {
+        setState(() {
+          _weekSleepBars = result['chartData'];
+          _sleepsData = result['summaryData'];
+          yAxisMax = (result['y_axis_max'] as num).toDouble();
+          mainDate = result['mainDate'];
+          target_sleep = result['target_sleep'];
+          targetSleepValue = parseTargetSleep(target_sleep!);
+          // target_sleep = result['target_sleep']?.toString();
+          // targetSleepValue = parseTargetSleep(target_sleep ?? "0");
+          target_visible = true;
+        });
+      }
 
       print("✅ Weekly Sleep Chart Data Loaded");
     } catch (e) {
       print('❌ Error loading weekly sleep chart: $e');
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -438,15 +442,17 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
       totalsleep = result['daily_avg_sleep']?.toString() ?? "0";
       totalPercentage = result['recent_total_percent']?.toString() ?? "0";
 
-      setState(() {
-        _monthSleepBars = result['chartData'] ?? [];
-        _sleepsData = result['summaryData'] ?? [];
-        mainDate = result['mainDate']?.toString() ?? "";
-        yAxisMax = double.tryParse(result['y_axis_max']?.toString() ?? "0") ?? 0;
-        target_sleep = result['target_sleep']?.toString();
-        targetSleepValue = parseTargetSleep(target_sleep ?? "0");
-        target_visible = true;
-      });
+      if (mounted) {
+        setState(() {
+          _monthSleepBars = result['chartData'] ?? [];
+          _sleepsData = result['summaryData'] ?? [];
+          mainDate = result['mainDate']?.toString() ?? "";
+          yAxisMax = double.tryParse(result['y_axis_max']?.toString() ?? "0") ?? 0;
+          target_sleep = result['target_sleep']?.toString();
+          targetSleepValue = parseTargetSleep(target_sleep ?? "0");
+          target_visible = true;
+        });
+      }
 
       print("Monthly Sleep Chart Data Loaded");
     } catch (e, stackTrace) {
@@ -484,16 +490,18 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
 
 
 
-      setState(() {
-        _yearsleepBars = result['chartData'] ;
-        _sleepsData = result['summaryData'];
-        mainDate = result['mainDate'];
-        yAxisMax = (result['y_axis_max'] as num).toDouble();
-        target_sleep = result['target_sleep']?.toString();
-        targetSleepValue = parseTargetSleep(target_sleep!);
-        target_visible = true;
+      if (mounted) {
+        setState(() {
+          _yearsleepBars = result['chartData'] ;
+          _sleepsData = result['summaryData'];
+          mainDate = result['mainDate'];
+          yAxisMax = (result['y_axis_max'] as num).toDouble();
+          target_sleep = result['target_sleep']?.toString();
+          targetSleepValue = parseTargetSleep(target_sleep!);
+          target_visible = true;
 
-      });
+        });
+      }
 
       print("✅ yearly Sleep Chart Data Loaded");
     } catch (e) {
@@ -613,10 +621,10 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
               if (_advancedDrawerController.value.visible) {
                 _advancedDrawerController.hideDrawer();
               } else {
-                //Get.back();
-                Get.offAll(() => DashboardScreen(
-                  deviceID: '', // pass params if needed
-                ));
+               Get.back();
+                //Get.offAll(() => DashboardScreen(
+                //  deviceID: '', // pass params if needed
+                //));
               }
             },
             icon: Icon(Icons.arrow_back_ios),
@@ -652,7 +660,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  InkWell(
+                                  GestureDetector(
                                     child: Text(
                                       AppText.day,
                                       style:
@@ -671,7 +679,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                   SizedBox(
                                     width: 20,
                                   ),
-                                  InkWell(
+                                  GestureDetector(
                                     child: Text(
                                       AppText.week,
                                       style:  Reports == 'Week' ?  Apptextstyle.s16wncR
@@ -688,7 +696,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                   SizedBox(
                                     width: 20,
                                   ),
-                                  InkWell(
+                                  GestureDetector(
                                     child: Text(
                                       AppText.month,
                                       style:Reports == 'Month' ?  Apptextstyle.s16wncR
@@ -705,7 +713,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                   SizedBox(
                                     width: 20,
                                   ),
-                                  InkWell(
+                                  GestureDetector(
                                     child: Text(
                                      AppText.year,
                                       style: Reports == 'Year' ?  Apptextstyle.s16wncR
@@ -722,7 +730,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                   SizedBox(
                                     width: 20,
                                   ),
-                                  InkWell(
+                                  GestureDetector(
                                     child: Text(
                                       AppText.multiyear,
                                       style: Reports == 'Multi-Year' ?  Apptextstyle.s16wncR
@@ -753,7 +761,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              InkWell(
+                              GestureDetector(
                                 onTap: () async {
         
                                   if (Reports == 'Multi-Year') {
@@ -1491,13 +1499,12 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
                                     },
                                   ),
                                 ),
-        
+                                DisclaimerFooter(),
                               ],
                             ),
                           ),
                         ),
                       ),
-                    DisclaimerFooter(),
                   ],
                 ),
           ),

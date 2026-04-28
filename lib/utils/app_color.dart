@@ -16,7 +16,7 @@ class AppColors {
   static const Color contentColorPurple = Color(0xFF7e5ae4);
   static const Color greytext = Color(0xFF6c7982);
   static const Color cblue = Color(0xFF00bbf3);
-  static const Color d_appbar = Color(0xFF365c7f);
+    static const Color d_appbar = Color(0xFF365c7f);
   static final Color steps_graph = Color(0xff775DD0);
   static const Color others = Color(0xFF10527a);
   static const Color target_color = Colors.green;

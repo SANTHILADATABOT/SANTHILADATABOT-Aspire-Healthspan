@@ -192,7 +192,7 @@ class _BloodPressureChartPageState extends State<BloodPressureChartPage>
 
   Future<void> Day_Chart() async {
 
-    setState(() => isLoading = true);
+    if (mounted) setState(() => isLoading = true);
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var user_id = prefs.getString('user_id') ?? "";
@@ -206,28 +206,30 @@ class _BloodPressureChartPageState extends State<BloodPressureChartPage>
       final String? recentRaw = result['recent_datetime'];
       final String formattedDate = recentRaw != null ? formatDateTime(recentRaw) : result['mainDate'];
 
-      setState(() {
-        mainDate = formattedDate;
-        systolicValue = result['dayBpSystolic'];
-        diastolicValue = result['dayBpDiastolic'];
-        target_sys = result['targetSystolic'];
-        target_dys = result['targetDiastolic'];
-        chartData = result['chartData'];
-        diastolic_sd_low = (result['diastolic_sd_low'] as num?)?.toDouble();
-        systolic_sd_high = (result['systolic_sd_high'] as num?)?.toDouble();
-        systolic_sd_low = (result['systolic_sd_low'] as num?)?.toDouble();
-        diastolic_sd_high = (result['diastolic_sd_high'] as num?)?.toDouble();
-      });
+      if (mounted) {
+        setState(() {
+          mainDate = formattedDate;
+          systolicValue = result['dayBpSystolic'];
+          diastolicValue = result['dayBpDiastolic'];
+          target_sys = result['targetSystolic'];
+          target_dys = result['targetDiastolic'];
+          chartData = result['chartData'];
+          diastolic_sd_low = (result['diastolic_sd_low'] as num?)?.toDouble();
+          systolic_sd_high = (result['systolic_sd_high'] as num?)?.toDouble();
+          systolic_sd_low = (result['systolic_sd_low'] as num?)?.toDouble();
+          diastolic_sd_high = (result['diastolic_sd_high'] as num?)?.toDouble();
+        });
+      }
     } catch (e) {
       print('Error fetching BP Day Chart: $e');
     }finally {
-      setState(() => isLoading = false);
+    if (mounted) setState(() => isLoading = false);
     }
   }
 
   Future<void> Week_Chart() async {
 
-    setState(() => isLoading = true);
+    if (mounted) setState(() => isLoading = true);
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var user_id = prefs.getString('user_id') ?? "";
@@ -447,10 +449,10 @@ class _BloodPressureChartPageState extends State<BloodPressureChartPage>
                   _advancedDrawerController.hideDrawer();
                 }
                 else {
-                 // Get.back();
-                  Get.offAll(() => DashboardScreen(
-                    deviceID: '', // pass params if needed
-                  ));
+                 Get.back();
+                  // Get.offAll(() => DashboardScreen(
+                  //   deviceID: '', // pass params if needed
+                  // ));
                 }
               },
               icon: Icon(Icons.arrow_back_ios),
@@ -493,7 +495,7 @@ class _BloodPressureChartPageState extends State<BloodPressureChartPage>
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      InkWell(
+                                      GestureDetector(
                                         child: Text(
                                           AppText.day,
                                           style: Reports == 'Day'
@@ -511,7 +513,7 @@ class _BloodPressureChartPageState extends State<BloodPressureChartPage>
                                         },
                                       ),
                                       SizedBox(width: 20),
-                                      InkWell(
+                                      GestureDetector(
                                         child: Text(
                                           AppText.week,
                                           style: Reports == 'Week'
@@ -529,7 +531,7 @@ class _BloodPressureChartPageState extends State<BloodPressureChartPage>
                                         },
                                       ),
                                       SizedBox(width: 20),
-                                      InkWell(
+                                      GestureDetector(
                                         child: Text(
                                           AppText.month,
                                           style: Reports == 'Month'
@@ -547,7 +549,7 @@ class _BloodPressureChartPageState extends State<BloodPressureChartPage>
                                         },
                                       ),
                                       SizedBox(width: 20),
-                                      InkWell(
+                                      GestureDetector(
                                         child: Text(
                                           AppText.year,
                                           style: Reports == 'Year'
@@ -565,7 +567,7 @@ class _BloodPressureChartPageState extends State<BloodPressureChartPage>
                                         },
                                       ),
                                       SizedBox(width: 20),
-                                      InkWell(
+                                      GestureDetector(
                                         child: Text(
                                           AppText.multiyear,
                                           style: Reports == 'Multi-Year'
@@ -598,7 +600,7 @@ class _BloodPressureChartPageState extends State<BloodPressureChartPage>
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    InkWell(
+                                    GestureDetector(
                                       onTap: () async {
                                         if (Reports == 'Multi-Year') {
                                           var toDatePicked = await DatePicker.showSimpleDatePicker(
@@ -1108,7 +1110,7 @@ class _BloodPressureChartPageState extends State<BloodPressureChartPage>
                                             mainAxisAlignment:
                                             MainAxisAlignment.center,
                                             children: [
-                                              InkWell(
+                                              GestureDetector(
                                                 onTap: () =>
                                                     _toggletextinfo(true),
                                                 // Toggle text on icon click
@@ -1188,7 +1190,7 @@ class _BloodPressureChartPageState extends State<BloodPressureChartPage>
                                               mainAxisAlignment:
                                               MainAxisAlignment.center,
                                               children: [
-                                                InkWell(
+                                                GestureDetector(
                                                   onTap: () =>
                                                       _toggletextinfo(false),
                                                   // Toggle text on icon click

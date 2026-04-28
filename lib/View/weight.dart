@@ -76,17 +76,21 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
 
   Future<void> loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      username = prefs.getString("name"); // or "username"
-    });
+    if (mounted) {
+      setState(() {
+        username = prefs.getString("name"); // or "username"
+      });
+    }
   }
 
 
   void simulateLoading(Function chartFunction) async {
-    setState(() {
-      //chartData = [];
-      isLoading = true; // Set loading state
-    });
+    if (mounted) {
+      setState(() {
+        //chartData = [];
+        isLoading = true; // Set loading state
+      });
+    }
     await Future.delayed(Duration(seconds: 2)); // Simulate a delay
     chartFunction();
     loadUsername();
@@ -155,20 +159,24 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
         formattedDate = mainDateString;
       }
 
-      setState(() {
-        chartData = data;
-        mainDate = formattedDate;
-        weightrate = weekWeight;
-        bmi1 = bmi;
-        target_weight = result['weight_target'];
-        target_bmi = result['bmi_target'];
-      });
+      if (mounted) {
+        setState(() {
+          chartData = data;
+          mainDate = formattedDate;
+          weightrate = weekWeight;
+          bmi1 = bmi;
+          target_weight = result['weight_target'];
+          target_bmi = result['bmi_target'];
+        });
+      }
     } catch (e) {
       print('Error fetching weight chart: $e');
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -429,9 +437,9 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        // InkWell(
+                                        // GestureDetector(
                                         SizedBox(width: 20),
-                                        InkWell(
+                                        GestureDetector(
                                           child: Text(
                                            AppText.week,
                                             style: Reports == 'Week'
@@ -449,7 +457,7 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
                                           },
                                         ),
                                         SizedBox(width: 20),
-                                        InkWell(
+                                        GestureDetector(
                                           child: Text(
                                             AppText.month,
                                             style: Reports == 'Month'
@@ -467,7 +475,7 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
                                           },
                                         ),
                                         SizedBox(width: 20),
-                                        InkWell(
+                                        GestureDetector(
                                           child: Text(
                                             AppText.year,
                                             style: Reports == 'Year'
@@ -485,7 +493,7 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
                                           },
                                         ),
                                         SizedBox(width: 20),
-                                        InkWell(
+                                        GestureDetector(
                                           child: Text(
                                            AppText.multiyear,
                                             style: Reports == 'Multi-Year'
@@ -519,7 +527,7 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      InkWell(
+                                      GestureDetector(
                                         onTap: () async {
                                           if (Reports == 'Multi-Year') {
                                             var toDatePicked = await DatePicker
@@ -657,7 +665,7 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
                         top: 30,
                         child: Padding(
                           padding: const EdgeInsets.only(right: 10),
-                          child: InkWell(
+                          child: GestureDetector(
                             onTap: () {
                               Get.to(() => AddWeight());
                             },
@@ -1056,7 +1064,7 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
                                             SizedBox(width: 4),
                                             Padding(
                                               padding: const EdgeInsets.only(right: 10),
-                                              child: InkWell(
+                                              child: GestureDetector(
                                                 onTap: _toggletextinfo,
                                                 child: Icon(
                                                   Icons.info_outline_rounded,

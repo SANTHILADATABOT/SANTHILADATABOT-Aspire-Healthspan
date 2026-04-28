@@ -491,7 +491,7 @@ class _BluetoothPairState extends State<BluetoothPair> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text(AppText.skip),
+                    child: const Text(AppText.demo_mode),
                   ),
                   SizedBox(height: 20),
 

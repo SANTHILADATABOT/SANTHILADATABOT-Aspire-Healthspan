@@ -589,13 +589,15 @@ class SyncService {
     if (response.statusCode == 200 || response.statusCode == 201) {
       print("DailyData API response: ${response.body}");
     } else {
-      print("❌ DialyData Error ${response.statusCode}: ${response.body} :${response.statusCode}");
+      print("❌ DailyData Error ${response.statusCode}: ${response.body} :${response.statusCode}");
     }
 
     } catch (e) {
       print("Error sending DailyData: $e");
     }
   }
+
+
 
   // 🔹 BULK MINUTE API (UNCHANGED)
   Future<bool> sendBulkMinuteDataToApi(
@@ -628,7 +630,7 @@ class SyncService {
       )
           .timeout(Duration(seconds: 40));
       print("Minute data API response: ${response.body}");
-      print("Minute_data: $response");
+      //print("Minute_data: $response");
       if (response.statusCode == 200 || response.statusCode == 201) {
         print("Minute_Data_list:${response.body}");
         final jsonResponse = jsonDecode(response.body);

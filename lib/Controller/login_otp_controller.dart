@@ -247,7 +247,8 @@ class LoginOtpController {
     print('FCM Token: ${token == null ? " " : token}');
     print('OTP screen token read: $token');
     final String url = '$root/mobile_otp_verified';
-
+print("url $url");
+print("userType $userType");
     final Map<String, String> userData = {
       'mobile_no': mobileno ?? '',
       'mobile_otp': enteredOtp ?? '',

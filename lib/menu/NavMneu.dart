@@ -200,7 +200,7 @@ class _NavMenuState extends State<NavMenu> {
                   padding: EdgeInsets.symmetric(horizontal: 15),
                   child: Column(
                     children: [
-                      if (userType == 'Admin')
+                      // if (userType == 'Admin')
                         ListTile(
                           leading: Icon(
                               Icons.person, color: Color(0xFF254a6c), size: 25),
@@ -618,7 +618,8 @@ class _NavMenuState extends State<NavMenu> {
           print(response.body);
           final SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.remove('isLoggedIn');
-          await prefs.remove('DeviceId'); // Clear last stored device ID
+          await prefs.remove('DeviceId');
+          //await prefs.remove('user_type');
           Get.offAll(() => LoginScreen());
           setState(() => is_loading = false);
         } else {

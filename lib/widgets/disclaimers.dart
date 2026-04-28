@@ -6,10 +6,11 @@ class MedicalDisclaimerDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       title: Row(
         children: [
-          Icon(Icons.info_outline, color: AppColors.others),
+          Icon(Icons.info_outline, color: AppColors.d_appbar),
           SizedBox(width: 10),
           Text("Health Disclaimer", style: Apptextstyle.s18wbcB),
         ],

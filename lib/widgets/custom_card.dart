@@ -37,7 +37,7 @@ class CustomCard1 extends StatelessWidget {
     final double portraitHeight = screenSize.height > screenSize.width
         ? screenSize.height
         : screenSize.width;
-    return InkWell(
+    return GestureDetector(
       onTap: press,
       child: Container(
         height: portraitHeight *0.55,
@@ -59,7 +59,7 @@ class CustomCard1 extends StatelessWidget {
                       title,
                       style: Apptextstyle.s16wbcB,
                     ),
-                    InkWell(
+                    GestureDetector(
                       onTap: press,
                       child: Icon(
                         Icons.arrow_forward_ios,
@@ -172,7 +172,7 @@ class CustomCard extends StatelessWidget {
     final double portraitHeight = screenSize.height > screenSize.width
         ? screenSize.height
         : screenSize.width;
-    return InkWell(
+    return GestureDetector(
       onTap: press,
       child: Container(
         //height:portraitHeight * 0.45,
@@ -195,7 +195,7 @@ class CustomCard extends StatelessWidget {
                       title,
                       style: Apptextstyle.s16wbcB,
                     ),
-                    InkWell(
+                    GestureDetector(
                       onTap: press,
                       child: Icon(
                         Icons.arrow_forward_ios,
@@ -295,7 +295,7 @@ class CustomCardspo2 extends StatelessWidget {
     Size size = MediaQuery.of(context).size;
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
     final height = isLandscape ? size.width * 0.65 : size.height * 0.65;
-    return InkWell(
+    return GestureDetector(
       onTap: press,
       child: Container(
         height: height,
@@ -317,7 +317,7 @@ class CustomCardspo2 extends StatelessWidget {
                       title,
                       style: Apptextstyle.s16wbcB,
                     ),
-                    InkWell(
+                    GestureDetector(
                       onTap: press,
                       child: Icon(
                         Icons.arrow_forward_ios,
@@ -500,7 +500,7 @@ class CustomCardsleep extends StatelessWidget {
     // final height = isLandscape ? size.height * 0.95 : size.height * 0.60;
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
     final height = isLandscape ? size.width * 0.60 : size.height * 0.60;
-    return InkWell(
+    return GestureDetector(
       onTap: press,
       child: Container(
         height: height,
@@ -522,7 +522,7 @@ class CustomCardsleep extends StatelessWidget {
                       title,
                       style: Apptextstyle.s16wbcB,
                     ),
-                    InkWell(
+                    GestureDetector(
                       onTap: press,
                       child: Icon(
                         Icons.arrow_forward_ios,

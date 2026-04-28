@@ -80,14 +80,14 @@ class _StepsChartPageState extends State<StepsChartPage>
 
 
   void simulateLoading(Future<void> Function() chartFunction) async {
-    setState(() {
+    if (mounted) setState(() {
       _isLoading = true;
     });
 
     await Future.delayed(Duration(seconds: 2)); // Optional delay
     await chartFunction();
 
-    setState(() {
+    if (mounted) setState(() {
       _isLoading = false;
     });
   }
@@ -141,7 +141,7 @@ class _StepsChartPageState extends State<StepsChartPage>
   Future<void> Day_Chart() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var user_id = prefs.getString('user_id') ?? "";
-    setState(() => _isLoading = true);
+    if (mounted) setState(() => _isLoading = true);
     try {
       //final service = StepsService();
       final result = await _stepscontroller.Day_Chart(
@@ -163,22 +163,23 @@ class _StepsChartPageState extends State<StepsChartPage>
 
 
 
-      setState(() {
-        mainDate = result['mainDate'];
-        stespsvalue = result['recentSteps'];
-        milesValue = result['miles'];
-        calValue = result['calories'];
-        _stepsData = result['chartData'];
-        target_steps = result['targetsteps'];
-        day_target_steps = result['targetsteps'];
-        max_steps = result['maxSteps'];
-        target_visible = false;
-
-      });
+      if (mounted) {
+        setState(() {
+          mainDate = result['mainDate'];
+          stespsvalue = result['recentSteps'];
+          milesValue = result['miles'];
+          calValue = result['calories'];
+          _stepsData = result['chartData'];
+          target_steps = result['targetsteps'];
+          day_target_steps = result['targetsteps'];
+          max_steps = result['maxSteps'];
+          target_visible = false;
+        });
+      }
     } catch (e) {
       print('Error loading Daily steps: $e');
     } finally {
-      setState(() => _isLoading = false);
+    if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -398,10 +399,10 @@ class _StepsChartPageState extends State<StepsChartPage>
               if (_advancedDrawerController.value.visible) {
                 _advancedDrawerController.hideDrawer();
               } else {
-               // Get.back();
-                Get.offAll(() => DashboardScreen(
-                  deviceID: '', // pass params if needed
-                ));
+               Get.back();
+                // Get.offAll(() => DashboardScreen(
+                //  deviceID: '', // pass params if needed
+                // ));
               }
             },
             icon: Icon(Icons.arrow_back_ios),
@@ -434,7 +435,7 @@ class _StepsChartPageState extends State<StepsChartPage>
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  InkWell(
+                                  GestureDetector(
                                     child: Text(
                                       AppText.day,
                                       style: Reports == 'Day'
@@ -452,7 +453,7 @@ class _StepsChartPageState extends State<StepsChartPage>
                                     },
                                   ),
                                   SizedBox(width: 20),
-                                  InkWell(
+                                  GestureDetector(
                                     child: Text(
                                         AppText.week,
                                         style: Reports == 'Week' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG
@@ -469,7 +470,7 @@ class _StepsChartPageState extends State<StepsChartPage>
                                     },
                                   ),
                                   SizedBox(width: 20,),
-                                  InkWell(
+                                  GestureDetector(
                                     child: Text(
                                         AppText.month,
                                         style: Reports == 'Month' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG
@@ -486,7 +487,7 @@ class _StepsChartPageState extends State<StepsChartPage>
                                     },
                                   ),
                                   SizedBox(width: 20,),
-                                  InkWell(
+                                  GestureDetector(
                                     child: Text(
                                         AppText.year,
                                         style: Reports == 'Year' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG
@@ -503,7 +504,7 @@ class _StepsChartPageState extends State<StepsChartPage>
                                     },
                                   ),
                                   SizedBox(width: 20,),
-                                  InkWell(
+                                  GestureDetector(
                                     child: Text(
                                         AppText.multiyear,
                                         style: Reports == 'Multi-Year' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG
@@ -537,7 +538,7 @@ class _StepsChartPageState extends State<StepsChartPage>
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              InkWell(
+                              GestureDetector(
                                 onTap: () async {
 
                                   if (Reports == 'Multi-Year') {
@@ -655,7 +656,6 @@ class _StepsChartPageState extends State<StepsChartPage>
                               ),
                             ],
                           ),
-                          DisclaimerFooter(),
                         ],
                       ),
                     ),
@@ -921,7 +921,7 @@ class _StepsChartPageState extends State<StepsChartPage>
                                               ),
                                             ),
                                             SizedBox(width: 4,),
-                                            InkWell(
+                                            GestureDetector(
                                               onTap: () => _toggletextinfo(), // Toggle text on icon click
                                               child: Icon(
                                                 Icons.info_outline_rounded,
@@ -1210,6 +1210,7 @@ class _StepsChartPageState extends State<StepsChartPage>
                                 },
                               ),
                             ),
+                            DisclaimerFooter(),
 
                           ],
                         ),

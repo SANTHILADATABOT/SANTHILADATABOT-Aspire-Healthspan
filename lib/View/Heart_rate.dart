@@ -80,14 +80,14 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
 
 
   void simulateLoading(Future<void> Function() chartFunction) async {
-    setState(() {
+    if (mounted) setState(() {
       isLoading = true;
     });
 
     await Future.delayed(Duration(seconds: 2)); // Optional delay
     await chartFunction();
 
-    setState(() {
+    if (mounted) setState(() {
       isLoading = false;
     });
   }
@@ -132,7 +132,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
     }
   }
   Future<void> Day_Chart() async {
-    setState(() => isLoading = true);
+    if (mounted) setState(() => isLoading = true);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var user_id = prefs.getString('user_id') ?? "";
     try {
@@ -145,7 +145,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
       final String? recentRaw = result['recent_datetime'];
       final String formattedDate = recentRaw != null ? formatDateTime(recentRaw) : result['mainDate'];
 
-      setState(() {
+      if (mounted) {
         setState(() {
           mainDate = formattedDate;
           heartrateValue = result['targetHeartRate'];
@@ -154,15 +154,14 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
           sd_low = result['sd_low'];
           sd_high = result['sd_high'];
         });
-
-      });
+      }
       print("sd_low${sd_low.toString()} sd_high ${sd_high.toString()}");
       print('✅ mainDate: $mainDate');
       print('✅ weekhearrtrate: $weekhearrtrate');
     } catch (e) {
       print('❌ Error fetching HR Day Chart: $e');
     } finally {
-      setState(() => isLoading = false);
+    if (mounted) setState(() => isLoading = false);
     }
   }
 
@@ -369,10 +368,10 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                     if (_advancedDrawerController.value.visible) {
                       _advancedDrawerController.hideDrawer();
                     } else {
-                     // Get.back();
-                      Get.offAll(() => DashboardScreen(
-                        deviceID: '', // pass params if needed
-                      ));
+                     Get.back();
+                      // Get.offAll(() => DashboardScreen(
+                      //  deviceID: '', // pass params if needed
+                      // ));
                     }
                   },
                   icon: Icon(Icons.arrow_back_ios),
@@ -403,7 +402,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      InkWell(
+                                      GestureDetector(
                                         onTap: (){
                                           setState(() {
                                             Reports = 'Day';
@@ -415,7 +414,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                                         child: Text(AppText.day,style: Reports == 'Day' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG),
                                       ),
                                       SizedBox(width: 20),
-                                      InkWell(
+                                      GestureDetector(
                                         onTap: (){
                                           setState(() {
                                             Reports = 'Week';
@@ -428,7 +427,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                                         child: Text(AppText.week,style: Reports == 'Week' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG),
                                       ),
                                       SizedBox(width: 20,),
-                                      InkWell(
+                                      GestureDetector(
                                         onTap: (){
                                           setState(() {
                                             Reports ='Month';
@@ -440,7 +439,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                                         child: Text(AppText.month,style: Reports == 'Month' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG),
                                       ),
                                       SizedBox(width: 20,),
-                                      InkWell(
+                                      GestureDetector(
                                         onTap: (){
                                           setState(() {
                                             Reports = 'Year';
@@ -453,7 +452,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                                         child: Text(AppText.year,style: Reports == 'Year' ? Apptextstyle.s16wncR: Apptextstyle.s16wncG),
                                       ),
                                       SizedBox(width: 20,),
-                                      InkWell(
+                                      GestureDetector(
                                         onTap: (){
                                           setState(() {
                                             Reports = 'Multi-Year';
@@ -482,7 +481,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  InkWell(
+                                  GestureDetector(
                                     onTap: () async {
 
                                       if (Reports == 'Multi-Year') {
@@ -860,7 +859,7 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
                                                 mainAxisAlignment: MainAxisAlignment
                                                     .center,
                                                 children: [
-                                                  InkWell(
+                                                  GestureDetector(
                                                     onTap: () => _toggletextinfo(),
                                                     // Toggle text on icon click
                                                     child: Icon(

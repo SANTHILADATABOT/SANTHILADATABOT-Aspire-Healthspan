@@ -211,8 +211,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   void dispose() {
-    //_healthDatacontroller.stopSyncTimer();
-    //_minuteDatacontroller.stopSyncing();
+    _toggleRefreshTimer?.cancel();
     super.dispose();
   }
 
@@ -292,23 +291,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> checkSession() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-    });
+    if (mounted) {
+      setState(() {
+        isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+      });
+    }
     print("isLoggedIn$isLoggedIn");
   }
 
   Future<void> loaddata() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await Future.delayed(Duration(seconds: 2));
-    setState(() {
-      user_id = prefs.getString('user_id');
-      name = prefs.getString('name');
-      mobile_no = prefs.getString('mobile_no');
-      email = prefs.getString('email');
-      pofileimage = prefs.getString('pofile');
-      isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        user_id = prefs.getString('user_id');
+        name = prefs.getString('name');
+        mobile_no = prefs.getString('mobile_no');
+        email = prefs.getString('email');
+        pofileimage = prefs.getString('pofile');
+        isLoading = false;
+      });
+    }
 
     if (prefs.getString("name") != null) {
       await prefs.setString("username", prefs.getString("name")!);
@@ -326,7 +329,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _loadFromAPI() async {
-    setState(() => _loading = true);
+    if (mounted) setState(() => _loading = true);
 
     final result = await _toggleController.fetchAllToggles();
 
@@ -380,7 +383,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
     }
 
-    setState(() => _loading = false);
+    if (mounted) setState(() => _loading = false);
   }
 
 
@@ -518,8 +521,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   t2fontsize: 24,
                                   datetime: AppText.avg_bp,
                                   chart: BloodPressureChart(),
-                                  press: () {
-                                    Get.to(() => BloodPressureChartPage(name: name, email: email, profile: profilephoto, noti_count: noti_count));
+                                  press: () async {
+                                    await Get.to(() => BloodPressureChartPage(name: name, email: email, profile: profilephoto, noti_count: noti_count));
+                                    if (mounted) {
+                                      loadDashboardData();
+                                      _loadNotificationCount();
+                                    }
                                   },
                                   color1: AppColors.color1,
                                   color2: AppColors.color2,
@@ -532,8 +539,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   t2fontsize: 15,
                                   datetime: AppText.avg_hr,
                                   chart: HeartRateChartPage(),
-                                  press: () {
-                                    Get.to(() => HeartRateChart(name: name, email: email, profile: profilephoto, noti_count: noti_count));
+                                  press: () async {
+                                    await Get.to(() => HeartRateChart(name: name, email: email, profile: profilephoto, noti_count: noti_count));
+                                    if (mounted) {
+                                      loadDashboardData();
+                                      _loadNotificationCount();
+                                    }
                                   },
                                   color: Color(0xFFe13b4a),
                                   heading: 'heart',
@@ -546,8 +557,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   t2fontsize: 15,
                                   datetime: AppText.avg_steps,
                                   chart: StepsChart(),
-                                  press: () {
-                                    Get.to(() => StepsChartPage(name: name, email: email, profile: profilephoto, noti_count: noti_count));
+                                  press: () async {
+                                    await Get.to(() => StepsChartPage(name: name, email: email, profile: profilephoto, noti_count: noti_count));
+                                    if (mounted) {
+                                      loadDashboardData();
+                                      _loadNotificationCount();
+                                    }
                                   },
                                   color: Color(0xFF9C53C7),
                                   heading: 'steps',
@@ -560,8 +575,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   t2fontsize: 15,
                                   datetime: AppText.avg_sleep,
                                   chart: SleepChart(),
-                                  press: () {
-                                    Get.to(() => SleepChartPage(name: name, email: email, profile: profilephoto, noti_count: noti_count));
+                                  press: () async {
+                                    await Get.to(() => SleepChartPage(name: name, email: email, profile: profilephoto, noti_count: noti_count));
+                                    if (mounted) {
+                                      loadDashboardData();
+                                      _loadNotificationCount();
+                                    }
                                   },
                                   color: AppColors.color3,
                                   deepPercentage: _formatPercentage(deepPercentage),
@@ -576,8 +595,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   t2fontsize: 15,
                                   datetime: AppText.avg,
                                   chart: BloodOxygenChartPage(),
-                                  press: () {
-                                    Get.to(() => BloodoxygenPressureChartPage(name: name, email: email, profile: profilephoto, noti_count: noti_count));
+                                  press: () async {
+                                    await Get.to(() => BloodoxygenPressureChartPage(name: name, email: email, profile: profilephoto, noti_count: noti_count));
+                                    if (mounted) {
+                                      loadDashboardData();
+                                      _loadNotificationCount();
+                                    }
                                   },
                                   color: AppColors.color4,
                                 ),
@@ -589,8 +612,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   t2fontsize: 15,
                                   datetime: AppText.avg,
                                   chart: WeightChartPage(),
-                                  press: () {
-                                    Get.to(() => WeightChart(name: name, email: email, profile: profilephoto, noti_count: noti_count));
+                                  press: () async {
+                                    await Get.to(() => WeightChart(name: name, email: email, profile: profilephoto, noti_count: noti_count));
+                                    if (mounted) {
+                                      loadDashboardData();
+                                      _loadNotificationCount();
+                                    }
                                   },
                                   color: Color(0xffF5B849),
                                   heading: 'weight',

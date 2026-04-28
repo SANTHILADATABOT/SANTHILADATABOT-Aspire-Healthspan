@@ -77,9 +77,11 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
 
   Future<void> loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      username = prefs.getString("name"); // or "username"
-    });
+    if (mounted) {
+      setState(() {
+        username = prefs.getString("name"); // or "username"
+      });
+    }
   }
 
 
@@ -136,14 +138,14 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
 
 
   void simulateLoading(Future<void> Function() chartFunction) async {
-    setState(() {
+    if (mounted) setState(() {
       isLoading = true;
     });
 
     await Future.delayed(Duration(seconds: 2)); // Optional delay
     await chartFunction();
 
-    setState(() {
+    if (mounted) setState(() {
       isLoading = false;
 
     });
@@ -186,7 +188,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
   }
 
   Future<void> Day_Chart() async {
-    setState(() => isLoading = true);
+    if (mounted) setState(() => isLoading = true);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var user_id = prefs.getString('user_id') ?? "";
     try {
@@ -205,30 +207,32 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
 
 
 
-      setState(() {
-        mainDate = formattedDate;
-        targetNormal = result['targetNormal'];
-        targetHigh = result['targetHigh'];
-        //recentSpo2 = result['recentSpo2'];
-        double rawSpo2 =
-            double.tryParse(result['recentSpo2'].toString()) ?? 0;
+      if (mounted) {
+        setState(() {
+          mainDate = formattedDate;
+          targetNormal = result['targetNormal'];
+          targetHigh = result['targetHigh'];
+          //recentSpo2 = result['recentSpo2'];
+          double rawSpo2 =
+              double.tryParse(result['recentSpo2'].toString()) ?? 0;
 
-        double finalSpo2 =
-        rawSpo2 > 100 ? rawSpo2 / 10 : rawSpo2;
+          double finalSpo2 =
+          rawSpo2 > 100 ? rawSpo2 / 10 : rawSpo2;
 
-        recentSpo2 = finalSpo2.toInt(); // ✅
-        chartData = result['chartData'];
-      });
+          recentSpo2 = finalSpo2.toInt(); // ✅
+          chartData = result['chartData'];
+        });
+      }
     } catch (e) {
       print('Error fetching SPO2 data: $e');
     }
     finally {
-      setState(() => isLoading = false);
+    if (mounted) setState(() => isLoading = false);
     }
   }
 
   Future<void> Week_Chart() async {
-    setState(() => isLoading = true);
+    if (mounted) setState(() => isLoading = true);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var user_id = prefs.getString('user_id') ?? "";
     try {
@@ -245,25 +249,27 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
       final String formattedDate = formatDateTime(rawDate);
 
 
-      setState(() {
-        mainDate = formattedDate;
-        targetNormal = result['target_spo2_normal'];
-        targetHigh = result['target_spo2_high'];
-        //recentSpo2 = result['weekspo2'];
-        double rawSpo2 =
-            double.tryParse(result['weekspo2'].toString()) ?? 0;
+      if (mounted) {
+        setState(() {
+          mainDate = formattedDate;
+          targetNormal = result['target_spo2_normal'];
+          targetHigh = result['target_spo2_high'];
+          //recentSpo2 = result['weekspo2'];
+          double rawSpo2 =
+              double.tryParse(result['weekspo2'].toString()) ?? 0;
 
-        double finalSpo2 =
-        rawSpo2 > 100 ? rawSpo2 / 10 : rawSpo2;
+          double finalSpo2 =
+          rawSpo2 > 100 ? rawSpo2 / 10 : rawSpo2;
 
-        recentSpo2 = finalSpo2.toInt();
-        chartData = result['chartData'];
-      });
+          recentSpo2 = finalSpo2.toInt();
+          chartData = result['chartData'];
+        });
+      }
     } catch (e) {
       print('Error fetching Weekly SPO2 data: $e');
     }
     finally {
-      setState(() => isLoading = false);
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
@@ -459,9 +465,9 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                 _advancedDrawerController.hideDrawer();
               } else {
                 Get.back();
-                Get.offAll(() => DashboardScreen(
-                  deviceID: '', // pass params if needed
-                ));
+                // Get.offAll(() => DashboardScreen(
+                //  deviceID: '', // pass params if needed
+                // ));
               }
             },
             icon: Icon(Icons.arrow_back_ios),
@@ -494,7 +500,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                InkWell(
+                                GestureDetector(
                                   child: Text(
                                     AppText.day,
                                     style: Reports == 'Day'
@@ -510,7 +516,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                                   },
                                 ),
                                 SizedBox(width: 20),
-                                InkWell(
+                                GestureDetector(
                                   child: Text(
                                     AppText.week,
                                     style: Reports == 'Week'
@@ -526,7 +532,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                                   },
                                 ),
                                 SizedBox(width: 20),
-                                InkWell(
+                                GestureDetector(
                                   child: Text(
                                     AppText.month,
                                     style: Reports == 'Month'
@@ -542,7 +548,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                                   },
                                 ),
                                 SizedBox(width: 20),
-                                InkWell(
+                                GestureDetector(
                                   child: Text(
                                     AppText.year,
                                     style: Reports == 'Year'
@@ -559,7 +565,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                                   },
                                 ),
                                 SizedBox(width: 20),
-                                InkWell(
+                                GestureDetector(
                                   child: Text(
                                     AppText.multiyear,
                                     style: Reports == 'Multi-Year'
@@ -594,7 +600,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            InkWell(
+                            GestureDetector(
                               onTap: () async {
           
                                 if (Reports == 'Multi-Year') {
@@ -1008,7 +1014,7 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
                                           mainAxisAlignment: MainAxisAlignment
                                               .center,
                                           children: [
-                                            InkWell(
+                                            GestureDetector(
                                               onTap: () => _toggletextinfo(),
                                               // Toggle text on icon click
                                               child: Icon(

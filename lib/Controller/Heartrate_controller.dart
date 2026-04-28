@@ -641,7 +641,7 @@ class HeartRatecontroller extends GetxController {
       'date': date,
       'type': 'yearly'
     };
-
+print("payload$payload");
     try {
       final response = await http.post(
         Uri.parse(url),
