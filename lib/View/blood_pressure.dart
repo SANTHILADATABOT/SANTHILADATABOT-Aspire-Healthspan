@@ -95,7 +95,8 @@ class _BloodPressureChartPageState extends State<BloodPressureChartPage>
       isLoading = true;
     });
 
-    await Future.delayed(Duration(seconds: 2)); // Optional delay
+
+   // await Future.delayed(Duration(seconds: 2)); // Optional delay
     await chartFunction();
 
     setState(() {

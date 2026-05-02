@@ -142,6 +142,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
    // _healthDataService.startSyncTimer();
   }
 
+
+
   Future<void> _showMedicalDisclaimer() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     bool hasSeenDisclaimer = prefs.getBool('hasSeenMedicalDisclaimer') ?? false;

@@ -326,6 +326,12 @@ class _edit_phone_numberState extends State<edit_phone_number> {
             AppText.editprofile,
             style: Apptextstyle.s18wbap
         ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Get.to(() => EditProfile());
+          },
+        ),
         backgroundColor: Color(0xFFffffff),
 
       ),

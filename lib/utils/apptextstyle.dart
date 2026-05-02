@@ -535,6 +535,13 @@ class Apptextstyle {
     fontWeight: FontWeight.normal,
   );
 
+  static  const s14wncb= TextStyle(
+    fontFamily: "Inter",
+    color:  Colors.black,
+    fontSize: 14,
+    fontWeight: FontWeight.normal,
+  );
+
 
 
 

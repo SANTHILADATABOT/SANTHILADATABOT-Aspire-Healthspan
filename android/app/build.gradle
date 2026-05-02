@@ -92,8 +92,9 @@ android {
         applicationId = "com.eugene.aspire"
         minSdk = 26
         targetSdk = 36
-        versionCode = 14
-        versionName = "14.0"
+        versionCode = 16
+        versionName = "16.0"
+
     }
 
     compileOptions {
@@ -114,7 +115,7 @@ android {
 
     packagingOptions {
         jniLibs {
-            useLegacyPackaging true
+            useLegacyPackaging false
         }
     }
     signingConfigs {

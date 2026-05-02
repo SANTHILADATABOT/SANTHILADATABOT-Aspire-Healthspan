@@ -39,6 +39,7 @@ import android.Manifest;
 import android.provider.Settings;
 import android.net.Uri;
 import android.content.Intent;
+import android.content.BroadcastReceiver;
 
 public class MainActivity extends FlutterActivity {
     private static final String TAG = "ClingSDK";
@@ -255,6 +256,30 @@ public class MainActivity extends FlutterActivity {
                     }
                 }
             };
+
+    private BroadcastReceiver bluetoothReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+
+            if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
+                int state = intent.getIntExtra(
+                        BluetoothAdapter.EXTRA_STATE,
+                        BluetoothAdapter.ERROR
+                );
+
+                if (methodChannel == null) return; // ✅ safety check
+
+                if (state == BluetoothAdapter.STATE_OFF) {
+                    methodChannel.invokeMethod("bluetoothOff", null);
+                } else if (state == BluetoothAdapter.STATE_ON) {
+                    methodChannel.invokeMethod("bluetoothOn", null);
+                }
+            }
+        }
+    };
+
+
     private void applyDeviceConfiguration() {
         try {
             DeviceConfiguration devCfg = new DeviceConfiguration();
@@ -317,6 +342,8 @@ public class MainActivity extends FlutterActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 // 1️⃣ Register listeners BEFORE init
+        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        registerReceiver(bluetoothReceiver, filter);
         ClingSdk.setBleDataListener(bleDataListener);
         ClingSdk.setDeviceConnectListener(deviceListener);
         initSdk();
@@ -432,6 +459,17 @@ public class MainActivity extends FlutterActivity {
 //                        ClingBleManager.startScan();
 //                        result.success(null);
 //                        break;
+                    case "isBluetoothOn":
+                        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+                        boolean isOn = adapter != null && adapter.isEnabled();
+                        result.success(isOn);
+                        break;
+                    case "openBluetoothSettings":
+                        Intent intent = new Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        result.success(null);
+                        break;
                     case "startScan":
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -444,19 +482,6 @@ public class MainActivity extends FlutterActivity {
                                     checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT)
                                             == PackageManager.PERMISSION_GRANTED;
 
-
-
-//                            // ✅ THIS BLOCK IS MANDATORY
-//                            if (scanGranted && connectGranted) {
-//
-//                                Log.i(TAG, "✅ Permission granted → init SDK + scan");
-//
-//                                initSdk(); // 🔥 REQUIRED
-//
-//                                ClingBleManager.startScan();
-//                                result.success(null);
-//                                return;
-//                            }
 
                             if (!scanGranted || !connectGranted) {
 
@@ -510,12 +535,30 @@ public class MainActivity extends FlutterActivity {
 // ClingBleManager.connect(call.argument("name"), this);
                         result.success(null);
                         break;
+//                    case "deregister":
+//                        Log.i(TAG, "🗑️ Clearing CLING_ID from SharedPreferences");
+//                        getSharedPreferences("CLING_PREF", MODE_PRIVATE)
+//                                .edit()
+//                                .clear()
+//                                .apply();
+//                        ClingBleManager.deregisterDevice();
+//                        result.success(null);
+//                        break;
                     case "deregister":
+
+                        if (!mbDeviceConnected) {
+                            Log.w(TAG, "⚠️ Cannot deregister → Device not connected");
+                            result.error("NOT_CONNECTED", "Device not connected", null);
+                            return;
+                        }
+
                         Log.i(TAG, "🗑️ Clearing CLING_ID from SharedPreferences");
+
                         getSharedPreferences("CLING_PREF", MODE_PRIVATE)
                                 .edit()
                                 .clear()
                                 .apply();
+
                         ClingBleManager.deregisterDevice();
                         result.success(null);
                         break;
@@ -607,6 +650,7 @@ public class MainActivity extends FlutterActivity {
                     default:
                         result.notImplemented();
                         break;
+
                 }
             } catch (Exception e) {
                 result.error("NATIVE_ERROR", e.getMessage(), null);
@@ -696,6 +740,11 @@ public class MainActivity extends FlutterActivity {
     @Override
     protected void onDestroy() {
 //ClingSdk.stop(this);
+        try {
+            unregisterReceiver(bluetoothReceiver);
+        } catch (Exception e) {
+            Log.e(TAG, "Receiver not registered");
+        }
         super.onDestroy();
     }
 }

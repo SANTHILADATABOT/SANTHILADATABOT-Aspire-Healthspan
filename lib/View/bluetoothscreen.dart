@@ -25,8 +25,9 @@ class BluetoothPair extends StatefulWidget {
   _BluetoothPairState createState() => _BluetoothPairState();
 }
 
-class _BluetoothPairState extends State<BluetoothPair> {
-  static const platform = MethodChannel('cling_sdk');
+class _BluetoothPairState extends State<BluetoothPair>  with WidgetsBindingObserver {
+  //static const platform = MethodChannel('cling_sdk');
+  //final String METHOD_CHANNEL = "cling/methods";
   final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
   //List<String> _devices = [];
@@ -41,17 +42,29 @@ class _BluetoothPairState extends State<BluetoothPair> {
   StreamSubscription? _syncSub;
   bool _hasNavigated = false;
   bool isLoading = false;
-
+  bool _isDialogOpen = false;
+  late final MethodChannel platform;
+  Timer? _btStateTimer;
+  bool _lastBtState = true;
 
   @override
   void initState() {
     super.initState();
+    if (Platform.isAndroid) {
+      platform = const MethodChannel('cling/methods');
+
+    } else if (Platform.isIOS) {
+      platform = const MethodChannel('cling_sdk');
+    }
     _hasNavigated = false;
     platform.setMethodCallHandler(_methodCallHandler);
     _listenForPairEvents();
-    Future.delayed(const Duration(milliseconds: 1200), () {
-      _startScanning();
-    });
+    _checkBluetoothOnEntry();
+    _startBluetoothMonitoring();
+    // Future.delayed(const Duration(milliseconds: 1200), () {
+    //   //_startScanning();
+    // });
+    WidgetsBinding.instance.addObserver(this);
     // Android: listen to scan results and update _devices list
     _scanSub?.cancel();
     if (Platform.isAndroid) {
@@ -70,6 +83,155 @@ class _BluetoothPairState extends State<BluetoothPair> {
       });
     }
 
+  }
+
+  // void _startBluetoothMonitoring() {
+  //   _btStateTimer?.cancel();
+  //
+  //   _btStateTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+  //     final isOn = await platform.invokeMethod("isBluetoothOn");
+  //
+  //     // 🔴 Bluetooth turned OFF
+  //     if (_lastBtState == true && isOn == false) {
+  //
+  //       await ClingBleService.stopScan(); // ✅ stop native scan
+  //
+  //       if (mounted) {
+  //         setState(() {
+  //           _devices.clear(); // ✅ CLEAR LIST HERE
+  //         });
+  //       }
+  //
+  //       _showBluetoothPopup();
+  //     }
+  //
+  //     _lastBtState = isOn;
+  //   });
+  // }
+
+  void _startBluetoothMonitoring() {
+    _btStateTimer?.cancel();
+
+    _btStateTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+      final isOn = await platform.invokeMethod("isBluetoothOn");
+
+      // 🔴 Bluetooth turned OFF
+      if (_lastBtState == true && isOn == false) {
+        await ClingBleService.stopScan();
+
+        if (mounted) {
+          setState(() {
+            _devices.clear();
+          });
+        }
+
+        _showBluetoothPopup();
+      }
+
+      // 🟢 Bluetooth turned ON
+      if (_lastBtState == false && isOn == true) {
+
+        // ✅ CLOSE POPUP
+        if (_isDialogOpen && mounted) {
+          Navigator.of(context, rootNavigator: true).pop();
+          _isDialogOpen = false;
+        }
+
+        // ✅ Start scanning again
+        await Future.delayed(const Duration(milliseconds: 200));
+        _startScanning();
+      }
+
+      _lastBtState = isOn;
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _onReturnFromSettings();
+    }
+  }
+
+  Future<void> _onReturnFromSettings() async {
+    final isOn = await platform.invokeMethod("isBluetoothOn");
+
+    if (isOn == true) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      _startScanning();
+    } else {
+      _showBluetoothPopup(); // 👈 ALSO HANDLE OFF CASE
+    }
+  }
+
+  Future<void> _checkBluetoothOnEntry() async {
+    try {
+      final isOn = await platform.invokeMethod("isBluetoothOn");
+
+      _lastBtState = isOn; // 👈 track initial state
+
+      if (isOn == false) {
+        _showBluetoothPopup();
+      } else {
+        _startScanning();
+      }
+    } catch (e) {
+      print("BT check error: $e");
+    }
+  }
+
+  void _showBluetoothPopup() {
+    if (_isDialogOpen) return;
+
+    _isDialogOpen = true;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: const Text("Turn on Bluetooth"),
+          content: const Text(
+              "Bluetooth is required to scan for and connect to nearby devices. Please enable Bluetooth to continue"
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            Center(
+              child: TextButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  _isDialogOpen = false;
+
+                  if (Platform.isAndroid) {
+                    try {
+                      await const MethodChannel('cling/methods')
+                          .invokeMethod("openBluetoothSettings");
+                    } catch (e) {
+                      print("Error opening Bluetooth: $e");
+                    }
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.others,
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                  child: const Text(
+                    "OK",
+                    style: Apptextstyle.s15wbcW,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    ).then((_) {
+      // ✅ Ensures state resets even if dialog dismissed unexpectedly
+      _isDialogOpen = false;
+    });
   }
 
   Future<void> _listenForPairEvents() async {
@@ -137,12 +299,21 @@ class _BluetoothPairState extends State<BluetoothPair> {
     //   ClingBleService.startScan();
     // }
     if (Platform.isAndroid) {
+
+      final isOn = await platform.invokeMethod("isBluetoothOn");
+
+      if (isOn == false) {
+        _showBluetoothPopup();
+        return;
+      }
+
+
       await ClingBleService.stopScan(); // 🔥 IMPORTANT
       await Future.delayed(Duration(milliseconds: 300));
 
-      setState(() {
-        _devices.clear(); // 🔥 clear old devices
-      });
+      // setState(() {
+      //   _devices.clear(); // 🔥 clear old devices
+      // });
 
       try {
         await ClingBleService.startScan();
@@ -433,6 +604,7 @@ class _BluetoothPairState extends State<BluetoothPair> {
     _pairSub?.cancel();
     _minuteSub?.cancel();
     _syncSub?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 

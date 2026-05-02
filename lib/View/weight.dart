@@ -91,7 +91,8 @@ class _WeightChartState extends State<WeightChart> with SingleTickerProviderStat
         isLoading = true; // Set loading state
       });
     }
-    await Future.delayed(Duration(seconds: 2)); // Simulate a delay
+
+    //await Future.delayed(Duration(seconds: 2)); // Simulate a delay
     chartFunction();
     loadUsername();
   }

@@ -141,7 +141,7 @@ class _SleepChartPageState extends State<SleepChartPage> with SingleTickerProvid
     });
 
     // Allow UI to refresh before starting the heavy work
-    await Future.delayed(const Duration(milliseconds: 100));
+    //await Future.delayed(const Duration(milliseconds: 100));
 
     try {
       await chartFunction(); // Call the passed chart function

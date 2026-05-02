@@ -597,8 +597,6 @@ class SyncService {
     }
   }
 
-
-
   // 🔹 BULK MINUTE API (UNCHANGED)
   Future<bool> sendBulkMinuteDataToApi(
       List<Map<String, dynamic>> dataList) async {

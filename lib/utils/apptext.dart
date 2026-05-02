@@ -224,7 +224,7 @@ class AppText {
   static const middlesleep = "Middle Sleep - Transitional Stage";
 
   //notifications
-  static const no_notifications = "No Notifications";
+  static const no_notifications = "No notifications found for this user";
 
   //Nav menu
   static const dashboard_m = "Dashboard";

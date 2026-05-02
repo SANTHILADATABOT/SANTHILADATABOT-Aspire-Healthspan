@@ -77,14 +77,12 @@ class _HeartRateChartState extends State<HeartRateChart> with SingleTickerProvid
 
 
 
-
-
   void simulateLoading(Future<void> Function() chartFunction) async {
     if (mounted) setState(() {
       isLoading = true;
     });
 
-    await Future.delayed(Duration(seconds: 2)); // Optional delay
+    //await Future.delayed(Duration(seconds: 2)); // Optional delay
     await chartFunction();
 
     if (mounted) setState(() {

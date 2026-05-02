@@ -116,16 +116,16 @@ bool is_loading = false;
             },
           ),
         ),
-        body:
-        notificationsList.isEmpty
-            // ? Center(child: Text("No Notifications", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold,fontSize: 18),))
-            // :
-        // is_loading == false ?
-              ? _buildShimmerEffect() :
-        notificationsList.isEmpty ? Center(child: Text(
-          AppText.no_notifications,
-          style: Apptextstyle.s18wbcB,)):
-      ListView.builder(
+        body: is_loading
+            ? _buildShimmerEffect()
+            : notificationsList.isEmpty
+            ? Center(
+          child: Text(
+            AppText.no_notifications,
+            style: Apptextstyle.s18wbcB,
+          ),
+        )
+            : ListView.builder(
           itemCount: notificationsList.length,
           itemBuilder: (context, index) {
             return Card(
@@ -137,7 +137,6 @@ bool is_loading = false;
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 5),
                     Text(
                       notificationsList[index]['category']!,
                       style: TextStyle(
@@ -149,20 +148,14 @@ bool is_loading = false;
                     SizedBox(height: 5),
                     Text(
                       notificationsList[index]['message']!,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
+                      style: TextStyle(fontSize: 14),
                     ),
                     SizedBox(height: 5),
                     Align(
                       alignment: Alignment.centerRight,
                       child: Text(
                         notificationsList[index]['date']!,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
+                        style: TextStyle(color: Colors.grey),
                       ),
                     ),
                   ],
@@ -171,6 +164,61 @@ bool is_loading = false;
             );
           },
         ),
+      //   body:
+      //   notificationsList.isEmpty
+      //       // ? Center(child: Text("No Notifications", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold,fontSize: 18),))
+      //       // :
+      //   // is_loading == false ?
+      //         ? _buildShimmerEffect() :
+      //   notificationsList.isEmpty ? Center(child: Text(
+      //     AppText.no_notifications,
+      //     style: Apptextstyle.s18wbcB,)):
+      // ListView.builder(
+      //     itemCount: notificationsList.length,
+      //     itemBuilder: (context, index) {
+      //       return Card(
+      //         color: Colors.white,
+      //         elevation: 4,
+      //         margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      //         child: Padding(
+      //           padding: const EdgeInsets.all(15.0),
+      //           child: Column(
+      //             crossAxisAlignment: CrossAxisAlignment.start,
+      //             children: [
+      //               SizedBox(height: 5),
+      //               Text(
+      //                 notificationsList[index]['category']!,
+      //                 style: TextStyle(
+      //                   fontSize: 16,
+      //                   fontWeight: FontWeight.bold,
+      //                   color: Color(0xFF365c7f),
+      //                 ),
+      //               ),
+      //               SizedBox(height: 5),
+      //               Text(
+      //                 notificationsList[index]['message']!,
+      //                 style: TextStyle(
+      //                   fontSize: 14,
+      //                   color: Colors.black87,
+      //                 ),
+      //               ),
+      //               SizedBox(height: 5),
+      //               Align(
+      //                 alignment: Alignment.centerRight,
+      //                 child: Text(
+      //                   notificationsList[index]['date']!,
+      //                   style: TextStyle(
+      //                     fontSize: 14,
+      //                     color: Colors.grey,
+      //                   ),
+      //                 ),
+      //               ),
+      //             ],
+      //           ),
+      //         ),
+      //       );
+      //     },
+      //   ),
         //bottomNavigationBar: CustomBottomNavBar(controller: _controller)
         bottomNavigationBar: (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
             ? CustomBottomNavBar(controller: _controller)

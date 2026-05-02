@@ -91,8 +91,8 @@ class _ProfileState extends State<Profile> {
 
     return WillPopScope(
       onWillPop: () async {
-        Get.to(() => DashboardScreen(deviceID: _registeredDevice!));
-        return true;
+        bool shouldExit = await showExitConfirmationDialog(context);
+        return shouldExit;
       },
       child: Scaffold(
           backgroundColor: Color(0xFFffffff),

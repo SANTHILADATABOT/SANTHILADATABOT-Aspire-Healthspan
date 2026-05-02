@@ -142,7 +142,8 @@ class _BloodoxygenPressureChartPageState extends State<BloodoxygenPressureChartP
       isLoading = true;
     });
 
-    await Future.delayed(Duration(seconds: 2)); // Optional delay
+
+   // await Future.delayed(Duration(seconds: 2)); // Optional delay
     await chartFunction();
 
     if (mounted) setState(() {

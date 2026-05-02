@@ -148,6 +148,12 @@ class _edit_emailState extends State<edit_email> {
             'Edit Profile',
             style: Apptextstyle.s17wbcapp_b
         ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Get.to(() => EditProfile());
+          },
+        ),
         backgroundColor: Color(0xFFffffff),
 
       ),

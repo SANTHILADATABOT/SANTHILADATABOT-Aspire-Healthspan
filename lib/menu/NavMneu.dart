@@ -200,7 +200,7 @@ class _NavMenuState extends State<NavMenu> {
                   padding: EdgeInsets.symmetric(horizontal: 15),
                   child: Column(
                     children: [
-                      // if (userType == 'Admin')
+                      if (userType == 'Admin')
                         ListTile(
                           leading: Icon(
                               Icons.person, color: Color(0xFF254a6c), size: 25),
@@ -326,9 +326,77 @@ class _NavMenuState extends State<NavMenu> {
                   ),
                   onTap: () async{
 
+                    // if (Platform.isAndroid) {
+                    //   try {
+                    //
+                    //     final prefs = await SharedPreferences.getInstance();
+                    //
+                    //     String deviceId = prefs.getString('DeviceId') ?? "";
+                    //     String user_id = prefs.getString('user_id') ?? "";
+                    //
+                    //     print("Stored DeviceId: $deviceId");
+                    //     print("Stored user_id: $user_id");
+                    //
+                    //     await ClingBleService.deregisterDevice();
+                    //
+                    //
+                    //     await Future.delayed(const Duration(milliseconds: 500));
+                    //
+                    //     if (deviceId.isEmpty || user_id.isEmpty) {
+                    //       throw Exception("Missing device or user info");
+                    //     }
+                    //
+                    //     final response = await deregisterDevice(user_id, deviceId);
+                    //
+                    //     if (response == null) {
+                    //       throw Exception("No response from API");
+                    //     }
+                    //
+                    //     String status = response['status'] ?? "";
+                    //     String message = response['message'] ?? "";
+                    //     String apiDeviceId =
+                    //     (response['device_id'] ?? "").toString().trim();
+                    //     String apiUserId =
+                    //     (response['user_id'] ?? "").toString().trim();
+                    //
+                    //     print("API Status: $status | Message: $message");
+                    //
+                    //     // ❌ FAIL CASE
+                    //     if (status != "SUCCESS" ||
+                    //         apiDeviceId != deviceId.trim() ||
+                    //         apiUserId != user_id.trim()) {
+                    //
+                    //       // _scaffoldMessengerKey.currentState?.showSnackBar(
+                    //       //   SnackBar(content: Text(message)),
+                    //       // );
+                    //
+                    //       showCustomToast(message);
+                    //
+                    //       return;
+                    //     }
+                    //
+                    //     // // ✅ SUCCESS CASE
+                    //     // _scaffoldMessengerKey.currentState?.showSnackBar(
+                    //     //   SnackBar(content: Text(message)), // "Device deregistered successfully"
+                    //     // );
+                    //
+                    //     showCustomToast(message);
+                    //
+                    //     // 🚀 Navigate to pairing screen
+                    //     Get.offAll(() => BluetoothPair());
+                    //
+                    //     // 🔥 Disconnect BLE
+                    //   } catch (e) {
+                    //     print("Error: $e");
+                    //
+                    //     // _scaffoldMessengerKey.currentState?.showSnackBar(
+                    //     //   const SnackBar(content: Text("Failed to deregister device")),
+                    //     // );
+                    //     showCustomToast("Failed to deregister device");
+                    //   }
+                    // }
                     if (Platform.isAndroid) {
                       try {
-
                         final prefs = await SharedPreferences.getInstance();
 
                         String deviceId = prefs.getString('DeviceId') ?? "";
@@ -337,15 +405,26 @@ class _NavMenuState extends State<NavMenu> {
                         print("Stored DeviceId: $deviceId");
                         print("Stored user_id: $user_id");
 
+                        // ✅ STEP 1: CHECK CONNECTION FIRST
+                        final state = await ClingBleService.getConnectionState() ?? 0;
+
+                        print("🔌 Connection State: $state");
+
+                        // ❌ NOT CONNECTED → STOP EVERYTHING
+                        if (state == 0) {
+                          showCustomToast("Device is not connected");
+                          return;
+                        }
+
+                        // ✅ STEP 2: ONLY if connected → call native
                         await ClingBleService.deregisterDevice();
 
-
-                        await Future.delayed(const Duration(milliseconds: 500));
-
+                        // ✅ STEP 3: Validate
                         if (deviceId.isEmpty || user_id.isEmpty) {
                           throw Exception("Missing device or user info");
                         }
 
+                        // ✅ STEP 4: API
                         final response = await deregisterDevice(user_id, deviceId);
 
                         if (response == null) {
@@ -361,37 +440,19 @@ class _NavMenuState extends State<NavMenu> {
 
                         print("API Status: $status | Message: $message");
 
-                        // ❌ FAIL CASE
                         if (status != "SUCCESS" ||
                             apiDeviceId != deviceId.trim() ||
                             apiUserId != user_id.trim()) {
 
-                          // _scaffoldMessengerKey.currentState?.showSnackBar(
-                          //   SnackBar(content: Text(message)),
-                          // );
-
                           showCustomToast(message);
-
                           return;
                         }
 
-                        // // ✅ SUCCESS CASE
-                        // _scaffoldMessengerKey.currentState?.showSnackBar(
-                        //   SnackBar(content: Text(message)), // "Device deregistered successfully"
-                        // );
-
                         showCustomToast(message);
-
-                        // 🚀 Navigate to pairing screen
                         Get.offAll(() => BluetoothPair());
 
-                        // 🔥 Disconnect BLE
                       } catch (e) {
                         print("Error: $e");
-
-                        // _scaffoldMessengerKey.currentState?.showSnackBar(
-                        //   const SnackBar(content: Text("Failed to deregister device")),
-                        // );
                         showCustomToast("Failed to deregister device");
                       }
                     }
@@ -619,7 +680,7 @@ class _NavMenuState extends State<NavMenu> {
           final SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.remove('isLoggedIn');
           await prefs.remove('DeviceId');
-          //await prefs.remove('user_type');
+          await prefs.remove('user_type');
           Get.offAll(() => LoginScreen());
           setState(() => is_loading = false);
         } else {
