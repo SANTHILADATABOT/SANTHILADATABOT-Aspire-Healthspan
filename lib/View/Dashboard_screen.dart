@@ -1,4 +1,4 @@
-
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'dart:async';
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:azpire_new/Cling%20Connections/sync_data.dart';
@@ -117,19 +117,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _syncService = SyncService(
       updateMessage: (msg) {
         print("📝 Message: $msg");
+        // ✅ Guard: only call setState if widget is still in the tree
+        if (!mounted) return;
         setState(() => notificationMessage = msg);
       },
       onDailyDataReceived: (data) {
-        //print("📥 Daily Data from SyncService: $data");
+        // ✅ Guard: only call setState if widget is still in the tree
+        if (!mounted) return;
         setState(() => _dailyData = data);
       },
       onDashboardRefresh: () {
         print("🔄 Refreshing dashboard after sync");
-        loadDashboardData(); // 🔥 THIS FIXES YOUR ISSUE
+        // ✅ Guard: only refresh if widget is still alive
+        if (!mounted) return;
+        loadDashboardData();
       },
       onSyncComplete: () {
         print("✅ Sync complete");
-      }, shouldSync:true ,
+      },
+      shouldSync: true,
     );
     _syncService.startSync();
     loadDashboardData();
@@ -139,7 +145,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _startToggleAutoRefresh();
     _initHealthKit();
     _showMedicalDisclaimer();
-   // _healthDataService.startSyncTimer();
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!kIsWeb && Theme.of(context).platform == TargetPlatform.iOS) {
+        final status = await AppTrackingTransparency.trackingAuthorizationStatus;
+        if (status == TrackingStatus.notDetermined) {
+          await AppTrackingTransparency.requestTrackingAuthorization();
+        }
+      }
+    });
   }
 
   Future<void> _showMedicalDisclaimer() async {
@@ -211,15 +225,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   void dispose() {
+    // Cancel timers FIRST so they cannot fire any callback during or after disposal
     _toggleRefreshTimer?.cancel();
+    _toggleRefreshTimer = null;
+    _syncTimer?.cancel();
+    _syncTimer = null;
+    // Dispose SyncService so its internal periodic timers also stop
+    _syncService.dispose();
     super.dispose();
   }
 
   Future<void> loadDashboardData() async {
+    // ✅ Guard before async work begins
+    if (!mounted) return;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var user_id = prefs.getString('user_id') ?? "";
     print("user_id:$user_id");
     final data = await _dashboardcontroller.fetchDashboardload(user_id);
+    // ✅ Guard after await — widget may have been disposed while waiting
+    if (!mounted) return;
     if (data != null) {
 
       DateTime originalDateTime = DateFormat('yyyy-MM-dd hh:mm:ss a').parse(data['collection_date']);
@@ -320,21 +344,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _startToggleAutoRefresh() {
-    // Start timer that refreshes toggle states every 10 seconds
-    _toggleRefreshTimer = Timer.periodic(Duration(seconds: 10), (Timer timer) {
-      if (mounted) {
-        _loadFromAPI();
+    _toggleRefreshTimer = Timer.periodic(const Duration(seconds: 10), (Timer timer) {
+      // ✅ Self-cancel if the widget was disposed between ticks
+      if (!mounted) {
+        timer.cancel();
+        return;
       }
+      _loadFromAPI();
     });
   }
 
   Future<void> _loadFromAPI() async {
-    if (mounted) setState(() => _loading = true);
+    // ✅ Guard: widget may have been disposed before the async result returns
+    if (!mounted) return;
+    setState(() => _loading = true);
 
     final result = await _toggleController.fetchAllToggles();
 
+    // ✅ Guard again after await — widget could have been disposed while waiting
+    if (!mounted) return;
+
     if (result != null && result.data.isNotEmpty) {
-      // Get ToggleService and update it
+      // Get ToggleService and update it — safe because mounted is true
       final toggleService = Provider.of<ToggleService>(context, listen: false);
 
       // Create a map to store new values

@@ -37,10 +37,14 @@ class EditPhoneController {
         body: userData,
       );
 
+      print("editphone:$url");
+      print("Edit_phone:${response.body}");
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
 
         if (jsonResponse["status"] == "SUCCESS") {
+          print("Edit_phone1:${jsonResponse}");
           controller.restart();
           showToast("OTP Sent Successfully");
           return true;
@@ -182,8 +186,11 @@ class EditPhoneController {
         body: userData,
       );
 
+      print("edit_verify_phone:${response.body}");
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        print("edit_verify_phone1:$jsonResponse");
 
         if (jsonResponse["status"] == "SUCCESS") {
           print(response.body);

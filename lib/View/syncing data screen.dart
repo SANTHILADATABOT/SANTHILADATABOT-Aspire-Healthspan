@@ -29,8 +29,6 @@ class SyncDataScreen extends StatefulWidget {
 class _SyncDataScreenState extends State<SyncDataScreen> {
 
   late final MethodChannel platform;
-
-
   static const _minuteChannel = EventChannel('cling/minute_data');
   static const _dailyChannel = EventChannel('cling/daily_total');
   static const _syncStatusChannel = EventChannel('cling/sync_status');
@@ -50,88 +48,122 @@ class _SyncDataScreenState extends State<SyncDataScreen> {
   StreamSubscription? _pairSub;
 
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //
+  //   if (Platform.isAndroid) {
+  //     platform = const MethodChannel('cling/methods');
+  //   } else if (Platform.isIOS) {
+  //     platform = const MethodChannel('cling_sdk');
+  //   }
+  //
+  //   print("🟢 Active MethodChannel: ${platform.name}");
+  //
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //
+  //     if (Platform.isAndroid) {
+  //
+  //       ClingChannelHandler().initialize();
+  //
+  //       // 1️⃣ First attach listeners
+  //       _setupAndroidListeners();
+  //
+  //       // 2️⃣ Then call reconnect ONCE
+  //       _syncDeviceData();
+  //
+  //     }
+  //
+  //     else if (Platform.isIOS) {
+  //
+  //       // ✅ Set up listener FIRST before any sync attempt.
+  //       // The listener handles onDeviceConnected from native, which fires
+  //       // inside serviceChange() after downloadPhoneSettingFinished() unlocks
+  //       // the SDK data pipeline.
+  //       _setupMethodChannelListener();
+  //
+  //       // ✅ Fallback: if onDeviceConnected is never received within 6s
+  //       // (e.g. device was already connected before screen opened),
+  //       // trigger sync manually.
+  //       _syncTimer = Timer(const Duration(seconds: 6), () {
+  //         if (!_hasNavigatedToDashboard && mounted) {
+  //           print("⏱️ Fallback: triggering syncDeviceData after 6s timeout");
+  //           _syncDeviceData();
+  //         }
+  //       });
+  //     }
+  //   });
+  // }
+
   @override
   void initState() {
     super.initState();
-
+    print("🔥 Sync Screen DeviceID = ${widget.deviceID}");
     if (Platform.isAndroid) {
       platform = const MethodChannel('cling/methods');
-
     } else if (Platform.isIOS) {
       platform = const MethodChannel('cling_sdk');
     }
-
     print("🟢 Active MethodChannel: ${platform.name}");
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
-
       if (Platform.isAndroid) {
-
         ClingChannelHandler().initialize();
-
-        // 1️⃣ First attach listeners
         _setupAndroidListeners();
-
-        // 2️⃣ Then call reconnect ONCE
-         _syncDeviceData();
-
-        // setState(() {
-        //   notificationMessage = "Connecting to device...";
-        // });
-
-      }
-
-      else if (Platform.isIOS) {
-
-        _setupMethodChannelListener();
-
         _syncDeviceData();
-
-        _syncTimer =
-            Timer.periodic(const Duration(minutes: 2), (_) {
-              _syncDeviceData();
-            });
+      } else if (Platform.isIOS) {
+        // ✅ Set up listener FIRST, BEFORE any sync call
+        _setupMethodChannelListener();
+        // ✅ Wait for native "onDeviceConnected" signal.
+        // If it doesn't arrive within 6 seconds, retry sync manually.
+        _syncTimer = Timer(const Duration(seconds: 6), () {
+          print("⏱️ Fallback: triggering syncDeviceData after 6s timeout");
+          _syncDeviceData();
+        });
       }
     });
   }
 
-  void _setupAndroidListeners() {
+  // void _setupAndroidListeners() {
+  //
+  //   // 1️⃣ Listen for pair success
+  //   _pairSub = _pairStatusChannel
+  //       .receiveBroadcastStream()
+  //       .listen((event) async {
+  //
+  //     print("🔥 Pair success received from native: $event");
+  //
+  //     // Now device is 100% connected
+  //     print("🔥 Now calling loadDeviceData safely");
+  //
+  //     await androidChannel.invokeMethod("loadDeviceData");
+  //   });
+  //
+  //   // 2️⃣ Listen for daily data
+  //   _dailySub = _dailyChannel
+  //       .receiveBroadcastStream()
+  //       .listen((event) {
+  //
+  //     print("🟢 ANDROID DAILY TOTAL DATA RECEIVED");
+  //     print(event);
+  //
+  //     if (event is! Map) return;
+  //
+  //     final map = Map<String, dynamic>.from(event);
+  //
+  //     setState(() {
+  //       notificationMessage = "Sync completed";
+  //       dailyData = map;
+  //     });
+  //
+  //     if (!_hasNavigatedToDashboard) {
+  //       _hasNavigatedToDashboard = true;
+  //       _navigateToDashboard();
+  //     }
+  //   });
+  // }
 
-    // 1️⃣ Listen for pair success
-    _pairSub = _pairStatusChannel
-        .receiveBroadcastStream()
-        .listen((event) async {
 
-      print("🔥 Pair success received from native: $event");
 
-      // Now device is 100% connected
-      print("🔥 Now calling loadDeviceData safely");
-
-      await androidChannel.invokeMethod("loadDeviceData");
-    });
-
-    // 2️⃣ Listen for daily data
-    _dailySub = _dailyChannel
-        .receiveBroadcastStream()
-        .listen((event) {
-
-      print("🟢 ANDROID DAILY DATA RECEIVED");
-
-      if (event is! Map) return;
-
-      final map = Map<String, dynamic>.from(event);
-
-      setState(() {
-        notificationMessage = "Sync completed";
-        dailyData = map;
-      });
-
-      if (!_hasNavigatedToDashboard) {
-        _hasNavigatedToDashboard = true;
-        _navigateToDashboard();
-      }
-    });
-  }
   @override
   void dispose() {
     _syncTimer?.cancel();
@@ -179,16 +211,109 @@ class _SyncDataScreenState extends State<SyncDataScreen> {
     }
   }
 
+  void _setupAndroidListeners() {
+
+    // 1️⃣ Listen for pair success
+    _pairSub = _pairStatusChannel
+        .receiveBroadcastStream()
+        .listen((event) async {
+
+      print("🔥 Pair success received from native: $event");
+
+      try {
+        // Ensure device is fully ready before loading data
+        // await Future.delayed(const Duration(milliseconds: 500));
+
+        print("🔥 Calling loadDeviceData after pair success");
+
+        await androidChannel.invokeMethod("loadDeviceData");
+
+      } catch (e) {
+        print("⚠️ Error calling loadDeviceData: $e");
+      }
+    });
+
+    // 2️⃣ Listen for daily data
+    _dailySub = _dailyChannel
+        .receiveBroadcastStream()
+        .listen((event) async {
+
+      print("🟢 ANDROID DAILY TOTAL DATA RECEIVED");
+      print(event);
+
+      if (event is! Map) {
+        print("⚠️ Invalid daily data format");
+        return;
+      }
+
+      final map = Map<String, dynamic>.from(event);
+
+      setState(() {
+        notificationMessage = "Sync completed";
+        dailyData = map;
+      });
+
+      try {
+        // ✅ Extract values safely
+        int heartRate = (map['heartRate'] ?? 0).toInt();
+        int totalSteps = (map['totalSteps'] ?? 0).toInt();
+        int systolicBP = (map['iBPHigh'] ?? 0).toInt();
+        int diastolicBP = (map['iBPLow'] ?? 0).toInt();
+        int totalSleep = (map['totalSleep'] ?? 0).toInt();
+        int totalspo2 = (map['spo2']?? 0).toInt();
+
+        print("🔥 CALLING API FROM EVENT CHANNEL");
+        print("HR: $heartRate, Steps: $totalSteps, SYS: $systolicBP, DIA: $diastolicBP, Sleep: $totalSleep, spo2:$totalspo2", );
+
+        // ✅ Call API (MAIN FIX)
+        await _sendHeartRateToAPI(
+            heartRate,
+            totalSteps,
+            systolicBP,
+            diastolicBP,
+            totalSleep,
+            totalspo2
+        );
+
+      } catch (e) {
+        print("⚠️ Error while sending daily data to API: $e");
+      }
+
+      // ✅ Navigate only once
+      if (!_hasNavigatedToDashboard) {
+        _hasNavigatedToDashboard = true;
+        _navigateToDashboard();
+      }
+    }, onError: (error) {
+      print("❌ Daily channel error: $error");
+    });
+  }
+
 
 
   void _setupMethodChannelListener() {
     platform.setMethodCallHandler((call) async {
       print("Method call received: ${call.method}");
 
+      // ✅ Native confirms BLE service is stable and data pipeline is unlocked
+      if (call.method == "onDeviceConnected") {
+        print("✅ onDeviceConnected received — triggering sync now");
+        _syncTimer?.cancel(); // Cancel the fallback timer
+        await _syncDeviceData();
+        return;
+        // print("✅ onDeviceConnected received — cancelling fallback timer and triggering sync");
+        // _syncTimer?.cancel();
+        // if (!_hasNavigatedToDashboard && mounted) {
+        //   await _syncDeviceData();
+        // }
+        // return;
+      }
+
       bool dataHandled = false;
 
       if (call.method == "onDailyTotalReceived") {
         print("Method call received1: ${call.method}");
+        if (!mounted) return;
         setState(() {
           notificationMessage = "Received daily data";
           dailyData = Map<String, dynamic>.from(call.arguments);
@@ -202,6 +327,7 @@ class _SyncDataScreenState extends State<SyncDataScreen> {
         print("Raw systolicBP value: ${dailyData!['iBPHigh']}");
         print("Raw diastolicBP value: ${dailyData!['iBPLow']}");
         print("Raw totalSleep value: ${dailyData!['totalSleep']}");
+        print("Raw totalSpo2 value: ${dailyData!['spo2']}");
 
         if (dailyData != null) {
           int heartRate = dailyData?['heartRate']?.toInt() ?? 0;
@@ -209,12 +335,13 @@ class _SyncDataScreenState extends State<SyncDataScreen> {
           int systolicBP = dailyData?['iBPHigh']?.toInt() ?? 0;
           int diastolicBP = dailyData?['iBPLow']?.toInt() ?? 0;
           int totalSleep = dailyData?['totalSleep']?.toInt() ?? 0;
+          int totalspo2 = dailyData?['spo2']?.toInt() ?? 0;
 
-          await _sendHeartRateToAPI(heartRate, totalSteps, systolicBP, diastolicBP, totalSleep);
+          await _sendHeartRateToAPI(heartRate, totalSteps, systolicBP, diastolicBP, totalSleep, totalspo2);
           if (!_hasNavigatedToDashboard) {
-                      _hasNavigatedToDashboard = true;
-                      _navigateToDashboard();
-                    }
+            _hasNavigatedToDashboard = true;
+            _navigateToDashboard();
+          }
 
         } else {
           print("Heart rate key not found in dailyData!");
@@ -308,7 +435,7 @@ class _SyncDataScreenState extends State<SyncDataScreen> {
     }
   }
 
-  Future<void> _sendHeartRateToAPI(int heartRate, int totalSteps, int systolicBP, int diastolicBP, int totalSleep) async {
+  Future<void> _sendHeartRateToAPI(int heartRate, int totalSteps, int systolicBP, int diastolicBP, int totalSleep,  int totalspo2,) async {
     String formattedDate = DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now());
     String formattedDate1 = DateFormat('yyyy-MM-dd').format(DateTime.now());
     print("Helooo123");
@@ -319,6 +446,7 @@ class _SyncDataScreenState extends State<SyncDataScreen> {
     print("totalSleep${totalSleep.toString()}");
     print("formattedDate1${formattedDate1}");
     print("formattedDate${formattedDate}");
+    print("total_spo2${totalspo2.toString()}");
     final url = Uri.parse("$root/health_variable/add");
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var user_id = prefs.getString('user_id') ?? "";
@@ -331,6 +459,7 @@ class _SyncDataScreenState extends State<SyncDataScreen> {
       "blood_pressure_diastolic": diastolicBP.toString(),
       "no_of_steps": totalSteps.toString(),
       "sleep": totalSleep.toString(),
+      "oxygen": totalspo2,
       "weight": "50",
       "datetime_now": formattedDate1,
     };
@@ -341,14 +470,14 @@ class _SyncDataScreenState extends State<SyncDataScreen> {
       final response = await http.post(
         url,
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
+          "Content-Type": "application/json"
         },
-        body: body, // Send as form-data
+        body: jsonEncode(body),// Send as form-data
       );
 
       final responseData = jsonDecode(response.body);
       print("status code: ${response.statusCode}");
-      print("responseData:1234 $responseData");
+      print("daily_response_data $responseData");
 
       if (response.statusCode == 201 && responseData['status'] == 'SUCCESS') {
         print("Heart rate sent successfully: $responseData");

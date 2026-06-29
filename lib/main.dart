@@ -1,10 +1,9 @@
 
 import 'dart:async';
-import 'dart:io';
-
 import 'package:azpire_new/Cling%20Connections/hive_model.dart';
 import 'package:azpire_new/cling_ble_service.dart';
 import 'package:azpire_new/root/root.dart';
+import 'package:azpire_new/web_app/platform_utils_io.dart' as Platform;
 import 'package:azpire_new/web_app/platform_utils_stub.dart';
 import 'package:azpire_new/widgets/notifications_mobile.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -390,22 +389,6 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
     initializeNotifications();
-
-    if (!kIsWeb && isIOS) {
-      Future.delayed(const Duration(seconds: 1), () async {
-        if (!mounted) return;
-        final status = await AppTrackingTransparency.trackingAuthorizationStatus;
-        print("Current ATT status: $status");
-
-        if (status == TrackingStatus.notDetermined) {
-          if (!mounted) return;
-          final newStatus = await AppTrackingTransparency.requestTrackingAuthorization();
-          print("ATT prompt shown. New status: $newStatus");
-        } else {
-          print("ATT already determined: $status");
-        }
-      });
-    }
 
 
     checkSession();

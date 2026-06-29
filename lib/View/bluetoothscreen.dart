@@ -1,19 +1,14 @@
 import 'dart:async';
-import 'dart:io';
-import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:azpire_new/Controller/pairedevice_controller.dart';
 import 'package:azpire_new/View/Dashboard_screen.dart';
-import 'package:azpire_new/View/login_Screen.dart';
 import 'package:azpire_new/cling_ble_service.dart';
-import 'package:azpire_new/minute_data_screen.dart';
 import 'package:azpire_new/utils/app_color.dart';
 import 'package:azpire_new/utils/apptext.dart';
 import 'package:azpire_new/utils/apptextstyle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../web_app/platform_utils_io.dart';
 import 'syncing data screen.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:flutter/foundation.dart'; // for kIsWeb
@@ -25,12 +20,8 @@ class BluetoothPair extends StatefulWidget {
   _BluetoothPairState createState() => _BluetoothPairState();
 }
 
-class _BluetoothPairState extends State<BluetoothPair> {
-  static const platform = MethodChannel('cling_sdk');
+class _BluetoothPairState extends State<BluetoothPair>  with WidgetsBindingObserver {
   final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
-
-  //List<String> _devices = [];
-  //List<Map<String, String>> _devices = [];
   List<dynamic> _devices = [];
   String? _registeredDevice;
   String? _pairingDevice;
@@ -41,20 +32,34 @@ class _BluetoothPairState extends State<BluetoothPair> {
   StreamSubscription? _syncSub;
   bool _hasNavigated = false;
   bool isLoading = false;
-
+  bool _isDialogOpen = false;
+  late final MethodChannel platform;
+  Timer? _btStateTimer;
+  bool _lastBtState = true;
 
   @override
   void initState() {
     super.initState();
+    if (kIsWeb) {
+      print("Running on Web - Bluetooth logic skipped");
+      return;
+    }
+
+
+    if (isAndroid) {
+      platform = const MethodChannel('cling/methods');
+
+    } else if (isIOS) {
+      platform = const MethodChannel('cling_sdk');
+    }
     _hasNavigated = false;
     platform.setMethodCallHandler(_methodCallHandler);
     _listenForPairEvents();
-    Future.delayed(const Duration(milliseconds: 1200), () {
-      _startScanning();
-    });
-    // Android: listen to scan results and update _devices list
+    _checkBluetoothOnEntry();
+    _startBluetoothMonitoring();
+    WidgetsBinding.instance.addObserver(this);
     _scanSub?.cancel();
-    if (Platform.isAndroid) {
+    if (isAndroid) {
       _scanSub = ClingBleService.scanResults().listen((results) {
 
         final devices = results.map((d) {
@@ -63,6 +68,7 @@ class _BluetoothPairState extends State<BluetoothPair> {
             "mac": d['mac'].toString(),
           };
         }).toList();
+        print("📱 Final Devices List: $devices");
 
         setState(() {
           _devices = devices;
@@ -72,9 +78,179 @@ class _BluetoothPairState extends State<BluetoothPair> {
 
   }
 
+
+
+  void _startBluetoothMonitoring() {
+
+    if (kIsWeb) return;
+
+
+    _btStateTimer?.cancel();
+
+    _btStateTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      final isOn = await platform.invokeMethod("isBluetoothOn");
+
+      // 🔴 Bluetooth turned OFF
+      if (_lastBtState == true && isOn == false) {
+        await ClingBleService.stopScan();
+
+        if (mounted) {
+          setState(() {
+            _devices.clear();
+          });
+        }
+
+        _showBluetoothPopup();
+      }
+
+      // 🟢 Bluetooth turned ON
+      if (_lastBtState == false && isOn == true) {
+
+        // ✅ CLOSE POPUP
+        if (_isDialogOpen && mounted) {
+          Navigator.of(context, rootNavigator: true).pop();
+          _isDialogOpen = false;
+        }
+
+        // ✅ Start scanning again
+        await Future.delayed(const Duration(milliseconds: 300));
+        _startScanning();
+      }
+
+      _lastBtState = isOn;
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _onReturnFromSettings();
+    }
+  }
+
+  Future<void> _onReturnFromSettings() async {
+    // On iOS the CBCentralManager state is asynchronous.
+    // Give it a moment to settle before querying.
+    if (isIOS) {
+      await Future.delayed(const Duration(milliseconds: 600));
+    }
+
+    final isOn = await platform.invokeMethod("isBluetoothOn");
+
+    if (isOn == true) {
+      // Sync state tracker so the periodic timer doesn't get confused.
+      _lastBtState = true;
+
+      // Dismiss the popup if it is showing.
+      if (_isDialogOpen && mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+        _isDialogOpen = false;
+      }
+
+      // Start scanning here in case the native bluetoothOn event was fired
+      // while the app was in the background and was never received by Flutter.
+      await Future.delayed(const Duration(milliseconds: 300));
+      _startScanning();
+    } else {
+      _lastBtState = false;
+      _showBluetoothPopup();
+    }
+  }
+
+  Future<void> _checkBluetoothOnEntry() async {
+
+    if (kIsWeb) return;
+
+    try {
+      if (isIOS) {
+        await Future.delayed(const Duration(milliseconds: 800));
+      }
+
+      final isOn = await platform.invokeMethod("isBluetoothOn");
+
+      _lastBtState = isOn; // 👈 track initial state
+
+      if (isOn == false) {
+        _showBluetoothPopup();
+      } else {
+        _startScanning();
+      }
+    } catch (e) {
+      print("BT check error: $e");
+    }
+  }
+
+  void _showBluetoothPopup() {
+
+    if (kIsWeb) return;
+
+    if (!mounted) return;
+    if (_isDialogOpen) return;
+
+    _isDialogOpen = true;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: const Text("Turn on Bluetooth"),
+          content: const Text(
+              "Bluetooth is required to scan for and connect to nearby devices. Please enable Bluetooth to continue"
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            Center(
+              child: TextButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  _isDialogOpen = false;
+
+                  if (isAndroid) {
+                    try {
+                      await const MethodChannel('cling/methods')
+                          .invokeMethod("openBluetoothSettings");
+                    } catch (e) {
+                      print("Error opening Bluetooth: $e");
+                    }
+                  } else if (isIOS) {
+                    try {
+                      await platform.invokeMethod("openBluetoothSettings");
+                    } catch (e) {
+                      print("Error opening Bluetooth settings: $e");
+                    }
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.others,
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                  child: const Text(
+                    "OK",
+                    style: Apptextstyle.s15wbcW,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    ).then((_) {
+      // ✅ Ensures state resets even if dialog dismissed unexpectedly
+      _isDialogOpen = false;
+    });
+  }
+
   Future<void> _listenForPairEvents() async {
     print("print9");
-    if (!Platform.isAndroid) return;
+    if (isAndroid) return;
     print("print10");
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -84,11 +260,6 @@ class _BluetoothPairState extends State<BluetoothPair> {
     _pairSub = ClingBleService.pairStatusStream().listen((connectedId) {
 
       if (!mounted) return;
-
-      // ✅ ALWAYS use the tapped device (UI key)
-      // final deviceName = _pairingDevice;
-      //
-      // if (deviceName == null) return;
 
       final deviceName = _pairingDevice ?? connectedId;
 
@@ -127,22 +298,47 @@ class _BluetoothPairState extends State<BluetoothPair> {
     if (call.method == "onDevicesDiscovered") {
       setState(() {
         _devices = List<String>.from(call.arguments);
-
       });
+    } else if (call.method == "bluetoothOff") {
+      if (isAndroid) {
+        await ClingBleService.stopScan();
+      }
+      if (mounted) {
+        setState(() {
+          _devices.clear();
+        });
+      }
+      _showBluetoothPopup();
+    } else if (call.method == "bluetoothOn") {
+      if (_isDialogOpen && mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+        _isDialogOpen = false;
+      }
+      await Future.delayed(const Duration(milliseconds: 300));
+      _startScanning();
     }
   }
 
-  Future<void> _startScanning() async {
-    // if (Platform.isAndroid) {
-    //   ClingBleService.startScan();
-    // }
-    if (Platform.isAndroid) {
+  Future<void>  _startScanning() async {
+
+    if (kIsWeb) {
+      print("Web does not support Cling BLE scanning");
+      return;
+    }
+
+    if (isAndroid) {
+
+      final isOn = await platform.invokeMethod("isBluetoothOn");
+
+      if (isOn == false) {
+        _showBluetoothPopup();
+        return;
+      }
+
+
       await ClingBleService.stopScan(); // 🔥 IMPORTANT
       await Future.delayed(Duration(milliseconds: 300));
 
-      setState(() {
-        _devices.clear(); // 🔥 clear old devices
-      });
 
       try {
         await ClingBleService.startScan();
@@ -158,7 +354,7 @@ class _BluetoothPairState extends State<BluetoothPair> {
         }
       }
     }
-    else if (Platform.isIOS) {
+    else if (isIOS) {
       // iOS scan
       try {
         await platform.invokeMethod('startScanning');
@@ -174,7 +370,7 @@ class _BluetoothPairState extends State<BluetoothPair> {
     print("print1");
 
 
-    if (Platform.isAndroid) {
+    if (isAndroid) {
       try {
         setState(() {
           _pairingDevice = deviceID;
@@ -188,6 +384,8 @@ class _BluetoothPairState extends State<BluetoothPair> {
         print("DEVICE_ID:$deviceID");
 
         final response = await pairDevice(user_id, deviceID);
+
+
 
         if (response == null) {
           throw Exception("No response from API");
@@ -211,9 +409,6 @@ class _BluetoothPairState extends State<BluetoothPair> {
             status != "SUCCESS" ||
             apiDeviceId != deviceID.trim()) {
 
-          // _scaffoldMessengerKey.currentState?.showSnackBar(
-          //   SnackBar(content: Text(message)),
-          // );
           showCustomToast(message);
 
 
@@ -226,20 +421,15 @@ class _BluetoothPairState extends State<BluetoothPair> {
           return;
         }
 
-        // _scaffoldMessengerKey.currentState?.showSnackBar(
-        //   SnackBar(content: Text(message)),
-        // );
         showCustomToast(message);
 
         setState(() {
           _pairingStatus[deviceID] = AppText.paired;
         });
 
-        // 🔥 Connect only on TRUE success
-        // await ClingBleService.connectToDevice(deviceID);
         await ClingBleService.connectToDevice(deviceID);
+        print("Android_Deviceid:$deviceID");
 
-// wait for BLE readiness
         await Future.delayed(const Duration(seconds: 2));
 
         _registeredDevice = deviceID;
@@ -265,54 +455,11 @@ class _BluetoothPairState extends State<BluetoothPair> {
           isLoading = false;
         });
 
-        // _scaffoldMessengerKey.currentState?.showSnackBar(
-        //   const SnackBar(content: Text("Something went wrong")),
-        // );
         showCustomToast("Something went wrong");
       }
     }
-    // else if (Platform.isIOS) {
-    //   setState(() {
-    //     _pairingDevice = deviceID; // Show loader for this device
-    //   });
-    //
-    //   try {
-    //     await platform.invokeMethod('registerDevice', {"deviceID": deviceID});
-    //
-    //     setState(() {
-    //       _registeredDevice = deviceID;
-    //       _pairingStatus[deviceID] = AppText.paired;
-    //     });
-    //
-    //     _scaffoldMessengerKey.currentState?.showSnackBar(
-    //       SnackBar(content: Text("Device $deviceID registered successfully!")),
-    //     );
-    //
-    //     // Navigate to the Sync Screen after pairing
-    //     Future.delayed(Duration(seconds: 1), () {
-    //       _navigateToSyncScreen();
-    //     });
-    //
-    //   }
-    //   on PlatformException
-    //   catch (e) {
-    //     setState(() {
-    //       _pairingStatus[deviceID] = AppText.failed;
-    //       // _pairingDevice = null;
-    //       // isLoading = false; // ✅ stop loader on failure
-    //     });
-    //     print("Failed to register device: ${e.message}");
-    //     _scaffoldMessengerKey.currentState?.showSnackBar(
-    //       SnackBar(content: Text("Failed to register device: ${e.message}")),
-    //     );
-    //     }
-    //   // } finally {
-    //   //   setState(() {
-    //   //     _pairingDevice = null; // Hide loader after pairing
-    //   //   });
-    //   // }
-    // }
-    else if (Platform.isIOS) {
+
+    else if (isIOS) {
       try {
         setState(() {
           _pairingDevice = deviceID;
@@ -320,24 +467,7 @@ class _BluetoothPairState extends State<BluetoothPair> {
           isLoading = true;
         });
 
-        // //🔥 Call native method
-        // await platform.invokeMethod('registerDevice', {
-        //   "deviceID": deviceID
-        // });
-
-        if (_registeredDevice == deviceID) {
-          // 🔥 Already paired → just connect
-          await platform.invokeMethod('connectDevice', {
-            "deviceID": deviceID
-          });
-        } else {
-          // 🔥 First time → register
-          await platform.invokeMethod('registerDevice', {
-            "deviceID": deviceID
-          });
-        }
-
-        await Future.delayed(const Duration(seconds: 2));
+        print("Ble_DeviceId:$deviceID");
 
         final prefs = await SharedPreferences.getInstance();
         var user_id = prefs.getString('user_id') ?? "";
@@ -345,7 +475,6 @@ class _BluetoothPairState extends State<BluetoothPair> {
 
         print("DEVICE_ID (iOS): $deviceID");
 
-        // ✅ CALL API FIRST
         final response = await pairDevice(user_id, deviceID);
 
         if (response == null) {
@@ -357,17 +486,11 @@ class _BluetoothPairState extends State<BluetoothPair> {
         String message = response['message'] ?? "";
         String apiDeviceId =
         (response['device_id'] ?? "").toString().trim();
-
-        // ❌ FAIL CASE
         if (statusCode != 200 ||
             status != "SUCCESS" ||
             apiDeviceId != deviceID.trim()) {
 
-          // _scaffoldMessengerKey.currentState?.showSnackBar(
-          //   SnackBar(content: Text(message)),
-          // );
           showCustomToast(message);
-
 
           setState(() {
             _pairingStatus[deviceID] = AppText.failed;
@@ -375,17 +498,20 @@ class _BluetoothPairState extends State<BluetoothPair> {
             isLoading = false;
           });
 
-          return; // 🚫 STOP HERE (NO NAVIGATION)
+          return;
         }
+        print("iOS → calling registerDevice (handles both new and already-paired devices correctly)");
+        await platform.invokeMethod('registerDevice', {
+          "deviceID": deviceID
+        });
 
-        // ✅ SUCCESS CASE
-        // _scaffoldMessengerKey.currentState?.showSnackBar(
-        //   SnackBar(content: Text(message)),
-        // );
+        await Future.delayed(const Duration(seconds: 2));
+        // ✅ SUCCESS CASE UI UPDATE
         showCustomToast(message);
 
         setState(() {
           _pairingStatus[deviceID] = AppText.paired;
+          _registeredDevice = deviceID;
           _pairingDevice = null;
           isLoading = false;
         });
@@ -393,6 +519,7 @@ class _BluetoothPairState extends State<BluetoothPair> {
         // 🚀 NAVIGATE ONLY AFTER SUCCESS
         if (!_hasNavigated && mounted) {
           _hasNavigated = true;
+          await Future.delayed(const Duration(milliseconds: 800));
           _navigateToSyncScreen();
         }
 
@@ -405,9 +532,6 @@ class _BluetoothPairState extends State<BluetoothPair> {
           isLoading = false;
         });
 
-        // _scaffoldMessengerKey.currentState?.showSnackBar(
-        //   const SnackBar(content: Text("Something went wrong")),
-        // );
         showCustomToast("Something went wrong");
       }
     }
@@ -424,7 +548,6 @@ class _BluetoothPairState extends State<BluetoothPair> {
 
   void _navigateToSkip() {
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DashboardScreen(deviceID: '')));
-
   }
 
   @override
@@ -433,6 +556,8 @@ class _BluetoothPairState extends State<BluetoothPair> {
     _pairSub?.cancel();
     _minuteSub?.cancel();
     _syncSub?.cancel();
+    _btStateTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -507,19 +632,22 @@ class _BluetoothPairState extends State<BluetoothPair> {
 
                         final device = _devices[index];
 
-                        if (Platform.isAndroid && device is Map<String, String>) {
+                        if( (!kIsWeb && isAndroid && device is Map<String, String>)){
                           deviceName = device['name'] ?? "";
                           deviceMac = device['mac'] ?? "";
-                        } else if (Platform.isIOS && device is String) {
+                        }
+                        else if (!kIsWeb && isIOS && device is String){
                           deviceName = device;
-                        } else {
+                        }
+                        else{
                           deviceName = "";
                         }
 
                         return Column(
                           children: [
                             ListTile(
-                              title: Text(deviceName),
+                             title: Text(deviceName),
+
                               subtitle: Text(
                                 _pairingStatus[deviceName] ?? AppText.notpaired,
                                 style: _pairingStatus[deviceName] == AppText.paired

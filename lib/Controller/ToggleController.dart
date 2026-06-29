@@ -82,18 +82,23 @@ import 'package:flutter/foundation.dart';
 
 
 class ToggleService with ChangeNotifier {
-  // Remove the singleton pattern and use Provider properly
-  ToggleService() {
-    _initializeToggles();
-  }
+  ToggleService();
+  // Note: do NOT call loadToggleStates() here in the constructor.
+  // notifyListeners() called from an async constructor fires before any
+  // Consumer/Provider listener is attached, which causes the
+  // "deactivated widget's ancestor" crash.
+  // Instead, the Dashboard explicitly calls loadToggleStates() (via _loadFromAPI)
+  // only when it is safely mounted.
+
+  bool _disposed = false;
 
   final AdminController _adminController = AdminController();
 
-  bool _showBloodPressure = true;
+  bool _showBloodPressure = false;
   bool _showHeartRate = true;
   bool _showSteps = true;
   bool _showSleep = true;
-  bool _showSpo2 = true;
+  bool _showSpo2 = false;
   bool _showWeight = true;
 
   // Getters
@@ -104,14 +109,20 @@ class ToggleService with ChangeNotifier {
   bool get showSpo2 => _showSpo2;
   bool get showWeight => _showWeight;
 
-  Future<void> _initializeToggles() async {
-    await loadToggleStates();
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
-
   // Load toggle states from API
   Future<void> loadToggleStates() async {
+    // ✅ Don't notify after ChangeNotifier is disposed
+    if (_disposed) return;
     try {
       final result = await _adminController.fetchAllToggles();
+
+      // ✅ Guard again after await
+      if (_disposed) return;
 
       if (result != null && result.data.isNotEmpty) {
         bool changed = false;
@@ -169,7 +180,7 @@ class ToggleService with ChangeNotifier {
     }
   }
 
-  // Update toggle states (used by AdminScreen)
+  // Update toggle states (used by AdminScreen and Dashboard auto-refresh)
   void updateToggleStates({
     bool? bloodPressure,
     bool? heartRate,
@@ -178,41 +189,37 @@ class ToggleService with ChangeNotifier {
     bool? spo2,
     bool? weight,
   }) {
+    // ✅ Don't notify after ChangeNotifier is disposed
+    if (_disposed) return;
+
     bool changed = false;
 
     if (bloodPressure != null && _showBloodPressure != bloodPressure) {
       _showBloodPressure = bloodPressure;
       changed = true;
-      print("Blood Pressure updated to: $bloodPressure");
     }
     if (heartRate != null && _showHeartRate != heartRate) {
       _showHeartRate = heartRate;
       changed = true;
-      print("Heart Rate updated to: $heartRate");
     }
     if (steps != null && _showSteps != steps) {
       _showSteps = steps;
       changed = true;
-      print("Steps updated to: $steps");
     }
     if (sleep != null && _showSleep != sleep) {
       _showSleep = sleep;
       changed = true;
-      print("Sleep updated to: $sleep");
     }
     if (spo2 != null && _showSpo2 != spo2) {
       _showSpo2 = spo2;
       changed = true;
-      print("SpO2 updated to: $spo2");
     }
     if (weight != null && _showWeight != weight) {
       _showWeight = weight;
       changed = true;
-      print("Weight updated to: $weight");
     }
 
     if (changed) {
-      print("ToggleService: Notifying listeners about changes");
       notifyListeners();
     }
   }

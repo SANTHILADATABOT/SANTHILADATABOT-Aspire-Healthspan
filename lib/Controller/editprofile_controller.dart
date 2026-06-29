@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart'; // for kIsWeb
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../root/root.dart';
 
+
 class EditProfileController {
 
   Future<void> Profile_Details({

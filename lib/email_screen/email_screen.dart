@@ -47,10 +47,13 @@ class _EmailScreenState extends State<EmailScreen> {
      if (result['success']) {
        final emailOtp = result['data']['email_otp'].toString();
        final email = result['data']["email"];
+       final Usertype = result['data']["user_type"];
+       print("Usertype:$Usertype");
        showCustomToast(result['message']);
        Get.to(() => VerificationOtpScreen(
          email: email!,
          emailOtp: emailOtp,
+         userType: Usertype,
        ));
      } else {
        showCustomToast(result['message']);

@@ -29,7 +29,8 @@ import 'package:flutter/foundation.dart'; // for kIsWeb
 class VerificationOtpScreen extends StatefulWidget {
   var email;
   var emailOtp;
-  VerificationOtpScreen({super.key, required this.email,required this.emailOtp });
+  final String userType;
+  VerificationOtpScreen({super.key, required this.email,required this.emailOtp, required this.userType });
 
   @override
   State<VerificationOtpScreen> createState() => _VerificationOtpScreenState();
@@ -49,6 +50,7 @@ class _VerificationOtpScreenState extends State<VerificationOtpScreen> {
   @override
   void initState() {
     print(widget.email);
+    print("User Type_login: ${widget.userType}");
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (kIsWeb) {
         _focusNode.requestFocus();
@@ -73,6 +75,7 @@ class _VerificationOtpScreenState extends State<VerificationOtpScreen> {
       email: widget.email,
       enteredOtp: enteredOtp,
       fcmToken: token,
+      usertype: widget.userType
     );
 
     if (result['success']) {
@@ -83,6 +86,7 @@ class _VerificationOtpScreenState extends State<VerificationOtpScreen> {
       await prefs.setString('mobile_no', data["mobile_no"].toString());
       await prefs.setString('email', data["email"]);
       await prefs.setString('pofile', data["pofile"] ?? " ");
+      await prefs.setString('user_type', widget.userType);
 print("mobile_no ${data["mobile_no"]}");
       showToast(result['message']);
       _controller.pause();

@@ -41,6 +41,8 @@ bool is_loading = false;
     var user_id = prefs.getString('user_id');
     final String Url = "$root/get_notification";
 
+    print("notify_usedId:$user_id");
+
     final Map<String, dynamic> userData = {
       'user_id': user_id,
     };
@@ -82,6 +84,8 @@ bool is_loading = false;
     }
   }
 
+
+
   String _formatDate(String dateString) {
     try {
       DateTime parsedDate = DateTime.parse(dateString);
@@ -96,9 +100,13 @@ bool is_loading = false;
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
+      // onWillPop: () async {
+      //   Get.to(() => DashboardScreen(deviceID:_registeredDevice!));
+      //   return false;
+      // },
       onWillPop: () async {
-        Get.to(() => DashboardScreen(deviceID:_registeredDevice!));
-        return true;
+        bool shouldExit = await showExitConfirmationDialog(context);
+        return shouldExit;
       },
       child: Scaffold(
         backgroundColor: Color(0xFFffffff),

@@ -1,14 +1,39 @@
 
-// import 'dart:io';
+//  import 'platform_utils.dart';
 //
 // bool get isIOS => Platform.isIOS;
 
-// platform_utils_io.dart
+// // platform_utils_io.dart
+// import 'dart:io' show Platform;
+// import 'package:flutter/foundation.dart';
+//
+// bool get isIOS =>
+//     !kIsWeb &&
+//         (Platform.isIOS || (Platform.isMacOS && defaultTargetPlatform == TargetPlatform.iOS));
+
+
+// // lib/web_app/platform_utils_io.dart
+//
+// import 'dart:io' show Platform;
+// import 'package:flutter/foundation.dart';
+//
+// bool get isIOS =>
+//     !kIsWeb &&
+//         (Platform.isIOS ||
+//             (Platform.isMacOS &&
+//                 defaultTargetPlatform == TargetPlatform.iOS));
+//
+// bool get isAndroid =>
+//     !kIsWeb && Platform.isAndroid;
+
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 
 bool get isIOS =>
     !kIsWeb &&
-        (Platform.isIOS || (Platform.isMacOS && defaultTargetPlatform == TargetPlatform.iOS));
+        (Platform.isIOS ||
+            (Platform.isMacOS &&
+                defaultTargetPlatform == TargetPlatform.iOS));
 
-
+bool get isAndroid =>
+    !kIsWeb && Platform.isAndroid;

@@ -712,3 +712,720 @@
 //     );
 //   }
 // }
+
+
+
+
+
+
+
+//bluetoothscreen
+
+// class _BluetoothPairState extends State<BluetoothPair>  with WidgetsBindingObserver {
+//   //static const platform = MethodChannel('cling_sdk');
+//   //final String METHOD_CHANNEL = "cling/methods";
+//   final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+//
+//   //List<String> _devices = [];
+//   //List<Map<String, String>> _devices = [];
+//   List<dynamic> _devices = [];
+//   String? _registeredDevice;
+//   String? _pairingDevice;
+//   Map<String, String> _pairingStatus = {}; // Map to store pairing status
+//   StreamSubscription? _scanSub;
+//   StreamSubscription? _pairSub;
+//   StreamSubscription? _minuteSub;
+//   StreamSubscription? _syncSub;
+//   bool _hasNavigated = false;
+//   bool isLoading = false;
+//   bool _isDialogOpen = false;
+//   late final MethodChannel platform;
+//   Timer? _btStateTimer;
+//   bool _lastBtState = true;
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     if (Platform.isAndroid) {
+//       platform = const MethodChannel('cling/methods');
+//
+//     } else if (Platform.isIOS) {
+//       platform = const MethodChannel('cling_sdk');
+//     }
+//     _hasNavigated = false;
+//     platform.setMethodCallHandler(_methodCallHandler);
+//     _listenForPairEvents();
+//     _checkBluetoothOnEntry();
+//     _startBluetoothMonitoring();
+//     // Future.delayed(const Duration(milliseconds: 1200), () {
+//     //   //_startScanning();
+//     // });
+//     WidgetsBinding.instance.addObserver(this);
+//     // Android: listen to scan results and update _devices list
+//     _scanSub?.cancel();
+//     if (Platform.isAndroid) {
+//       _scanSub = ClingBleService.scanResults().listen((results) {
+//
+//         final devices = results.map((d) {
+//           return {
+//             "name": d['name'].toString(),
+//             "mac": d['mac'].toString(),
+//           };
+//         }).toList();
+//
+//         setState(() {
+//           _devices = devices;
+//         });
+//       });
+//     }
+//
+//   }
+//
+//
+//
+//   void _startBluetoothMonitoring() {
+//     _btStateTimer?.cancel();
+//
+//     _btStateTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+//       final isOn = await platform.invokeMethod("isBluetoothOn");
+//
+//       // 🔴 Bluetooth turned OFF
+//       if (_lastBtState == true && isOn == false) {
+//         await ClingBleService.stopScan();
+//
+//         if (mounted) {
+//           setState(() {
+//             _devices.clear();
+//           });
+//         }
+//
+//         _showBluetoothPopup();
+//       }
+//
+//       // 🟢 Bluetooth turned ON
+//       if (_lastBtState == false && isOn == true) {
+//
+//         // ✅ CLOSE POPUP
+//         if (_isDialogOpen && mounted) {
+//           Navigator.of(context, rootNavigator: true).pop();
+//           _isDialogOpen = false;
+//         }
+//
+//         // ✅ Start scanning again
+//         await Future.delayed(const Duration(milliseconds: 300));
+//         _startScanning();
+//       }
+//
+//       _lastBtState = isOn;
+//     });
+//   }
+//
+//   @override
+//   void didChangeAppLifecycleState(AppLifecycleState state) {
+//     if (state == AppLifecycleState.resumed) {
+//       _onReturnFromSettings();
+//     }
+//   }
+//
+//   Future<void> _onReturnFromSettings() async {
+//     // On iOS the CBCentralManager state is asynchronous.
+//     // Give it a moment to settle before querying.
+//     if (Platform.isIOS) {
+//       await Future.delayed(const Duration(milliseconds: 600));
+//     }
+//
+//     final isOn = await platform.invokeMethod("isBluetoothOn");
+//
+//     if (isOn == true) {
+//       // Sync state tracker so the periodic timer doesn't get confused.
+//       _lastBtState = true;
+//
+//       // Dismiss the popup if it is showing.
+//       if (_isDialogOpen && mounted) {
+//         Navigator.of(context, rootNavigator: true).pop();
+//         _isDialogOpen = false;
+//       }
+//
+//       // Start scanning here in case the native bluetoothOn event was fired
+//       // while the app was in the background and was never received by Flutter.
+//       await Future.delayed(const Duration(milliseconds: 300));
+//       _startScanning();
+//     } else {
+//       _lastBtState = false;
+//       _showBluetoothPopup();
+//     }
+//   }
+//
+//   Future<void> _checkBluetoothOnEntry() async {
+//     try {
+//       // On iOS, CBCentralManager initializes asynchronously and starts in
+//       // .unknown state for ~300-800ms. Querying too early returns false even
+//       // when Bluetooth is actually ON, which causes a false-positive popup.
+//       if (Platform.isIOS) {
+//         await Future.delayed(const Duration(milliseconds: 800));
+//       }
+//
+//       final isOn = await platform.invokeMethod("isBluetoothOn");
+//
+//       _lastBtState = isOn; // 👈 track initial state
+//
+//       if (isOn == false) {
+//         _showBluetoothPopup();
+//       } else {
+//         _startScanning();
+//       }
+//     } catch (e) {
+//       print("BT check error: $e");
+//     }
+//   }
+//
+//   void _showBluetoothPopup() {
+//     if (!mounted) return;
+//     if (_isDialogOpen) return;
+//
+//     _isDialogOpen = true;
+//
+//     showDialog(
+//       context: context,
+//       barrierDismissible: false,
+//       builder: (_) {
+//         return AlertDialog(
+//           backgroundColor: Colors.white,
+//           title: const Text("Turn on Bluetooth"),
+//           content: const Text(
+//               "Bluetooth is required to scan for and connect to nearby devices. Please enable Bluetooth to continue"
+//           ),
+//           actionsAlignment: MainAxisAlignment.center,
+//           actions: [
+//             Center(
+//               child: TextButton(
+//                 onPressed: () async {
+//                   Navigator.pop(context);
+//                   _isDialogOpen = false;
+//
+//                   if (Platform.isAndroid) {
+//                     try {
+//                       await const MethodChannel('cling/methods')
+//                           .invokeMethod("openBluetoothSettings");
+//                     } catch (e) {
+//                       print("Error opening Bluetooth: $e");
+//                     }
+//                   } else if (Platform.isIOS) {
+//                     try {
+//                       await platform.invokeMethod("openBluetoothSettings");
+//                     } catch (e) {
+//                       print("Error opening Bluetooth settings: $e");
+//                     }
+//                   }
+//                 },
+//                 child: Container(
+//                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+//                   decoration: BoxDecoration(
+//                     color: AppColors.others,
+//                     borderRadius: BorderRadius.circular(5.0),
+//                   ),
+//                   child: const Text(
+//                     "OK",
+//                     style: Apptextstyle.s15wbcW,
+//                   ),
+//                 ),
+//               ),
+//             ),
+//           ],
+//         );
+//       },
+//     ).then((_) {
+//       // ✅ Ensures state resets even if dialog dismissed unexpectedly
+//       _isDialogOpen = false;
+//     });
+//   }
+//
+//   Future<void> _listenForPairEvents() async {
+//     print("print9");
+//     if (!Platform.isAndroid) return;
+//     print("print10");
+//
+//     final SharedPreferences prefs = await SharedPreferences.getInstance();
+//     var user_id = prefs.getString('user_id') ?? "";
+//     print("user_id:$user_id");
+//
+//     _pairSub = ClingBleService.pairStatusStream().listen((connectedId) {
+//
+//       if (!mounted) return;
+//
+//       // ✅ ALWAYS use the tapped device (UI key)
+//       // final deviceName = _pairingDevice;
+//       //
+//       // if (deviceName == null) return;
+//
+//       final deviceName = _pairingDevice ?? connectedId;
+//
+//
+//       setState(() {
+//         _pairingStatus[deviceName] = AppText.paired; // ✅ correct key
+//         _registeredDevice = deviceName;
+//       });
+//
+//       // show paired UI briefly
+//       Future.delayed(const Duration(milliseconds: 800), () {
+//         if (!mounted) return;
+//
+//         setState(() {
+//           isLoading = false;
+//           _pairingDevice = null;
+//         });
+//
+//         _navigateToSyncScreen();
+//       });
+//     });
+//
+//   }
+//
+//
+//   void onDeviceConnected() async {
+//     try {
+//       await platform.invokeMethod("setDeviceConfig");
+//       print("Device config updated successfully.");
+//     } catch (e) {
+//       print("Error setting device config: $e");
+//     }
+//   }
+//
+//   Future<void> _methodCallHandler(MethodCall call) async {
+//     if (call.method == "onDevicesDiscovered") {
+//       setState(() {
+//         _devices = List<String>.from(call.arguments);
+//       });
+//     } else if (call.method == "bluetoothOff") {
+//       if (Platform.isAndroid) {
+//         await ClingBleService.stopScan();
+//       }
+//       if (mounted) {
+//         setState(() {
+//           _devices.clear();
+//         });
+//       }
+//       _showBluetoothPopup();
+//     } else if (call.method == "bluetoothOn") {
+//       if (_isDialogOpen && mounted) {
+//         Navigator.of(context, rootNavigator: true).pop();
+//         _isDialogOpen = false;
+//       }
+//       await Future.delayed(const Duration(milliseconds: 300));
+//       _startScanning();
+//     }
+//   }
+//
+//   Future<void> _startScanning() async {
+//     // if (Platform.isAndroid) {
+//     //   ClingBleService.startScan();
+//     // }
+//     if (Platform.isAndroid) {
+//
+//       final isOn = await platform.invokeMethod("isBluetoothOn");
+//
+//       if (isOn == false) {
+//         _showBluetoothPopup();
+//         return;
+//       }
+//
+//
+//       await ClingBleService.stopScan(); // 🔥 IMPORTANT
+//       await Future.delayed(Duration(milliseconds: 300));
+//
+//       // setState(() {
+//       //   _devices.clear(); // 🔥 clear old devices
+//       // });
+//
+//       try {
+//         await ClingBleService.startScan();
+//       } on PlatformException catch (e) {
+//         if (e.code == "NO_PERMISSION") {
+//           _scaffoldMessengerKey.currentState?.showSnackBar(
+//             SnackBar(content: Text("Bluetooth/Location permission is required to scan.")),
+//           );
+//         } else if (e.code == "LOCATION_DISABLED") {
+//           _scaffoldMessengerKey.currentState?.showSnackBar(
+//             SnackBar(content: Text("Please turn on your phone's Location (GPS) to find nearby devices.")),
+//           );
+//         }
+//       }
+//     }
+//     else if (Platform.isIOS) {
+//       // iOS scan
+//       try {
+//         await platform.invokeMethod('startScanning');
+//       } on PlatformException catch (e) {
+//         print("Failed to start scanning: ${e.message}");
+//       }
+//     } else {
+//       print("Scanning not supported on this platform");
+//     }
+//   }
+//
+//   Future<void> _registerDevice(String deviceID) async {
+//     print("print1");
+//
+//
+//     if (Platform.isAndroid) {
+//       try {
+//         setState(() {
+//           _pairingDevice = deviceID;
+//           _pairingStatus[deviceID] = "Pairing...";
+//           isLoading = true;
+//         });
+//
+//         final prefs = await SharedPreferences.getInstance();
+//         var user_id = prefs.getString('user_id') ?? "";
+//         await prefs.setString('DeviceId', deviceID);
+//         print("DEVICE_ID:$deviceID");
+//
+//         final response = await pairDevice(user_id, deviceID);
+//
+//         if (response == null) {
+//           throw Exception("No response from API");
+//         }
+//
+//         int statusCode = response['statusCode'] ?? 0;
+//         String status = response['status'] ?? "";
+//         String message = response['message'] ?? "";
+//         String apiDeviceId =
+//         (response['device_id'] ?? "").toString().trim();
+//
+//         // ✅ ADDED (user_id from API)
+//         String apiUserId =
+//         (response['user_id'] ?? "").toString().trim();
+//
+//         print("HTTP: $statusCode | API: $status | Msg: $message");
+//         print("Local Device: $deviceID | API Device: $apiDeviceId");
+//
+//         // ❌ FAILED (HTTP fail OR API fail OR Device mismatch)
+//         if (statusCode != 200 ||
+//             status != "SUCCESS" ||
+//             apiDeviceId != deviceID.trim()) {
+//
+//           // _scaffoldMessengerKey.currentState?.showSnackBar(
+//           //   SnackBar(content: Text(message)),
+//           // );
+//           showCustomToast(message);
+//
+//
+//           setState(() {
+//             _pairingStatus[deviceID] = AppText.failed;
+//             _pairingDevice = null;
+//             isLoading = false;
+//           });
+//
+//           return;
+//         }
+//
+//         // _scaffoldMessengerKey.currentState?.showSnackBar(
+//         //   SnackBar(content: Text(message)),
+//         // );
+//         showCustomToast(message);
+//
+//         setState(() {
+//           _pairingStatus[deviceID] = AppText.paired;
+//         });
+//
+//         // 🔥 Connect only on TRUE success
+//         // await ClingBleService.connectToDevice(deviceID);
+//         await ClingBleService.connectToDevice(deviceID);
+//
+// // wait for BLE readiness
+//         await Future.delayed(const Duration(seconds: 2));
+//
+//         _registeredDevice = deviceID;
+//
+//         if (!_hasNavigated && mounted) {
+//           _hasNavigated = true;
+//           _navigateToSyncScreen();
+//         }
+//
+//         if (mounted) {
+//           setState(() {
+//             _pairingDevice = null;
+//             isLoading = false;
+//           });
+//         }
+//
+//       } catch (e) {
+//         print("Error: $e");
+//
+//         setState(() {
+//           _pairingStatus[deviceID] = AppText.failed;
+//           _pairingDevice = null;
+//           isLoading = false;
+//         });
+//
+//         // _scaffoldMessengerKey.currentState?.showSnackBar(
+//         //   const SnackBar(content: Text("Something went wrong")),
+//         // );
+//         showCustomToast("Something went wrong");
+//       }
+//     }
+//
+//     else if (Platform.isIOS) {
+//       try {
+//         setState(() {
+//           _pairingDevice = deviceID;
+//           _pairingStatus[deviceID] = "Pairing...";
+//           isLoading = true;
+//         });
+//
+//         print("Ble_DeviceId:$deviceID");
+//
+//         //🔥 Call native method
+//         await platform.invokeMethod('registerDevice', {
+//           "deviceID": deviceID
+//         });
+//
+//         // if (_registeredDevice == deviceID) {
+//         //   // 🔥 Already paired → just connect
+//         //   await platform.invokeMethod('connectDevice', {
+//         //     "deviceID": deviceID
+//         //   });
+//         // } else {
+//         //   // 🔥 First time → register
+//         //   await platform.invokeMethod('registerDevice', {
+//         //     "deviceID": deviceID
+//         //   });
+//         // }
+//
+//         await Future.delayed(const Duration(seconds: 2));
+//
+//         final prefs = await SharedPreferences.getInstance();
+//         var user_id = prefs.getString('user_id') ?? "";
+//         await prefs.setString('DeviceId', deviceID);
+//
+//         print("DEVICE_ID (iOS): $deviceID");
+//
+//         // ✅ CALL API FIRST
+//         final response = await pairDevice(user_id, deviceID);
+//
+//         if (response == null) {
+//           throw Exception("No response from API");
+//         }
+//
+//         int statusCode = response['statusCode'] ?? 0;
+//         String status = response['status'] ?? "";
+//         String message = response['message'] ?? "";
+//         String apiDeviceId =
+//         (response['device_id'] ?? "").toString().trim();
+//
+//         // ❌ FAIL CASE
+//         if (statusCode != 200 ||
+//             status != "SUCCESS" ||
+//             apiDeviceId != deviceID.trim()) {
+//
+//           // _scaffoldMessengerKey.currentState?.showSnackBar(
+//           //   SnackBar(content: Text(message)),
+//           // );
+//           showCustomToast(message);
+//
+//
+//           setState(() {
+//             _pairingStatus[deviceID] = AppText.failed;
+//             _pairingDevice = null;
+//             isLoading = false;
+//           });
+//
+//           return; // 🚫 STOP HERE (NO NAVIGATION)
+//         }
+//
+//         // ✅ SUCCESS CASE
+//         // _scaffoldMessengerKey.currentState?.showSnackBar(
+//         //   SnackBar(content: Text(message)),
+//         // );
+//         showCustomToast(message);
+//
+//         setState(() {
+//           _pairingStatus[deviceID] = AppText.paired;
+//           _registeredDevice = deviceID;
+//           _pairingDevice = null;
+//           isLoading = false;
+//         });
+//
+//         // 🚀 NAVIGATE ONLY AFTER SUCCESS
+//         if (!_hasNavigated && mounted) {
+//           _hasNavigated = true;
+//           await Future.delayed(const Duration(milliseconds: 800));
+//           _navigateToSyncScreen();
+//         }
+//
+//       } catch (e) {
+//         print("iOS Error: $e");
+//
+//         setState(() {
+//           _pairingStatus[deviceID] = AppText.failed;
+//           _pairingDevice = null;
+//           isLoading = false;
+//         });
+//
+//         // _scaffoldMessengerKey.currentState?.showSnackBar(
+//         //   const SnackBar(content: Text("Something went wrong")),
+//         // );
+//         showCustomToast("Something went wrong");
+//       }
+//     }
+//
+//   }
+//
+//   void _navigateToSyncScreen() {
+//     if (_registeredDevice != null) {
+//       print("print12");
+//       Navigator.pushReplacement(context,
+//           MaterialPageRoute(builder: (context) => SyncDataScreen(deviceID: _registeredDevice!,)));
+//     }
+//   }
+//
+//   void _navigateToSkip() {
+//     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DashboardScreen(deviceID: '')));
+//
+//   }
+//
+//   @override
+//   void dispose() {
+//     _scanSub?.cancel();
+//     _pairSub?.cancel();
+//     _minuteSub?.cancel();
+//     _syncSub?.cancel();
+//     _btStateTimer?.cancel();
+//     WidgetsBinding.instance.removeObserver(this);
+//     super.dispose();
+//   }
+//
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       scaffoldMessengerKey: _scaffoldMessengerKey,
+//       home: WillPopScope(
+//         onWillPop: () async {
+//           bool shouldExit = await showExitConfirmationDialog(context);
+//           return shouldExit;
+//         },
+//         child: Scaffold(
+//           backgroundColor: Colors.white,
+//           appBar: AppBar(
+//             centerTitle: true,
+//             title: Text(AppText.SDK_headings,
+//               style:Apptextstyle.s18wbap,),
+//             backgroundColor:Colors.white,
+//             leading: IconButton(
+//               onPressed: () {
+//                 SystemNavigator.pop();
+//               },
+//               icon: Icon(Icons.arrow_back_ios),
+//             ),
+//           ),
+//           body: Stack(
+//             children: [
+//
+//               // 🔹 YOUR ORIGINAL UI
+//               Column(
+//                 children: [
+//                   SizedBox(height: 10,),
+//                   ElevatedButton(
+//                     onPressed: _startScanning,
+//                     style: ElevatedButton.styleFrom(
+//                       backgroundColor: AppColors.others,
+//                       foregroundColor: Colors.white,
+//                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+//                       shape: RoundedRectangleBorder(
+//                         borderRadius: BorderRadius.circular(10),
+//                       ),
+//                     ),
+//                     child: const Text(AppText.scandevice),
+//                   ),
+//                   SizedBox(height: 20,),
+//                   ElevatedButton(
+//                     onPressed: _navigateToSkip,
+//                     style: ElevatedButton.styleFrom(
+//                       backgroundColor: AppColors.others,
+//                       foregroundColor: Colors.white,
+//                       padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 12),
+//                       shape: RoundedRectangleBorder(
+//                         borderRadius: BorderRadius.circular(10),
+//                       ),
+//                     ),
+//                     child: const Text(AppText.demo_mode),
+//                   ),
+//                   SizedBox(height: 20),
+//
+//                   Expanded(
+//                     child: _devices.isEmpty
+//                         ? Center(child: Text(AppText.nodevices))
+//                         : ListView.builder(
+//                       itemCount: _devices.length,
+//                       itemBuilder: (context, index) {
+//
+//                         String deviceName;
+//                         String deviceMac = "";
+//
+//                         final device = _devices[index];
+//
+//                         if (Platform.isAndroid && device is Map<String, String>) {
+//                           deviceName = device['name'] ?? "";
+//                           deviceMac = device['mac'] ?? "";
+//                         } else if (Platform.isIOS && device is String) {
+//                           deviceName = device;
+//                         } else {
+//                           deviceName = "";
+//                         }
+//
+//                         return Column(
+//                           children: [
+//                             ListTile(
+//                               title: Text(deviceName),
+//                               subtitle: Text(
+//                                 _pairingStatus[deviceName] ?? AppText.notpaired,
+//                                 style: _pairingStatus[deviceName] == AppText.paired
+//                                     ? Apptextstyle.s16wncGreen
+//                                     : _pairingStatus[deviceName] == AppText.failed
+//                                     ? Apptextstyle.s16wncR
+//                                     : Apptextstyle.s16wncB,
+//                               ),
+//                               onTap: isLoading
+//                                   ? null
+//                                   : () => _registerDevice(deviceName),
+//                               trailing: Icon(
+//                                 Icons.bluetooth,
+//                                 color: _pairingStatus[deviceName] == AppText.paired
+//                                     ? AppColors.others
+//                                     : _pairingStatus[deviceName] == AppText.failed
+//                                     ? AppColors.Red
+//                                     : AppColors.Grey,
+//                               ),
+//                             ),
+//                             const Divider(height: 0.5, thickness: 0.5),
+//                           ],
+//                         );
+//                       },
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//
+//               // 🔥 FULL SCREEN CENTER LOADER
+//               if (isLoading)
+//                 Positioned.fill(
+//                   child: IgnorePointer(
+//                     child: Container(// optional dim
+//                       child: Center(
+//                         child: CircularProgressIndicator(
+//                           color: AppColors.others,
+//                           strokeWidth: 3,
+//                         ),
+//                       ),
+//                     ),
+//                   ),
+//                 ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }

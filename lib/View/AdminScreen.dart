@@ -40,8 +40,10 @@ class _AdminscreenState extends State<Adminscreen> {
   }
 
   Future<void> _loadFromAPI() async {
+    if (!mounted) return;
     setState(() => _loading = true);
     final result = await _controller.fetchAllToggles();
+    if (!mounted) return;
 
     if (result != null && result.data.isNotEmpty) {
       for (final toggle in result.data) {
@@ -68,7 +70,7 @@ class _AdminscreenState extends State<Adminscreen> {
         }
       }
     }
-    setState(() => _loading = false);
+    if (mounted) setState(() => _loading = false);
   }
 
 

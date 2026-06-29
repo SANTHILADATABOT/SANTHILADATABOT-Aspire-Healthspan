@@ -77,8 +77,8 @@ class _SignupScreenState extends State<SignupScreen> {
     print("emailController: ${_emailController.text}");
     print("completePhoneNumber: $completePhoneNumber");
 
-    final userType = isAdmin ? "Admin" : "User";
-    print("Selected userType: $userType");
+    // final userType = isAdmin ? "Admin" : "User";
+    // print("Selected userType: $userType");
 
     try {
       if (!_isPhoneValid || completePhoneNumber == null || completePhoneNumber!.isEmpty) {
@@ -97,7 +97,7 @@ class _SignupScreenState extends State<SignupScreen> {
         username: _usernameController.text,
         email: _emailController.text,
         completePhoneNumber: completePhoneNumber.toString(),
-        userType: userType,
+        userType: "User",
       );
 
 

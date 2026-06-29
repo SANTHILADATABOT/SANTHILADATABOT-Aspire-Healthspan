@@ -1,4 +1,4 @@
-import 'dart:io';
+import '../web_app/platform_utils_io.dart';
 import 'package:health/health.dart';
 import 'package:intl/intl.dart';
 
@@ -20,7 +20,7 @@ class HealthConnectService {
 
   /// Core method to mirror Cling data into Health Connect with toggle respect
   Future<void> syncToHealthConnect(Map<String, dynamic> data, {Map<String, bool>? toggles}) async {
-    if (!Platform.isAndroid) return;
+    if (isAndroid) return;
 
     // Use default 'true' if toggles are not provided
     final bool showBP = toggles?['BloodPressure'] ?? true;
@@ -110,7 +110,7 @@ class HealthConnectService {
 
   /// Bulk sync with toggle respect
   Future<void> syncBulkToHealthConnect(List<Map<String, dynamic>> rawList, {Map<String, bool>? toggles}) async {
-    if (!Platform.isAndroid || rawList.isEmpty) return;
+    if (isAndroid || rawList.isEmpty) return;
     
     for (var data in rawList) {
       await syncToHealthConnect(data, toggles: toggles);

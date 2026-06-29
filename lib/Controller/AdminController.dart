@@ -70,7 +70,7 @@ class AdminController {
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"})
-          .timeout(Duration(seconds: 10),
+          .timeout(Duration(seconds: 40),
         onTimeout: () {
           // Just show toast, no need to throw
           //showCustomToast("Time Out");

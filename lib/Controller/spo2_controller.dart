@@ -206,7 +206,7 @@ class spo2Controller extends GetxController {
 
             chartData.add(
               BloodOxygenData(
-                spo2: spo2Avg.toInt(),
+                spo2: spo2Avg.toDouble(),
                 day: dayName,
                 date: date,
                 months: '',
@@ -302,7 +302,7 @@ class spo2Controller extends GetxController {
             double spo2Avg = data?['average_spo2']?.toDouble() ?? 0.0;
 
             chartData.add(BloodOxygenData(
-              spo2: spo2Avg.round(),
+              spo2: spo2Avg.toDouble(),
               day: '',
               date: startDate,
               months: weekKey,
@@ -368,7 +368,7 @@ class spo2Controller extends GetxController {
             DateTime startDate = DateFormat('yyyy-MM-dd').parse(monthData['start_date']);
 
             chartData.add(BloodOxygenData(
-              spo2: spo2Avg.round(),
+              spo2: spo2Avg.toDouble(),
               day: '', // Not used here
               date: startDate,
               months: monthLabel,
@@ -429,7 +429,7 @@ class spo2Controller extends GetxController {
             DateTime startDate = DateFormat('yyyy-MM-dd').parse(yearData['start_date']);
 
             chartData.add(BloodOxygenData(
-              spo2: spo2Avg.round(),
+              spo2: spo2Avg.toDouble(),
               day: '', // Not used
               date: startDate,
               months: '', // Not used

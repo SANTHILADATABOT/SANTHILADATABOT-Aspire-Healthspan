@@ -4,6 +4,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:azpire_new/View/bluetoothscreen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -253,7 +254,7 @@ print("userType $userType");
       'mobile_no': mobileno ?? '',
       'mobile_otp': enteredOtp ?? '',
       "access_token": token ?? "",
-      'user_type': userType
+      "user_type": userType
       //'user_id' :user ?? ''
     };
 

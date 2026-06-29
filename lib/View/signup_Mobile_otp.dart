@@ -111,8 +111,6 @@ class _MobileOtpScreenState extends State<MobileOtpScreen> {
         userType: widget.userType
     );
 
-
-
     setState(() {
       isLoading = false;
     });

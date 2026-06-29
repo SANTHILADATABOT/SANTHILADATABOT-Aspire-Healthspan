@@ -4,6 +4,8 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 
+import '../web_app/platform_utils_io.dart';
+
 class ClingChannelHandler {
   static final ClingChannelHandler _instance =
   ClingChannelHandler._internal();
@@ -32,11 +34,11 @@ class ClingChannelHandler {
   // INIT (handles BOTH platforms automatically)
   // =================================================
   void initialize() {
-    if (Platform.isIOS) {
+    if (isIOS) {
       _setupIOS();
     }
 
-    if (Platform.isAndroid) {
+    if (isAndroid) {
       _setupAndroid();
     }
   }

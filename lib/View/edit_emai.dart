@@ -166,26 +166,56 @@ class _edit_emailState extends State<edit_email> {
                       Container(
                         height: 50,
                         // width: size.width*0.6,
+                        // child: TextFormField(
+                        //   readOnly: false,
+                        //   onChanged: _onTextChanged,
+                        //   controller: emailController,
+                        //   keyboardType: TextInputType.emailAddress,
+                        //   validator: (value) {
+                        //     if (value == null || value.isEmpty) {
+                        //       return 'Please enter an email address';
+                        //     } else if (!RegExp(
+                        //         r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
+                        //         .hasMatch(value)) {
+                        //       return 'Please enter a valid email address';
+                        //     }
+                        //     return null;
+                        //   },
+                        //   decoration: InputDecoration(
+                        //     hintText: "Enter Your Email",
+                        //     focusColor: Color(0xFF275176),
+                        //     hintStyle: TextStyle(
+                        //         color: Colors.grey.shade500, fontSize: 14),
+                        //   ),
+                        // ),
                         child: TextFormField(
                           readOnly: false,
                           onChanged: _onTextChanged,
                           controller: emailController,
                           keyboardType: TextInputType.emailAddress,
+
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+
                           validator: (value) {
-                            if (value == null || value.isEmpty) {
+
+                            if (value == null || value.trim().isEmpty) {
                               return 'Please enter an email address';
-                            } else if (!RegExp(
-                                r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
-                                .hasMatch(value)) {
+                            }
+
+                            if (!validateEmail(value.trim())) {
                               return 'Please enter a valid email address';
                             }
+
                             return null;
                           },
+
                           decoration: InputDecoration(
                             hintText: "Enter Your Email",
                             focusColor: Color(0xFF275176),
                             hintStyle: TextStyle(
-                                color: Colors.grey.shade500, fontSize: 14),
+                              color: Colors.grey.shade500,
+                              fontSize: 14,
+                            ),
                           ),
                         ),
                       ),
@@ -193,12 +223,21 @@ class _edit_emailState extends State<edit_email> {
                       SizedBox(height: 20,),
                       verify == false ?
                       InkWell(
+                        // onTap: () {
+                        //   if (emailController.text.isEmpty) {
+                        //     showToast("Email is Empty");
+                        //   } else {
+                        //     verify_mob();
+                        //   }
+                        // },
                         onTap: () {
-                          if (emailController.text.isEmpty) {
-                            showToast("Email is Empty");
-                          } else {
+
+                          FocusScope.of(context).unfocus();
+
+                          if (_formKey.currentState!.validate()) {
                             verify_mob();
                           }
+
                         },
                         child: isLoading_1 == true ? Center(
                           child: Image.asset(
@@ -346,7 +385,7 @@ class _edit_emailState extends State<edit_email> {
                       verify == true ?
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 50),
-                        child: isLoading == false ? MyButton(
+                        child: isLoading_1 == false ? MyButton(
                           // press: () async {
                           //   // otpverify();
                           //   verify_submit();

@@ -1,6 +1,6 @@
 
 import 'dart:convert';
-import 'dart:io';
+//  import 'platform_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -9,7 +9,7 @@ import 'package:oktoast/oktoast.dart';
 import 'package:flutter/foundation.dart'; // for kIsWeb
 import '../View/signup_Mobile_otp.dart';
 import '../root/root.dart';
-
+import 'dart:ui' as ui;
 
 
 
@@ -160,7 +160,7 @@ class LoginController {
     required String onOtpReceived,
     required String onUserReceived,
     required String onMobileNoReceived,
-    required String userType,
+    //required String userType,
   }) async
   {
     final String url = '$root/login_resend_otp';
@@ -177,7 +177,8 @@ class LoginController {
 
     try {
       print("🌍 Region Debug Test Started");
-      print("➡️ Device Locale: ${Platform.localeName}");
+     // print("➡️ Device Locale: ${Platform.localeName}");
+      print("➡️ Device Locale: ${ui.PlatformDispatcher.instance.locale}");
       print("➡️ Using VPN or No VPN");
       print("➡️ API URL: $url");
       // final HttpClient httpClient = HttpClient()
@@ -216,6 +217,11 @@ class LoginController {
           onUserReceived = jsonResponse['data']['user'].toString();
           onMobileNoReceived = jsonResponse['data']['mobile_no'].toString();
 
+          String apiUserType =
+          jsonResponse['data']['user_type'].toString();
+
+          print("USER TYPE: $apiUserType");
+
           showToast("OTP Sent Successfully");
 
           Get.to(() =>
@@ -223,7 +229,7 @@ class LoginController {
                 MobileOTP: onOtpReceived,
                 user: onUserReceived,
                 mobileno: onMobileNoReceived,
-                userType: userType,
+                userType: apiUserType,
               ));
         }
         else {
@@ -255,7 +261,7 @@ class LoginController {
   void showCustomToast(String msg) {
     showToast(
       msg,
-      duration: Duration(seconds: 2),
+      duration: Duration(seconds: 10),
       position: kIsWeb ? ToastPosition.top : ToastPosition.bottom,
       backgroundColor: Colors.black,
       radius: 8.0,

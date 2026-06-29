@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 
 class ClingBleService {
   static const _methodChannel = MethodChannel('cling/methods');
+  // iOS uses a separate channel registered in AppDelegate.swift
+  static const _iosMethodChannel = MethodChannel('cling_sdk');
   static const _scanChannel = EventChannel('cling/scan');
   static const _minuteChannel = EventChannel('cling/minute_data');
   static const _dailyChannel = EventChannel('cling/daily_total');
@@ -105,13 +107,21 @@ class ClingBleService {
 
 
   static Future<void> stopScan() async {
-    await _methodChannel.invokeMethod('stopScan');
+    if (Platform.isAndroid) {
+      await _methodChannel.invokeMethod('stopScan');
+    }
+    // } else if (Platform.isIOS) {
+    //   await _iosMethodChannel.invokeMethod('stopScanning');
+    // }
   }
 
   static Future<void> clearNativeCache() async {
     if (Platform.isAndroid) {
       await _methodChannel.invokeMethod('clearNativeCache');
     }
+    // else if (Platform.isIOS) {
+    //   await _iosMethodChannel.invokeMethod('clearNativeCache');
+    // }
   }
 
   // Add this method to check bond status
@@ -157,19 +167,6 @@ class ClingBleService {
   }
 
 
-  // static Future<void> reconnectByClingId(String clingId) async {
-  //   await _methodChannel.invokeMethod(
-  //     'reconnectByClingId',
-  //     {"clingId": clingId},
-  //   );
-  // }
-
-  // static Future<void> reconnectByName(String name) async {
-  //   await _methodChannel.invokeMethod(
-  //     'reconnectByName',
-  //     {"name": name},
-  //   );
-  // }
 
 
 

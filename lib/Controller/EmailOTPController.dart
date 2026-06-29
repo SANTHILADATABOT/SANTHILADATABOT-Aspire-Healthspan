@@ -59,6 +59,8 @@ class Emailotpcontroller {
     required String email,
     required String enteredOtp,
     required String? fcmToken,
+    required String usertype
+
   }) async {
 
     // 🚨 HARD STOP — DO NOT CALL API
@@ -79,6 +81,7 @@ class Emailotpcontroller {
     final prefs = await SharedPreferences.getInstance();
     var user_id = prefs.getString('user_id') ?? "";
 
+
     final String url = '$root/email_otp_verified';
 
     final Map<String, String> userData = {
@@ -86,13 +89,17 @@ class Emailotpcontroller {
       'email_otp': enteredOtp,
       'access_token': fcmToken ?? '',
       'user_id': user_id,
+      "user_type": usertype
     };
 
     try {
       final response = await http.post(Uri.parse(url), body: userData);
 
+      print("email_login_verify:${response.body}");
+
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
+        print("email_login_verify1:$jsonResponse");
         return {
           'success': jsonResponse['status'] == "SUCCESS",
           'data': jsonResponse,

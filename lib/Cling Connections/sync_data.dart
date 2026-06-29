@@ -1,7 +1,6 @@
-
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import '../web_app/platform_utils_io.dart';
 import 'package:azpire_new/Cling%20Connections/clingchannelHandler.dart';
 import 'package:azpire_new/Cling%20Connections/health_connect_service.dart';
 import 'package:azpire_new/Cling%20Connections/hive_model.dart';
@@ -268,7 +267,6 @@ import 'package:azpire_new/Controller/AdminController.dart';
 //   }
 // }
 
-
 class SyncService {
   Timer? _periodicSyncTimer; // 2-minute periodic sync timer
   final Duration periodicSyncDuration = const Duration(minutes: 2);
@@ -295,7 +293,6 @@ class SyncService {
   static const _minuteChannel = EventChannel('cling/minute_data');
   static const _dailyChannel = EventChannel('cling/daily_total');
   final VoidCallback onDashboardRefresh;
-
 
   SyncService({
     required this.updateMessage,
@@ -330,8 +327,6 @@ class SyncService {
       _syncToHealthConnectBackground(data);
     };
 
-
-
     // ---------------- MINUTE DATA ----------------
     clingHandler.onMinuteData = (List<dynamic> list) async {
       if (list.isEmpty) return;
@@ -346,12 +341,6 @@ class SyncService {
 
       print("✅ Stored ${newItems.length} minute records in Hive");
 
-      // 🔥 THIS IS THE REAL "WATCH SYNC COMPLETED"
-      if (!_isTwoMinTimerStarted) {
-        print("⌚ First minute data received — starting 2-minute sync timer");
-        _startTwoMinuteTimerOnce();
-      }
-
       // Keep only 1 week data
       // await _retainOneWeekData(box);
 
@@ -361,6 +350,11 @@ class SyncService {
       // 🔗 Mirror bulk data to Health Connect - NON-BLOCKING
       _syncBulkToHealthConnectBackground(newItems.map((e) => e.data).toList());
     };
+
+    // 🔥 NEW: Trigger first sync and start periodic timer immediately
+    print("🚀 Initializing startup sync and starting 2-minute timer");
+    await syncDeviceData();
+    _startTwoMinuteTimerOnce();
   }
 
   // 🔹 NON-BLOCKING Sync to Health Connect
@@ -374,10 +368,12 @@ class SyncService {
   }
 
   // 🔹 NON-BLOCKING Bulk Sync to Health Connect
-  void _syncBulkToHealthConnectBackground(List<Map<String, dynamic>> rawList) async {
+  void _syncBulkToHealthConnectBackground(
+      List<Map<String, dynamic>> rawList) async {
     try {
       final toggles = await _fetchToggles();
-      await HealthConnectService().syncBulkToHealthConnect(rawList, toggles: toggles);
+      await HealthConnectService()
+          .syncBulkToHealthConnect(rawList, toggles: toggles);
     } catch (e) {
       print("⚠️ Health Connect Background Bulk Sync Error: $e");
     }
@@ -400,32 +396,25 @@ class SyncService {
     return null;
   }
 
-    // // ---------------- WATCH SYNC COMPLETED ----------------
-    // clingHandler.onWatchSyncCompleted = () {
-    //   print("⌚ Watch sync completed");
-    //   _startTwoMinuteTimerOnce();
-    // };
-
-
+  // // ---------------- WATCH SYNC COMPLETED ----------------
+  // clingHandler.onWatchSyncCompleted = () {
+  //   print("⌚ Watch sync completed");
+  //   _startTwoMinuteTimerOnce();
+  // };
 
   Future<void> syncDeviceData() async {
     try {
-      if (Platform.isIOS) {
+      if (isIOS) {
         print("🍎 iOS → syncDeviceData()");
         await platform.invokeMethod('syncDeviceData');
-      }
-
-      else if (Platform.isAndroid) {
+      } else if (isAndroid) {
         print("🤖 Android → loadDeviceData()");
         await ClingBleService.syncdata();
       }
-
     } on PlatformException catch (e) {
       print("Failed to sync data: ${e.message}");
     }
   }
-
-
 
   // 🔹 START 2-MIN TIMER (ONLY ONCE)
   void _startTwoMinuteTimerOnce() {
@@ -434,13 +423,12 @@ class SyncService {
     print("⏱️ Started 2-minute sync timer");
     _isTwoMinTimerStarted = true;
 
-    _periodicSyncTimer =
-        Timer.periodic(periodicSyncDuration, (timer) async {
-          print("⏰ 2-minute timer triggered");
+    _periodicSyncTimer = Timer.periodic(periodicSyncDuration, (timer) async {
+      print("⏰ 2-minute timer triggered");
 
-          await syncDeviceData();
-          await _syncHiveDataToApi();
-        });
+      await syncDeviceData();
+      await _syncHiveDataToApi();
+    });
   }
 
   // 🔹 DEBOUNCE API CALL
@@ -498,9 +486,7 @@ class SyncService {
 
       _retrySyncTimer?.cancel();
       _retrySyncTimer = null;
-    }
-
-    else {
+    } else {
       print("❌ Sync failed, retrying in 5 minutes");
 
       _retrySyncTimer?.cancel();
@@ -537,67 +523,44 @@ class SyncService {
 
     print("Daily_URL:$url");
 
-    // final body = {
-    //   "heart_rate": heartRate.toString(),
-    //   "user_id": user_id,
-    //   "datetime": DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now()),
-    //   "blood_pressure_systolic": systolicBP.toString(),
-    //   "blood_pressure_diastolic": diastolicBP.toString(),
-    //   "no_of_steps": totalSteps.toString(),
-    //   "sleep": totalSleep.toString(),
-    //   "spo2": totalspo2.toString(),
-    //   "weight": "50",
-    //   "datetime_now": DateFormat('yyyy-MM-dd').format(DateTime.now()),
-    // };
-    //
-    // print("spo2_data:$body");
-    //
-    // try {
-    //   final response = await http.post(
-    //     url,
-    //     headers: {"Content-Type": "application/x-www-form-urlencoded"},
-    //     body: body,
-    //   );
     try {
       print("daily");
-    final response = await http.post(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode({
-        "heart_rate": heartRate,
-        "user_id": user_id,
-        "datetime": DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now()),
-        "blood_pressure_systolic": systolicBP,
-        "blood_pressure_diastolic": diastolicBP,
-        "no_of_steps": totalSteps,
-        "sleep": totalSleep,
-        "oxygen": totalspo2,
-        "weight": 50,
-        "datetime_now": DateFormat('yyyy-MM-dd').format(DateTime.now()),
-      }),
-    );
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "heart_rate": heartRate,
+          "user_id": user_id,
+          "datetime":
+              DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now()),
+          "blood_pressure_systolic": systolicBP,
+          "blood_pressure_diastolic": diastolicBP,
+          "no_of_steps": totalSteps,
+          "sleep": totalSleep,
+          "oxygen": totalspo2,
+          "weight": 50,
+          "datetime_now": DateFormat('yyyy-MM-dd').format(DateTime.now()),
+        }),
+      );
 
       print("daily1");
       print("Total_data:$response");
 
+      print("Status Code: ${response.statusCode}");
+      print("Raw Body: ${response.body}");
 
-    print("Status Code: ${response.statusCode}");
-    print("Raw Body: ${response.body}");
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      print("DailyData API response: ${response.body}");
-    } else {
-      print("❌ DailyData Error ${response.statusCode}: ${response.body} :${response.statusCode}");
-    }
-
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print("DailyData API response: ${response.body}");
+      } else {
+        print(
+            "❌ DailyData Error ${response.statusCode}: ${response.body} :${response.statusCode}");
+      }
     } catch (e) {
       print("Error sending DailyData: $e");
     }
   }
-
-
 
   // 🔹 BULK MINUTE API (UNCHANGED)
   Future<bool> sendBulkMinuteDataToApi(
@@ -621,14 +584,14 @@ class SyncService {
       // );
       final response = await http
           .post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "user_id": user_id,
-          "data": dataList,
-        }),
-      )
-          .timeout(Duration(seconds: 40));
+            url,
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode({
+              "user_id": user_id,
+              "data": dataList,
+            }),
+          )
+          .timeout(Duration(minutes: 5));
       print("Minute data API response: ${response.body}");
       //print("Minute_data: $response");
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -722,11 +685,3 @@ class SyncService {
     print("🧹 SyncService disposed and timers/subscriptions cancelled");
   }
 }
-
-
-
-
-
-
-
-

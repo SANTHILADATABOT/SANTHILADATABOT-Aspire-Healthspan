@@ -22,6 +22,8 @@ public class ClingBleManager {
 
     private static final String TAG = "CLING_MANAGER";
     private static final int USER_ID = 876355;
+    private static int scanCount = 0;
+   // public static final int CLING_DEVICE_TYPE_ALL = 26;
 
     private static final Map<String, BluetoothDevice> deviceMap = new HashMap<>();
     private static final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -71,34 +73,89 @@ public class ClingBleManager {
     // ================== SCAN ==================
 
     public static void startScan() {
+        scanCount++;
+
+        Log.e(
+                "VIVO_DEBUG",
+                "SCAN COUNT = " + scanCount
+        );
+
+        Log.e(
+                "VIVO_DEBUG",
+                "START SCAN CALLED FROM THREAD="
+                        + Thread.currentThread().getName()
+        );
+
+        Log.e(
+                "VIVO_DEBUG",
+                "TIME="
+                        + System.currentTimeMillis()
+        );
 
         Log.i(TAG, "🔍 Starting scan...");
-
+        Log.e(
+                "VIVO_DEBUG",
+                "STARTING SCAN NOW"
+        );
         ClingSdk.stopScan();
         ClingSdk.setUserId(USER_ID);
-        ClingSdk.setClingDeviceType(ClingSdk.CLING_DEVICE_TYPE_TRONL);
+        //ClingSdk.setClingDeviceType(ClingSdk.CLING_DEVICE_TYPE_TRONL);
+        //ClingSdk.setClingDeviceType(ClingSdk.CLING_DEVICE_TYPE_NO_FILTER);
+        ClingSdk.setClingDeviceType(ClingSdk.CLING_DEVICE_TYPE_ALL);
 
         ClingSdk.startScan(60 * 1000,
                 new OnBleListener.OnScanDeviceListener() {
 
                     @Override
                     public void onBleScanUpdated(Object o) {
-
+                        Log.e(
+                                "VIVO_DEBUG",
+                                "onBleScanUpdated called"
+                        );
                         if (o == null) return;
 
                         ArrayList<BluetoothDeviceInfo> devices =
                                 (ArrayList<BluetoothDeviceInfo>) o;
-
+                        for (int i = 0; i < devices.size(); i++) {
+                            Log.e(
+                                    "VIVO_DEBUG",
+                                    "DEVICE INDEX = " + i
+                            );
+                        }
+                        Log.e(
+                                "VIVO_DEBUG",
+                                "SDK returned " + devices.size() + " devices"
+                        );
                         List<Map<String, Object>> result = new ArrayList<>();
 
                         for (BluetoothDeviceInfo d : devices) {
 
                             BluetoothDevice device = d.getmBleDevice();
-                            if (device == null) continue;
+                            if (device == null) {
+                                Log.e(
+                                        "VIVO_DEBUG",
+                                        "BluetoothDevice is NULL"
+                                );
+                                continue;
+                            }
 
                             String mac = device.getAddress();
                             String name = device.getName();
 
+                            if (name == null) {
+                                Log.e(
+                                        "VIVO_DEBUG",
+                                        "NAME IS NULL | MAC=" + mac +
+                                                " RSSI=" + d.getmRssi()
+                                );
+                            } else {
+                                Log.e(
+                                        "VIVO_DEBUG",
+                                        "NAME=" + name +
+                                                " MAC=" + mac +
+                                                " RSSI=" + d.getmRssi()
+                                );
+                            }
                             deviceMap.put(name, device);
 
                             Map<String, Object> map = new HashMap<>();
@@ -129,7 +186,7 @@ public class ClingBleManager {
         ClingSdk.stopScan();
         // Disconnect from any previously bound native device before connecting to a new one
         ClingSdk.disconnectDevice(true);
-        
+
         ClingSdk.setUserId(USER_ID);
 
         BluetoothDevice device = deviceMap.get(name);
@@ -207,7 +264,7 @@ public class ClingBleManager {
                 }
         );
     }
-    
+
     // ================== CLEAR NATIVE CACHE (LOGOUT) ==================
 
     public static void clearNativeCache() {

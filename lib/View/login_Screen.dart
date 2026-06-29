@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:azpire_new/Controller/login_controller.dart';
 import 'package:azpire_new/FCM_Token/fcm_token.dart';
@@ -57,6 +56,15 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     initializePreferences();
     requestNotificationPermissions();
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!kIsWeb && Theme.of(context).platform == TargetPlatform.iOS) {
+        final status = await AppTrackingTransparency.trackingAuthorizationStatus;
+        if (status == TrackingStatus.notDetermined) {
+          await AppTrackingTransparency.requestTrackingAuthorization();
+        }
+      }
+    });
   }
 
 
@@ -130,9 +138,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> login() async {
 
-    final prefs = await SharedPreferences.getInstance();
-    final userType = prefs.getString('user_type') ?? 'Unknown';
-    print("Retrieved user_type from SharedPreferences: $userType");
+    // final prefs = await SharedPreferences.getInstance();
+    // final userType = prefs.getString('user_type') ?? 'Unknown';
+    // print("Retrieved user_type from SharedPreferences: $userType");
 
     if (!_isPhoneValid || completePhoneNumber == null || completePhoneNumber!.isEmpty) {
       setState(() {
@@ -153,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
         onOtpReceived: MobileOTP.toString(),
         onUserReceived: user.toString(),
         onMobileNoReceived: mobileno.toString(),
-        userType: userType,
+        //userType: userType,
       );
 
     } catch (e) {

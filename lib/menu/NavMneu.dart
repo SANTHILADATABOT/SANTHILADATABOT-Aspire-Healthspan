@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:azpire_new/Controller/pairedevice_controller.dart';
 import 'package:azpire_new/View/AdminScreen.dart';
 import 'package:azpire_new/View/Dashboard_screen.dart';
@@ -30,7 +31,6 @@ import 'package:http/http.dart' as http;
 import 'package:azpire_new/root/root.dart';
 import '../Controller/ToggleController.dart';
 import 'dart:async';
-import 'dart:io';
 import 'package:azpire_new/cling_ble_service.dart';
 import 'package:oktoast/oktoast.dart';
 
@@ -166,10 +166,10 @@ class _NavMenuState extends State<NavMenu> {
               children: [
                 Container(
                   height: kIsWeb
-                      ? ((MediaQuery.of(context).size.height * 0.12) < 85
-                      ? 85
+                      ? ((MediaQuery.of(context).size.height * 0.12) < 90
+                      ? 90
                       : (MediaQuery.of(context).size.height * 0.12))
-                      : 85, // Constant height for Android & iOS
+                      : 90, // Constant height for Android & iOS
                   width: kIsWeb ? 250 : MediaQuery
                       .of(context)
                       .size
@@ -200,7 +200,8 @@ class _NavMenuState extends State<NavMenu> {
                   padding: EdgeInsets.symmetric(horizontal: 15),
                   child: Column(
                     children: [
-                      // if (userType == 'Admin')
+                      //if (userType == 'Admin'.toLowerCase().trim())
+                      if (userType.toLowerCase().trim() == 'admin')
                         ListTile(
                           leading: Icon(
                               Icons.person, color: Color(0xFF254a6c), size: 25),
@@ -325,7 +326,6 @@ class _NavMenuState extends State<NavMenu> {
                   // ),
                   ),
                   onTap: () async{
-
                     if (Platform.isAndroid) {
                       try {
 
@@ -395,6 +395,67 @@ class _NavMenuState extends State<NavMenu> {
                         showCustomToast("Failed to deregister device");
                       }
                     }
+                    // if (Platform.isAndroid) {
+                    //   try {
+                    //     final prefs = await SharedPreferences.getInstance();
+                    //
+                    //     String deviceId = prefs.getString('DeviceId') ?? "";
+                    //     String user_id = prefs.getString('user_id') ?? "";
+                    //
+                    //     print("Stored DeviceId: $deviceId");
+                    //     print("Stored user_id: $user_id");
+                    //
+                    //     //✅ STEP 1: CHECK CONNECTION FIRST
+                    //     final state = await ClingBleService.getConnectionState() ?? 0;
+                    //
+                    //     print("🔌 Connection State: $state");
+                    //
+                    //     // ❌ NOT CONNECTED → STOP EVERYTHING
+                    //     if (state == 0) {
+                    //       showCustomToast("Device is not connected");
+                    //       return;
+                    //     }
+                    //
+                    //     // ✅ STEP 2: ONLY if connected → call native
+                    //     await ClingBleService.deregisterDevice();
+                    //
+                    //     // ✅ STEP 3: Validate
+                    //     if (deviceId.isEmpty || user_id.isEmpty) {
+                    //       throw Exception("Missing device or user info");
+                    //     }
+                    //
+                    //     // ✅ STEP 4: API
+                    //     final response = await deregisterDevice(user_id, deviceId);
+                    //
+                    //     if (response == null) {
+                    //       throw Exception("No response from API");
+                    //     }
+                    //
+                    //     String status = response['status'] ?? "";
+                    //     String message = response['message'] ?? "";
+                    //     String apiDeviceId =
+                    //     (response['device_id'] ?? "").toString().trim();
+                    //     String apiUserId =
+                    //     (response['user_id'] ?? "").toString().trim();
+                    //
+                    //     print("API Status: $status | Message: $message");
+                    //
+                    //     if (status != "SUCCESS" ||
+                    //         apiDeviceId != deviceId.trim() ||
+                    //         apiUserId != user_id.trim()) {
+                    //
+                    //       showCustomToast(message);
+                    //       return;
+                    //     }
+                    //
+                    //     showCustomToast(message);
+                    //     Get.offAll(() => BluetoothPair());
+                    //
+                    //   } catch (e) {
+                    //     print("Error: $e");
+                    //     showCustomToast("Failed to deregister device");
+                    //   }
+                    // }
                   else{
                      _deregisterDevice();
                    }
@@ -599,37 +660,79 @@ class _NavMenuState extends State<NavMenu> {
 
   Future<void> logout_api() async {
 
-    await ClingBleService.stopScan();
-    // Simulate an app uninstall natively so auto-reconnect breaks securely
-    await ClingBleService.clearNativeCache();
+      if(Platform.isAndroid){
+        await ClingBleService.stopScan();
+        // Simulate an app uninstall natively so auto-reconnect breaks securely
+        await ClingBleService.clearNativeCache();
 
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    var user_id = prefs.getString('user_id') ?? "";
-    final String Url = "$root/logout";
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        var user_id = prefs.getString('user_id') ?? "";
+        final String Url = "$root/logout";
 
-    final Map<String, dynamic> userData = {'user_id': user_id};
-    try {
-      final response = await http.post(Uri.parse(Url), body: userData);
-      final Map<String, dynamic> jsonResponse = json.decode(response.body);
-      print("logout_api$jsonResponse");
+        final Map<String, dynamic> userData = {'user_id': user_id};
+        try {
+          final response = await http.post(Uri.parse(Url), body: userData);
+          final Map<String, dynamic> jsonResponse = json.decode(response.body);
+          print("logout_api$jsonResponse");
 
-      if (response.statusCode == 200) {
-        if (jsonResponse['status'] == "SUCCESS") {
-          print(response.body);
-          final SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.remove('isLoggedIn');
-          await prefs.remove('DeviceId');
-          //await prefs.remove('user_type');
-          Get.offAll(() => LoginScreen());
-          setState(() => is_loading = false);
-        } else {
-          setState(() => is_loading = false);
-          throw Exception('Failed to load Profile');
+          if (response.statusCode == 200) {
+            if (jsonResponse['status'] == "SUCCESS") {
+              print(response.body);
+              final SharedPreferences prefs = await SharedPreferences.getInstance();
+              await prefs.remove('isLoggedIn');
+              await prefs.remove('DeviceId');
+              await prefs.remove('user_type');
+              Get.offAll(() => LoginScreen());
+              setState(() => is_loading = false);
+            } else {
+              setState(() => is_loading = false);
+              throw Exception('Failed to load Profile');
+            }
+          }
+        } catch (e) {
+          print('Error fetching Profile: $e');
         }
       }
-    } catch (e) {
-      print('Error fetching Profile: $e');
-    }
+      else if (Platform.isIOS){
+        // ✅ Mirror Android logout: stop scan + clear native cache FIRST
+        // This breaks auto-reconnect without deregistering the device,
+        // so on next login the device is still paired server-side.
+
+        // await platform.invokeMethod('disconnectDevice');
+
+       // await platform.invokeMethod('disconnectDevice');
+
+        await platform.invokeMethod('stopScanning');
+        await platform.invokeMethod('clearNativeCache');
+
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        var user_id = prefs.getString('user_id') ?? "";
+        final String Url = "$root/logout";
+
+        final Map<String, dynamic> userData = {'user_id': user_id};
+        try {
+          final response = await http.post(Uri.parse(Url), body: userData);
+          final Map<String, dynamic> jsonResponse = json.decode(response.body);
+          print("logout_api$jsonResponse");
+
+          if (response.statusCode == 200) {
+            if (jsonResponse['status'] == "SUCCESS") {
+              print(response.body);
+              final SharedPreferences prefs = await SharedPreferences.getInstance();
+              await prefs.remove('isLoggedIn');
+              await prefs.remove('DeviceId');
+              await prefs.remove('user_type');
+              Get.offAll(() => LoginScreen());
+              setState(() => is_loading = false);
+            } else {
+              setState(() => is_loading = false);
+              throw Exception('Failed to load Profile');
+            }
+          }
+        } catch (e) {
+          print('Error fetching Profile: $e');
+        }
+      }
   }
 }
 

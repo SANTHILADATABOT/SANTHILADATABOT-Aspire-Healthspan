@@ -191,7 +191,7 @@ class _edit_phone_numberState extends State<edit_phone_number> {
         } else {
           print("Error:1" + response.body);
           setState(() {
-            isLoading = false;
+            isLoading_1 = false;
           });
           showToast("OTP Mismatch. Please try again.");
         }
@@ -202,7 +202,7 @@ class _edit_phone_numberState extends State<edit_phone_number> {
       showToast("Error:2 $e");
     } finally {
       setState(() {
-        isLoading = false;
+        isLoading_1 = false;
       });
     }
   }
@@ -539,7 +539,7 @@ class _edit_phone_numberState extends State<edit_phone_number> {
                     verify == true ?
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 50),
-                      child: isLoading == false ? MyButton(
+                      child: isLoading_1 == false ? MyButton(
                         press: () async {
                           // otpverify();
                          // verify_submit();
